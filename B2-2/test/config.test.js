@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 
 import { loadConfigFromEnv } from '../scripts/lib/config.js';
 
-test('uses qwen3:6b and Newswire RSS as defaults', () => {
+test('uses qwen3.6:latest and Newswire RSS as defaults', () => {
   const config = loadConfigFromEnv({});
 
-  assert.equal(config.ollamaModel, 'qwen3:6b');
+  assert.equal(config.ollamaModel, 'qwen3.6:latest');
   assert.deepEqual(config.defaultRssSources, [
     {
       name: 'Newswire 전체 뉴스',

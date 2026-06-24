@@ -160,7 +160,7 @@ test('serializes dynamic HTTP JSON bodies before n8n parses them', () => {
 
   assert.equal(duplicateBody.filter.or[0].rich_text.equals, 'guid-1');
   assert.equal(duplicateBody.filter.or[1].url.equals, 'https://example.com/news/1');
-  assert.equal(ollamaBody.model, 'qwen3:6b');
+  assert.equal(ollamaBody.model, 'qwen3.6:latest');
   assert.match(ollamaBody.prompt, /Sample title/);
   assert.equal(saveBody.properties.Title.title[0].text.content, 'Sample title');
   assert.deepEqual(saveBody.properties['Matched Keywords'].multi_select, [{ name: 'AI' }, { name: 'n8n' }]);

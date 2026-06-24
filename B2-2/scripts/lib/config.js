@@ -53,7 +53,7 @@ export function loadConfigFromEnv(env = process.env) {
       timezone: optional(env, 'NEWS_TIMEZONE', 'Asia/Seoul'),
     },
     ollamaBaseUrl: optional(env, 'OLLAMA_BASE_URL', 'http://localhost:11434'),
-    ollamaModel: optional(env, 'OLLAMA_MODEL', 'qwen3:6b'),
+    ollamaModel: optional(env, 'OLLAMA_MODEL', 'qwen3.6:latest'),
     ollamaTimeoutMs: optionalNumber(env, 'OLLAMA_TIMEOUT_MS', 60000),
     maxRetryCount: optionalNumber(env, 'MAX_RETRY_COUNT', 2),
     rssFetchTimeoutMs: optionalNumber(env, 'RSS_FETCH_TIMEOUT_MS', 30000),

@@ -70,7 +70,7 @@ Ollama는 로컬 모델 서버를 HTTP로 호출한다.
 
 ```text
 OLLAMA_BASE_URL=http://host.docker.internal:11434
-OLLAMA_MODEL=qwen3:6b
+OLLAMA_MODEL=qwen3.6:latest
 ```
 
 기본 로컬 구성에서는 별도 API token이 없으므로 n8n Credential이 필요하지 않다. Docker n8n container에서 호스트의 Ollama로 접근하기 위해 `host.docker.internal`을 사용한다.
