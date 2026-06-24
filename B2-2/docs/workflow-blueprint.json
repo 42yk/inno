@@ -1,0 +1,166 @@
+{
+  "name": "B2-2 RSS AI News Summary Automation",
+  "tool": "n8n",
+  "storage": "Notion",
+  "ai": "Ollama",
+  "notification": "Discord",
+  "runtimeEnvironment": [
+    "NEWS_CRON_EXPRESSION",
+    "NEWS_TIMEZONE",
+    "OLLAMA_BASE_URL",
+    "OLLAMA_MODEL",
+    "OLLAMA_TIMEOUT_MS",
+    "NOTION_NEWS_DB_ID",
+    "NOTION_RSS_CONFIG_DB_ID",
+    "NOTION_TOPIC_CONFIG_DB_ID",
+    "DISCORD_WEBHOOK_URL",
+    "RSS_FETCH_TIMEOUT_MS",
+    "MAX_RETRY_COUNT"
+  ],
+  "nodes": [
+    {
+      "id": "manual-start",
+      "type": "Manual Trigger",
+      "purpose": "Run the same runtime path as the schedule trigger for manual testing."
+    },
+    {
+      "id": "schedule-trigger",
+      "type": "Schedule Trigger",
+      "purpose": "Run every day using NEWS_CRON_EXPRESSION and NEWS_TIMEZONE."
+    },
+    {
+      "id": "load-runtime-settings",
+      "type": "Code",
+      "purpose": "Read environment variables and validate required runtime settings."
+    },
+    {
+      "id": "query-rss-sources",
+      "type": "Notion Database Query",
+      "purpose": "Load enabled RSS sources from NOTION_RSS_CONFIG_DB_ID."
+    },
+    {
+      "id": "handle-empty-rss-sources",
+      "type": "IF",
+      "purpose": "When no enabled RSS source exists, log NO_RSS_SOURCES and end successfully without reseeding."
+    },
+    {
+      "id": "query-topic-keywords",
+      "type": "Notion Database Query",
+      "purpose": "Load enabled topic keywords from NOTION_TOPIC_CONFIG_DB_ID."
+    },
+    {
+      "id": "handle-empty-topic-keywords",
+      "type": "IF",
+      "purpose": "When no enabled keyword exists, log TOPIC_CONFIG_EMPTY and end successfully."
+    },
+    {
+      "id": "build-rss-source-items",
+      "type": "Code",
+      "purpose": "Turn Notion RSS Sources DB rows into feedUrl items for RSS Feed Read."
+    },
+    {
+      "id": "loop-rss-sources",
+      "type": "Loop Over Items",
+      "purpose": "Process enabled RSS sources one by one."
+    },
+    {
+      "id": "read-rss-feed",
+      "type": "RSS Feed Read",
+      "purpose": "Fetch RSS items for the current source with a bounded timeout and retry policy."
+    },
+    {
+      "id": "normalize-news-items",
+      "type": "Code",
+      "purpose": "Normalize title, originalUrl, guid, dedupeKey, publishedAt, content, and source."
+    },
+    {
+      "id": "filter-topic-matches",
+      "type": "Code",
+      "purpose": "Keep items that match enabled topic keywords."
+    },
+    {
+      "id": "handle-no-topic-match",
+      "type": "IF",
+      "purpose": "When there is no matching item, log NO_TOPIC_MATCH and end successfully."
+    },
+    {
+      "id": "select-one-candidate",
+      "type": "Code",
+      "purpose": "Select the newest one matching candidate."
+    },
+    {
+      "id": "query-notion-duplicate",
+      "type": "Notion Database Query",
+      "purpose": "Check NOTION_NEWS_DB_ID by Dedupe Key or Original URL before calling Ollama."
+    },
+    {
+      "id": "handle-duplicate",
+      "type": "IF",
+      "purpose": "When candidate already exists, log DUPLICATE_SKIPPED and do not call Ollama."
+    },
+    {
+      "id": "summarize-with-ollama",
+      "type": "HTTP Request",
+      "purpose": "Call OLLAMA_BASE_URL/api/generate once for the selected non-duplicate article."
+    },
+    {
+      "id": "validate-summary",
+      "type": "Code",
+      "purpose": "Reject empty, invalid JSON, or longer-than-three-line summaries."
+    },
+    {
+      "id": "create-notion-news-page",
+      "type": "Notion Create Page",
+      "purpose": "Save title, summary, original URL, published date, dedupe key, source, keywords, model, and saved time."
+    },
+    {
+      "id": "log-success",
+      "type": "Code",
+      "purpose": "Write SAVED_TO_NOTION to the n8n execution log."
+    },
+    {
+      "id": "error-workflow",
+      "type": "Error Trigger Workflow",
+      "purpose": "Send RSS, Ollama, Notion, and workflow errors to Discord. Log Discord failures only."
+    }
+  ],
+  "connections": [
+    ["manual-start", "query-rss-sources"],
+    ["schedule-trigger", "query-rss-sources"],
+    ["query-rss-sources", "handle-empty-rss-sources"],
+    ["handle-empty-rss-sources", "query-topic-keywords"],
+    ["query-topic-keywords", "handle-empty-topic-keywords"],
+    ["handle-empty-topic-keywords", "build-rss-source-items"],
+    ["build-rss-source-items", "loop-rss-sources"],
+    ["loop-rss-sources", "read-rss-feed"],
+    ["read-rss-feed", "normalize-news-items"],
+    ["normalize-news-items", "filter-topic-matches"],
+    ["filter-topic-matches", "handle-no-topic-match"],
+    ["handle-no-topic-match", "select-one-candidate"],
+    ["select-one-candidate", "query-notion-duplicate"],
+    ["query-notion-duplicate", "handle-duplicate"],
+    ["handle-duplicate", "summarize-with-ollama"],
+    ["summarize-with-ollama", "validate-summary"],
+    ["validate-summary", "create-notion-news-page"],
+    ["create-notion-news-page", "log-success"]
+  ],
+  "skipCodesLoggedOnly": [
+    "NO_RSS_SOURCES",
+    "NO_RSS_ITEMS",
+    "TOPIC_CONFIG_EMPTY",
+    "NO_TOPIC_MATCH",
+    "DUPLICATE_SKIPPED"
+  ],
+  "errorCodesNotifyDiscord": [
+    "RSS_ALL_FAILED",
+    "NOTION_CONFIG_AUTH_FAILED",
+    "NOTION_DEDUPE_SCHEMA_FAILED",
+    "NOTION_DEDUPE_AUTH_FAILED",
+    "OLLAMA_EMPTY_RESPONSE",
+    "OLLAMA_PARSE_FAILED",
+    "SUMMARY_INVALID",
+    "NOTION_SAVE_SCHEMA_FAILED",
+    "NOTION_SAVE_MAPPING_FAILED",
+    "NOTION_SAVE_AUTH_FAILED"
+  ]
+}

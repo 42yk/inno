@@ -1,0 +1,10 @@
+{
+  "name": "b2-2-news-summary-automation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "setup:docker": "node scripts/setup-docker.js"
+  }
+}
