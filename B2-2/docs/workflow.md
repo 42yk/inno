@@ -5,8 +5,8 @@
 메인 workflow 캔버스는 과제 예시 흐름에 맞춰 Sticky Note로 아래 6개 섹션을 시각적으로 구분한다.
 
 ```text
-[1] 스케줄 트리거
-    - Manual Start / Daily Schedule
+[1] 스케줄/Webhook 트리거
+    - Manual Start / Daily Schedule / Webhook Trigger
         ↓
 [2] RSS 수집
     - RSS 설정 조회, 피드 읽기, 기사 정규화
@@ -28,9 +28,9 @@
 
 아래 이미지는 n8n 캔버스를 Sticky Note 기준으로 나눈 1번부터 6번까지의 구간이다.
 
-### 1. 스케줄 트리거
+### 1. 스케줄/Webhook 트리거
 
-![1. 스케줄 트리거](../screenshots/workflow/1..png)
+![1. 스케줄 트리거](../screenshots/workflow/1.png)
 
 ### 2. RSS 수집
 
@@ -59,6 +59,9 @@
         |
 [1] Schedule Trigger
     env: NEWS_CRON_EXPRESSION, NEWS_TIMEZONE
+        |
+[1-1] Webhook Trigger
+    POST /webhook/{NEWS_WEBHOOK_PATH}
         |
 [2] Query Notion RSS Sources DB
     Enabled = true 인 RSS 목록 조회
@@ -113,25 +116,37 @@ Notion과 Discord 연동은 n8n native credential 노드보다 HTTP Request 또�
 이유는 `.env` 기반 secret 관리와 `npm run setup:docker` 재현성을 유지하기 위해서다.
 자세한 기준은 [인증/credential 관리 전략](credential-strategy.md)에 정리한다.
 
-### 1. Schedule Trigger
+### 1. Schedule Trigger / Webhook Trigger
 
 - 매일 지정 시간에 실행한다.
 - 시간은 n8n 워크플로우 내부에 고정하지 않고 `NEWS_CRON_EXPRESSION` 환경변수를 사용한다.
 - 타임존은 `NEWS_TIMEZONE=Asia/Seoul`을 기본값으로 둔다.
 - 스케줄 변수 값을 바꾼 뒤에는 워크플로우를 다시 publish해서 Schedule Trigger가 새 값을 읽게 한다.
+- Webhook Trigger는 production 실행 테스트용이다.
+- Webhook path는 `NEWS_WEBHOOK_PATH` 환경변수로 관리한다.
+- n8n UI의 `/webhook-test/...` URL은 Webhook 노드가 테스트 대기 중일 때만 유효하다.
+- Docker 실행 후 터미널에서는 production URL인 `/webhook/...`를 사용한다.
 
 예시:
 
 ```text
 NEWS_CRON_EXPRESSION=0 9 * * *
 NEWS_TIMEZONE=Asia/Seoul
+NEWS_WEBHOOK_PATH=b2-2/rss-ai-news-summary/run
+```
+
+Webhook 실행 예시:
+
+```bash
+curl -X POST http://localhost:5678/webhook/b2-2/rss-ai-news-summary/run
 ```
 
 ### 2. Manual Start
 
-- 수동 시작은 Daily Schedule과 같은 운영 경로를 실행한다.
+- 수동 시작은 편집 중 빠른 확인용이다.
+- Error Workflow 연동을 확인할 때는 Manual Start가 아니라 Webhook Trigger를 사용한다.
 - 기본 RSS와 기본 주제 키워드 등록은 workflow 밖의 `npm run setup:docker`가 담당한다.
-- 따라서 Manual Start와 Daily Schedule 모두 RSS 설정 DB가 0건이면 자동 재등록하지 않고 `NO_RSS_SOURCES` 로그 후 종료한다.
+- 따라서 Manual Start, Daily Schedule, Webhook Trigger 모두 RSS 설정 DB가 0건이면 자동 재등록하지 않고 `NO_RSS_SOURCES` 로그 후 종료한다.
 
 ### 3. Query Notion RSS Sources DB
 

@@ -1,5 +1,6 @@
 export const MAIN_WORKFLOW_ID = '6f9f5eec-3a5a-4ac7-901b-bb12c1f9f322';
 export const DISCORD_ERROR_WORKFLOW_ID = 'c73fd802-6fb8-46d7-a4f0-d059b88f504b';
+export const MAIN_WEBHOOK_ID = 'b2-2-rss-ai-news-summary';
 
 function node({ name, type, position, parameters = {}, typeVersion = 1, ...extra }) {
   return {
@@ -56,6 +57,14 @@ function discordWebhookParameters(bodyExpression) {
   };
 }
 
+function retryOnFailOptions(config) {
+  return {
+    retryOnFail: true,
+    maxTries: config.maxRetryCount,
+    waitBetweenTries: 1000,
+  };
+}
+
 function notionQueryParameters(databaseId, filterExpression) {
   return {
     method: 'POST',
@@ -103,9 +112,9 @@ export function buildWorkflow(config) {
       name: 'Section 1 Schedule Trigger',
       position: [-128, -304],
       width: 500,
-      height: 560,
+      height: 720,
       color: 4,
-      content: '## [1] 스케줄 트리거\n매일 설정된 시간에 실행\n\n- 기본: 매일 09:00\n- 타임존: Asia/Seoul\n- Manual Start도 같은 경로 실행',
+      content: '## [1] 스케줄/Webhook 트리거\n매일 설정된 시간 또는 Webhook으로 실행\n\n- 기본: 매일 09:00\n- 타임존: Asia/Seoul\n- Webhook: POST /webhook/NEWS_WEBHOOK_PATH\n- Manual Start는 편집 중 수동 확인용',
     }),
     stickyNote({
       name: 'Section 2 RSS Collection',
@@ -161,6 +170,20 @@ export function buildWorkflow(config) {
       },
     }),
     node({
+      name: 'WebhookTrigger',
+      type: 'n8n-nodes-base.webhook',
+      typeVersion: 2.1,
+      position: [-64, 320],
+      webhookId: MAIN_WEBHOOK_ID,
+      parameters: {
+        httpMethod: 'POST',
+        path: config.triggerWebhookPath,
+        authentication: 'none',
+        responseMode: 'onReceived',
+        options: {},
+      },
+    }),
+    node({
       name: 'Query RSS Sources',
       type: 'n8n-nodes-base.httpRequest',
       typeVersion: 4.4,
@@ -169,6 +192,7 @@ export function buildWorkflow(config) {
         config.notionDatabases.rssConfig,
         '{"filter":{"property":"Enabled","checkbox":{"equals":true}}}',
       ),
+      ...retryOnFailOptions(config),
     }),
     node({
       name: 'RSS Sources Empty?',
@@ -204,6 +228,7 @@ return [];`,
         config.notionDatabases.topicConfig,
         '{"filter":{"property":"Enabled","checkbox":{"equals":true}}}',
       ),
+      ...retryOnFailOptions(config),
     }),
     node({
       name: 'Topic Keywords Empty?',
@@ -259,6 +284,7 @@ return rows
           timeout: config.rssFetchTimeoutMs,
         },
       },
+      ...retryOnFailOptions(config),
     }),
     node({
       name: 'Normalize RSS Items',
@@ -329,6 +355,7 @@ return sorted.slice(0, 1);`,
           },
         }`),
       ),
+      ...retryOnFailOptions(config),
     }),
     node({
       name: 'Skip Duplicate',
@@ -378,6 +405,9 @@ return [{ json: candidate }];`,
           timeout: config.ollamaTimeoutMs,
         },
       },
+      retryOnFail: true,
+      maxTries: config.maxRetryCount,
+      waitBetweenTries: 1000,
     }),
     node({
       name: 'Validate Summary',
@@ -419,6 +449,7 @@ return [{ json: { ...candidate, summary: lines.join('\\n') } }];`,
           },
         }`),
       ),
+      ...retryOnFailOptions(config),
     }),
     node({
       name: 'Build Discord Success Message',
@@ -461,6 +492,7 @@ return items;`,
   const connections = {};
   connect(connections, 'Manual Start', 'Query RSS Sources');
   connect(connections, 'Daily Schedule', 'Query RSS Sources');
+  connect(connections, 'WebhookTrigger', 'Query RSS Sources');
   connect(connections, 'Query RSS Sources', 'RSS Sources Empty?');
   connect(connections, 'RSS Sources Empty?', 'Log No RSS Sources', 0);
   connect(connections, 'RSS Sources Empty?', 'Query Topic Keywords', 1);

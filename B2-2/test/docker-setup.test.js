@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import {
   assignmentsFromCreatedDatabaseResult,
   buildDockerImportCommands,
+  buildProductionWebhookUrl,
   missingNotionDatabaseEnvNames,
   mergeEnvAssignments,
 } from '../scripts/lib/docker-setup.js';
@@ -55,6 +56,17 @@ test('builds Docker CLI workflow import commands without n8n API key', () => {
       '--input=/tmp/b2-2-workflow.json',
     ],
   ]);
+});
+
+test('builds the production webhook URL from the configured path', () => {
+  assert.equal(
+    buildProductionWebhookUrl('b2-2/rss-ai-news-summary/run'),
+    'http://localhost:5678/webhook/b2-2/rss-ai-news-summary/run',
+  );
+  assert.equal(
+    buildProductionWebhookUrl('/custom/run/'),
+    'http://localhost:5678/webhook/custom/run',
+  );
 });
 
 test('builds Docker CLI workflow import commands with activation and restart when workflow is active', (t) => {

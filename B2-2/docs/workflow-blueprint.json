@@ -7,6 +7,7 @@
   "runtimeEnvironment": [
     "NEWS_CRON_EXPRESSION",
     "NEWS_TIMEZONE",
+    "NEWS_WEBHOOK_PATH",
     "OLLAMA_BASE_URL",
     "OLLAMA_MODEL",
     "OLLAMA_TIMEOUT_MS",
@@ -27,6 +28,11 @@
       "id": "schedule-trigger",
       "type": "Schedule Trigger",
       "purpose": "Run every day using NEWS_CRON_EXPRESSION and NEWS_TIMEZONE."
+    },
+    {
+      "id": "webhook-trigger",
+      "type": "Webhook Trigger",
+      "purpose": "Run the production path through POST /webhook/{NEWS_WEBHOOK_PATH} for operational and failure testing."
     },
     {
       "id": "load-runtime-settings",
@@ -137,6 +143,7 @@
   "connections": [
     ["manual-start", "query-rss-sources"],
     ["schedule-trigger", "query-rss-sources"],
+    ["webhook-trigger", "query-rss-sources"],
     ["query-rss-sources", "handle-empty-rss-sources"],
     ["handle-empty-rss-sources", "query-topic-keywords"],
     ["query-topic-keywords", "handle-empty-topic-keywords"],

@@ -38,6 +38,10 @@ function optionalNumber(env, name, fallback) {
   return number;
 }
 
+function webhookPath(env) {
+  return optional(env, 'NEWS_WEBHOOK_PATH', 'b2-2/rss-ai-news-summary/run').replace(/^\/+|\/+$/g, '');
+}
+
 export function loadConfigFromEnv(env = process.env) {
   const notionDatabases = {
     news: optional(env, 'NOTION_NEWS_DB_ID', ''),
@@ -47,7 +51,8 @@ export function loadConfigFromEnv(env = process.env) {
 
   return {
     workflowName: optional(env, 'N8N_WORKFLOW_NAME', 'B2-2 RSS AI News Summary'),
-    activateWorkflow: optional(env, 'N8N_ACTIVATE_WORKFLOW', 'false') === 'true',
+    activateWorkflow: optional(env, 'N8N_ACTIVATE_WORKFLOW', 'true') === 'true',
+    triggerWebhookPath: webhookPath(env),
     schedule: {
       cronExpression: optional(env, 'NEWS_CRON_EXPRESSION', '0 9 * * *'),
       timezone: optional(env, 'NEWS_TIMEZONE', 'Asia/Seoul'),

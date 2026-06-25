@@ -85,6 +85,12 @@ export function buildDockerImportCommands(workflowPath, { ollamaModel = 'gemma3:
   return commands;
 }
 
+export function buildProductionWebhookUrl(webhookPath, baseUrl = 'http://localhost:5678') {
+  const normalizedBaseUrl = String(baseUrl).replace(/\/+$/, '');
+  const normalizedPath = String(webhookPath || '').replace(/^\/+|\/+$/g, '');
+  return `${normalizedBaseUrl}/webhook/${normalizedPath}`;
+}
+
 export function assignmentsFromCreatedDatabaseResult(result) {
   if (!result || !result.created) {
     return {};

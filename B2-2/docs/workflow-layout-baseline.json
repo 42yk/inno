@@ -1,0 +1,934 @@
+[
+  {
+    "id": "6f9f5eec-3a5a-4ac7-901b-bb12c1f9f322",
+    "name": "B2-2 RSS AI News Summary",
+    "nodes": [
+      {
+        "parameters": {
+          "content": "## [1] 스케줄/Webhook 트리거\n매일 설정된 시간 또는 Webhook으로 실행\n\n- 기본: 매일 09:00\n- 타임존: Asia/Seoul\n- Webhook: POST /webhook/NEWS_WEBHOOK_PATH\n- Manual Start는 편집 중 수동 확인용",
+          "height": 720,
+          "width": 500,
+          "color": 4
+        },
+        "id": "section-1-schedule-trigger",
+        "name": "Section 1 Schedule Trigger",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -128,
+          -304
+        ]
+      },
+      {
+        "parameters": {
+          "content": "## [2] RSS 수집\nNotion 설정 DB의 RSS 목록에서 기사 수집\n\n- 활성 RSS 목록 조회\n- RSS 0건이면 로그 후 정상 종료\n- 피드 항목을 표준 뉴스 필드로 정규화",
+          "height": 560,
+          "width": 1576,
+          "color": 5
+        },
+        "id": "section-2-rss-collection",
+        "name": "Section 2 RSS Collection",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          416,
+          -304
+        ]
+      },
+      {
+        "parameters": {
+          "content": "## [3] 주제 필터링\n키워드 기준으로 조건 만족 기사 1건 선택\n\n- Notion 주제 키워드 DB 조회\n- 제목/본문 키워드 매칭\n- 최신 기사 1건 선택",
+          "height": 560,
+          "width": 1080,
+          "color": 6
+        },
+        "id": "section-3-topic-filtering",
+        "name": "Section 3 Topic Filtering",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          2032,
+          -304
+        ]
+      },
+      {
+        "parameters": {
+          "content": "## [4] AI 요약\nOllama로 3줄 이내 요약 생성\n\n- 중복 확인 후에만 AI 호출\n- 모델: OLLAMA_MODEL\n- 빈 응답/3줄 초과는 실패 처리",
+          "height": 560,
+          "width": 596,
+          "color": 3
+        },
+        "id": "section-4-ai-summary",
+        "name": "Section 4 AI Summary",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          3136,
+          -304
+        ]
+      },
+      {
+        "parameters": {
+          "content": "## [5] 노션 DB 저장\n요약 결과를 Notion 결과 DB에 저장\n\n- Title / Summary / URL / Date 매핑\n- Dedupe Key 저장\n- 성공 시 Discord 알림",
+          "height": 560,
+          "width": 760,
+          "color": 2
+        },
+        "id": "section-5-notion-save",
+        "name": "Section 5 Notion Save",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          3760,
+          -304
+        ]
+      },
+      {
+        "parameters": {},
+        "id": "manual-start",
+        "name": "Manual Start",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          -64,
+          -64
+        ]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "={{ $env.NEWS_CRON_EXPRESSION || \"21 15 * * *\" }}"
+              }
+            ]
+          },
+          "timezone": "={{ $env.NEWS_TIMEZONE || \"Asia/Seoul\" }}"
+        },
+        "id": "daily-schedule",
+        "name": "Daily Schedule",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1,
+        "position": [
+          -64,
+          128
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "b2-2/rss-ai-news-summary/run",
+          "authentication": "none",
+          "responseMode": "onReceived",
+          "options": {}
+        },
+        "id": "webhooktrigger",
+        "name": "WebhookTrigger",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          -64,
+          320
+        ],
+        "webhookId": "b2-2-rss-ai-news-summary"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.notion.com/v1/databases/389b4bb8-677d-813c-9976-f37b4cb21b22/query",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "={{ \"Bearer \" + $env.NOTION_API_TOKEN }}"
+              },
+              {
+                "name": "Notion-Version",
+                "value": "2022-06-28"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "json",
+          "specifyBody": "json",
+          "jsonBody": "{\"filter\":{\"property\":\"Enabled\",\"checkbox\":{\"equals\":true}}}",
+          "options": {
+            "timeout": 30000
+          }
+        },
+        "id": "query-rss-sources",
+        "name": "Query RSS Sources",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          208,
+          16
+        ],
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 1000
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{ $json.results.length }}",
+                "operation": "equal",
+                "value2": 0
+              }
+            ]
+          }
+        },
+        "id": "rss-sources-empty",
+        "name": "RSS Sources Empty?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          496,
+          64
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "console.log('NO_RSS_SOURCES');\nreturn [];"
+        },
+        "id": "log-no-rss-sources",
+        "name": "Log No RSS Sources",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          768,
+          -64
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.notion.com/v1/databases/389b4bb8-677d-81ca-88b6-c6f7a9091450/query",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "={{ \"Bearer \" + $env.NOTION_API_TOKEN }}"
+              },
+              {
+                "name": "Notion-Version",
+                "value": "2022-06-28"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "json",
+          "specifyBody": "json",
+          "jsonBody": "{\"filter\":{\"property\":\"Enabled\",\"checkbox\":{\"equals\":true}}}",
+          "options": {
+            "timeout": 30000
+          }
+        },
+        "id": "query-topic-keywords",
+        "name": "Query Topic Keywords",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          768,
+          64
+        ],
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 1000
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{ $json.results.length }}",
+                "operation": "equal",
+                "value2": 0
+              }
+            ]
+          }
+        },
+        "id": "topic-keywords-empty",
+        "name": "Topic Keywords Empty?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          1024,
+          64
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "console.log('TOPIC_CONFIG_EMPTY');\nreturn [];"
+        },
+        "id": "log-topic-config-empty",
+        "name": "Log Topic Config Empty",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          1280,
+          -64
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const rows = $items('Query RSS Sources').flatMap((item) => item.json.results || []);\nreturn rows\n  .map((row) => {\n    const properties = row.properties || {};\n    return {\n      json: {\n        sourceName: properties.Name?.title?.[0]?.plain_text || 'RSS Source',\n        feedUrl: properties['Feed URL']?.url || '',\n      },\n    };\n  })\n  .filter((item) => item.json.feedUrl);"
+        },
+        "id": "build-rss-source-items",
+        "name": "Build RSS Source Items",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          1280,
+          64
+        ]
+      },
+      {
+        "parameters": {
+          "url": "={{ $json.feedUrl }}",
+          "options": {
+            "timeout": 30000
+          }
+        },
+        "id": "read-rss-items",
+        "name": "Read RSS Items",
+        "type": "n8n-nodes-base.rssFeedRead",
+        "typeVersion": 1,
+        "position": [
+          1504,
+          64
+        ],
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 1000
+      },
+      {
+        "parameters": {
+          "jsCode": "return items.map((item) => {\n  const source = item.json;\n  const originalUrl = source.link || source.guid || '';\n  const guid = source.guid || source.id || '';\n  return {\n    json: {\n      title: source.title || '',\n      originalUrl,\n      guid,\n      dedupeKey: guid || originalUrl,\n      publishedAt: source.isoDate || source.pubDate || new Date().toISOString(),\n      content: source.content || source.contentSnippet || source.description || '',\n      source: $json.sourceName || 'RSS Source'\n    }\n  };\n});"
+        },
+        "id": "normalize-rss-items",
+        "name": "Normalize RSS Items",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          1760,
+          64
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const fallbackKeywords = [\"AI\",\"artificial intelligence\",\"인공지능\",\"생성형 AI\",\"generative AI\",\"LLM\",\"large language model\",\"agent\",\"AI agent\",\"automation\",\"workflow automation\",\"Ollama\",\"n8n\"];\nconst topicRows = $items('Query Topic Keywords').flatMap((item) => item.json.results || []);\nconst keywords = topicRows\n  .map((row) => row.properties?.Keyword?.title?.[0]?.plain_text)\n  .filter(Boolean);\nconst activeKeywords = (keywords.length > 0 ? keywords : fallbackKeywords).map((keyword) => keyword.toLowerCase());\nreturn items.filter((item) => {\n  const text = [item.json.title, item.json.content].join(' ').toLowerCase();\n  const matchedKeywords = activeKeywords.filter((keyword) => text.includes(keyword.toLowerCase()));\n  item.json.matchedKeywords = matchedKeywords;\n  return matchedKeywords.length > 0;\n});"
+        },
+        "id": "filter-candidates",
+        "name": "Filter Candidates",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          2096,
+          64
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const sorted = [...items].sort((a, b) => {\n  return new Date(b.json.publishedAt).getTime() - new Date(a.json.publishedAt).getTime();\n});\nreturn sorted.slice(0, 1);"
+        },
+        "id": "select-latest-candidate",
+        "name": "Select Latest Candidate",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          2352,
+          64
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.notion.com/v1/databases/389b4bb8-677d-81b2-8ca5-c4563e7f5bc3/query",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "={{ \"Bearer \" + $env.NOTION_API_TOKEN }}"
+              },
+              {
+                "name": "Notion-Version",
+                "value": "2022-06-28"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "json",
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({\n          filter: {\n            or: [\n              { property: \"Dedupe Key\", rich_text: { equals: $json.dedupeKey || \"\" } },\n              { property: \"Original URL\", url: { equals: $json.originalUrl || \"\" } },\n            ],\n          },\n        }) }}",
+          "options": {
+            "timeout": 30000
+          }
+        },
+        "id": "check-notion-duplicate",
+        "name": "Check Notion Duplicate",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          2624,
+          64
+        ],
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 1000
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [
+              {
+                "value1": "={{ $json.results.length }}",
+                "operation": "larger",
+                "value2": 0
+              }
+            ]
+          }
+        },
+        "id": "skip-duplicate",
+        "name": "Skip Duplicate",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 1,
+        "position": [
+          2880,
+          64
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const candidate = $items('Select Latest Candidate')[0]?.json;\nif (!candidate) {\n  throw new Error('CANDIDATE_RESTORE_FAILED');\n}\nreturn [{ json: candidate }];"
+        },
+        "id": "restore-selected-candidate",
+        "name": "Restore Selected Candidate",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          3184,
+          80
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://ollama:11434/api/generate",
+          "sendBody": true,
+          "contentType": "json",
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({\n          model: \"gemma3:1b\",\n          stream: false,\n          prompt: \"아래 뉴스 내용을 한국어로 3줄 이내로 요약해줘. 과장하지 말고 기사에 있는 사실만 사용해. 각 줄은 하나의 핵심 내용을 담아줘.\\n\\n제목: \" + ($json.title || \"\") + \"\\n본문: \" + ($json.content || \"\"),\n        }) }}",
+          "options": {
+            "timeout": 60000
+          }
+        },
+        "id": "summarize-with-ollama",
+        "name": "Summarize With Ollama",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          3392,
+          80
+        ],
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 1000
+      },
+      {
+        "parameters": {
+          "jsCode": "const candidate = $items('Restore Selected Candidate')[0]?.json || {};\nconst response = $json.response || '';\nconst lines = response.split(/\\r?\\n/).map((line) => line.trim()).filter(Boolean);\nif (!response.trim()) {\n  throw new Error('OLLAMA_EMPTY_RESPONSE');\n}\nif (lines.length > 3) {\n  throw new Error('SUMMARY_INVALID');\n}\nreturn [{ json: { ...candidate, summary: lines.join('\\n') } }];"
+        },
+        "id": "validate-summary",
+        "name": "Validate Summary",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          3584,
+          80
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://api.notion.com/v1/pages",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "={{ \"Bearer \" + $env.NOTION_API_TOKEN }}"
+              },
+              {
+                "name": "Notion-Version",
+                "value": "2022-06-28"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "contentType": "json",
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({\n          parent: { database_id: \"389b4bb8-677d-81b2-8ca5-c4563e7f5bc3\" },\n          properties: {\n            Title: { title: [{ type: \"text\", text: { content: $json.title || \"\" } }] },\n            Summary: { rich_text: [{ type: \"text\", text: { content: $json.summary || \"\" } }] },\n            \"Original URL\": { url: $json.originalUrl || null },\n            \"Published At\": { date: { start: $json.publishedAt || new Date().toISOString() } },\n            \"Dedupe Key\": { rich_text: [{ type: \"text\", text: { content: $json.dedupeKey || \"\" } }] },\n            Source: { rich_text: [{ type: \"text\", text: { content: $json.source || \"\" } }] },\n            \"Matched Keywords\": { multi_select: ($json.matchedKeywords || []).map((name) => ({ name })) },\n            Status: { select: { name: \"Saved\" } },\n            \"AI Model\": { rich_text: [{ type: \"text\", text: { content: \"gemma3:1b\" } }] },\n            \"Saved At\": { date: { start: new Date().toISOString() } },\n          },\n        }) }}"
+        },
+        "id": "save-notion-summary",
+        "name": "Save Notion Summary",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          3808,
+          80
+        ],
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 1000
+      },
+      {
+        "parameters": {
+          "jsCode": "const candidate = $items('Validate Summary')[0]?.json || {};\nconst content = [\n  '[B2-2] workflow succeeded',\n  'Title: ' + (candidate.title || 'unknown'),\n  'URL: ' + (candidate.originalUrl || 'unknown'),\n  'Published: ' + (candidate.publishedAt || 'unknown'),\n  'Model: gemma3:1b',\n].join('\\n');\nreturn [{ json: { discordContent: content } }];"
+        },
+        "id": "build-discord-success-message",
+        "name": "Build Discord Success Message",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          4192,
+          80
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+          "sendBody": true,
+          "contentType": "json",
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ content: $json.discordContent }) }}",
+          "options": {
+            "timeout": 10000
+          }
+        },
+        "id": "notify-discord-success",
+        "name": "Notify Discord Success",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          4384,
+          80
+        ],
+        "continueOnFail": true,
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 1000
+      },
+      {
+        "parameters": {
+          "jsCode": "console.log('SAVED_TO_NOTION', $json.id || $json);\nreturn items;"
+        },
+        "id": "log-result",
+        "name": "Log Result",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          4000,
+          80
+        ]
+      }
+    ],
+    "connections": {
+      "Manual Start": {
+        "main": [
+          [
+            {
+              "node": "Query RSS Sources",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Daily Schedule": {
+        "main": [
+          [
+            {
+              "node": "Query RSS Sources",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "WebhookTrigger": {
+        "main": [
+          [
+            {
+              "node": "Query RSS Sources",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Query RSS Sources": {
+        "main": [
+          [
+            {
+              "node": "RSS Sources Empty?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "RSS Sources Empty?": {
+        "main": [
+          [
+            {
+              "node": "Log No RSS Sources",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Query Topic Keywords",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Query Topic Keywords": {
+        "main": [
+          [
+            {
+              "node": "Topic Keywords Empty?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Topic Keywords Empty?": {
+        "main": [
+          [
+            {
+              "node": "Log Topic Config Empty",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Build RSS Source Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build RSS Source Items": {
+        "main": [
+          [
+            {
+              "node": "Read RSS Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read RSS Items": {
+        "main": [
+          [
+            {
+              "node": "Normalize RSS Items",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Normalize RSS Items": {
+        "main": [
+          [
+            {
+              "node": "Filter Candidates",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter Candidates": {
+        "main": [
+          [
+            {
+              "node": "Select Latest Candidate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Select Latest Candidate": {
+        "main": [
+          [
+            {
+              "node": "Check Notion Duplicate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Notion Duplicate": {
+        "main": [
+          [
+            {
+              "node": "Skip Duplicate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Skip Duplicate": {
+        "main": [
+          null,
+          [
+            {
+              "node": "Restore Selected Candidate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Restore Selected Candidate": {
+        "main": [
+          [
+            {
+              "node": "Summarize With Ollama",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Summarize With Ollama": {
+        "main": [
+          [
+            {
+              "node": "Validate Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Validate Summary": {
+        "main": [
+          [
+            {
+              "node": "Save Notion Summary",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Save Notion Summary": {
+        "main": [
+          [
+            {
+              "node": "Log Result",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Log Result": {
+        "main": [
+          [
+            {
+              "node": "Build Discord Success Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Discord Success Message": {
+        "main": [
+          [
+            {
+              "node": "Notify Discord Success",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "timezone": "Asia/Seoul",
+      "saveExecutionProgress": true,
+      "saveManualExecutions": true,
+      "errorWorkflow": "c73fd802-6fb8-46d7-a4f0-d059b88f504b"
+    },
+    "staticData": null,
+    "tags": [],
+    "active": true
+  },
+  {
+    "id": "c73fd802-6fb8-46d7-a4f0-d059b88f504b",
+    "name": "B2-2 Discord Error Notifier",
+    "nodes": [
+      {
+        "parameters": {},
+        "id": "workflow-error-trigger",
+        "name": "Workflow Error Trigger",
+        "type": "n8n-nodes-base.errorTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const execution = $json.execution || {};\nconst workflow = $json.workflow || {};\nconst error = execution.error || {};\nconst content = [\n  '[B2-2] workflow failed',\n  'Workflow: ' + (workflow.name || 'unknown') + ' (' + (workflow.id || 'unknown') + ')',\n  'Node: ' + (execution.lastNodeExecuted || 'unknown'),\n  'Mode: ' + (execution.mode || 'unknown'),\n  'Execution: ' + (execution.url || execution.id || 'unknown'),\n  'Error: ' + (error.message || 'Unknown error'),\n].join('\\n');\nreturn [{ json: { discordContent: content } }];"
+        },
+        "id": "build-discord-failure-message",
+        "name": "Build Discord Failure Message",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          272,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+          "sendBody": true,
+          "contentType": "json",
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ content: $json.discordContent }) }}",
+          "options": {
+            "timeout": 10000
+          }
+        },
+        "id": "notify-discord-failure",
+        "name": "Notify Discord Failure",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          528,
+          0
+        ],
+        "continueOnFail": true,
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 1000
+      },
+      {
+        "parameters": {
+          "jsCode": "if ($json.error) {\n  console.log('DISCORD_NOTIFY_FAILED', $json.error);\n}\nreturn items;"
+        },
+        "id": "log-discord-failure-notification",
+        "name": "Log Discord Failure Notification",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          784,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "content": "## [6] 예외 처리\n스킵/장애/알림 처리\n\n- 중복이면 Ollama 호출 없이 스킵\n- 실패는 Error Workflow로 전달\n- Discord 실패는 로그만 남김",
+          "height": 560,
+          "width": 1068
+        },
+        "id": "section-6-exception-handling",
+        "name": "Section 6 Exception Handling",
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -64,
+          -272
+        ]
+      }
+    ],
+    "connections": {
+      "Workflow Error Trigger": {
+        "main": [
+          [
+            {
+              "node": "Build Discord Failure Message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Build Discord Failure Message": {
+        "main": [
+          [
+            {
+              "node": "Notify Discord Failure",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Notify Discord Failure": {
+        "main": [
+          [
+            {
+              "node": "Log Discord Failure Notification",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "executionOrder": "v1",
+      "timezone": "Asia/Seoul",
+      "saveExecutionProgress": true,
+      "saveManualExecutions": true
+    },
+    "staticData": null,
+    "tags": [],
+    "active": true
+  }
+]

@@ -8,6 +8,8 @@ test('uses gemma3:1b and Newswire RSS as defaults', () => {
 
   assert.equal(config.ollamaBaseUrl, 'http://ollama:11434');
   assert.equal(config.ollamaModel, 'gemma3:1b');
+  assert.equal(config.activateWorkflow, true);
+  assert.equal(config.triggerWebhookPath, 'b2-2/rss-ai-news-summary/run');
   assert.deepEqual(config.defaultRssSources, [
     {
       name: 'Newswire 전체 뉴스',

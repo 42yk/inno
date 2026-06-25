@@ -50,7 +50,7 @@ test('adds visual sticky note sections that match the assignment workflow exampl
   assert.deepEqual(
     stickyNotes.map((note) => note.parameters.content.split('\n')[0]),
     [
-      '## [1] 스케줄 트리거',
+      '## [1] 스케줄/Webhook 트리거',
       '## [2] RSS 수집',
       '## [3] 주제 필터링',
       '## [4] AI 요약',
@@ -76,6 +76,30 @@ test('manual start and schedule use the same runtime entrypoint', () => {
     { node: 'Query RSS Sources', type: 'main', index: 0 },
   ]);
   assert.deepEqual(workflow.connections['Daily Schedule'].main[0], [
+    { node: 'Query RSS Sources', type: 'main', index: 0 },
+  ]);
+});
+
+test('webhook trigger uses the same runtime entrypoint for production failure testing', () => {
+  const workflow = buildWorkflow(
+    loadConfigFromEnv({
+      NEWS_WEBHOOK_PATH: 'custom/news/run',
+      NOTION_NEWS_DB_ID: 'news-db',
+      NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+      NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+    }),
+  );
+
+  const webhookNode = nodeByName(workflow, 'WebhookTrigger');
+
+  assert.equal(webhookNode.type, 'n8n-nodes-base.webhook');
+  assert.equal(webhookNode.typeVersion, 2.1);
+  assert.equal(webhookNode.webhookId, 'b2-2-rss-ai-news-summary');
+  assert.equal(webhookNode.parameters.httpMethod, 'POST');
+  assert.equal(webhookNode.parameters.path, 'custom/news/run');
+  assert.equal(webhookNode.parameters.responseMode, 'onReceived');
+  assert.equal(webhookNode.parameters.authentication, 'none');
+  assert.deepEqual(workflow.connections.WebhookTrigger.main[0], [
     { node: 'Query RSS Sources', type: 'main', index: 0 },
   ]);
 });
@@ -149,6 +173,48 @@ test('uses NOTION_API_TOKEN environment variable on every Notion HTTP node', () 
   }
 });
 
+test('retries Notion query and save requests up to the configured retry limit', () => {
+  const workflow = buildWorkflow(
+    loadConfigFromEnv({
+      MAX_RETRY_COUNT: '2',
+      NOTION_NEWS_DB_ID: 'news-db',
+      NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+      NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+    }),
+  );
+
+  const notionNodeNames = [
+    'Query RSS Sources',
+    'Query Topic Keywords',
+    'Check Notion Duplicate',
+    'Save Notion Summary',
+  ];
+
+  for (const nodeName of notionNodeNames) {
+    const node = nodeByName(workflow, nodeName);
+    assert.equal(node.retryOnFail, true, nodeName);
+    assert.equal(node.maxTries, 2, nodeName);
+    assert.equal(node.waitBetweenTries, 1000, nodeName);
+  }
+});
+
+test('retries RSS feed reads up to the configured retry limit', () => {
+  const workflow = buildWorkflow(
+    loadConfigFromEnv({
+      MAX_RETRY_COUNT: '2',
+      NOTION_NEWS_DB_ID: 'news-db',
+      NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+      NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+    }),
+  );
+
+  const rssNode = nodeByName(workflow, 'Read RSS Items');
+
+  assert.equal(rssNode.retryOnFail, true);
+  assert.equal(rssNode.maxTries, 2);
+  assert.equal(rssNode.waitBetweenTries, 1000);
+});
+
 test('sends JSON bodies through the HTTP Request JSON body mode', () => {
   const workflow = buildWorkflow(
     loadConfigFromEnv({
@@ -202,6 +268,23 @@ test('notifies Discord after a Notion save succeeds', () => {
   assert.deepEqual(workflow.connections['Build Discord Success Message'].main[0], [
     { node: 'Notify Discord Success', type: 'main', index: 0 },
   ]);
+});
+
+test('retries Ollama summary requests up to the configured retry limit', () => {
+  const workflow = buildWorkflow(
+    loadConfigFromEnv({
+      MAX_RETRY_COUNT: '2',
+      NOTION_NEWS_DB_ID: 'news-db',
+      NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+      NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+    }),
+  );
+
+  const ollamaNode = nodeByName(workflow, 'Summarize With Ollama');
+
+  assert.equal(ollamaNode.retryOnFail, true);
+  assert.equal(ollamaNode.maxTries, 2);
+  assert.equal(ollamaNode.waitBetweenTries, 1000);
 });
 
 test('builds a Discord error workflow for failed executions', () => {

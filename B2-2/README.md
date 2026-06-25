@@ -37,9 +37,10 @@ OLLAMA_MODEL="gemma3:1b"
 ```bash
 NEWS_CRON_EXPRESSION="0 9 * * *"
 NEWS_TIMEZONE="Asia/Seoul"
+NEWS_WEBHOOK_PATH="b2-2/rss-ai-news-summary/run"
 ```
 
-자동 활성화가 필요하면 아래 값을 바꾼다.
+워크플로우와 Error Workflow는 기본적으로 활성화한다.
 
 ```bash
 N8N_ACTIVATE_WORKFLOW="true"
@@ -74,6 +75,15 @@ npm run setup:docker
 ```text
 http://localhost:5678
 ```
+
+production 실행 테스트는 Manual Start 대신 Webhook으로 호출한다.
+
+```bash
+curl -X POST http://localhost:5678/webhook/b2-2/rss-ai-news-summary/run
+```
+
+`/webhook-test/...` URL은 n8n UI에서 Webhook 노드를 열고 테스트 실행을 대기 중일 때만 동작한다.
+Docker를 새로 올린 뒤 터미널에서 실행할 때는 위 production URL(`/webhook/...`)을 사용한다.
 
 n8n에서 아래 workflow가 보이는지 확인한다.
 

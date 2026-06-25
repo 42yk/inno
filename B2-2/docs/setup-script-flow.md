@@ -62,6 +62,7 @@ flowchart TD
    - 생성된 workflow JSON을 컨테이너의 `/tmp/b2-2-workflow.json`로 복사한다.
    - `n8n import:workflow --input=/tmp/b2-2-workflow.json`로 workflow를 import한다.
    - `N8N_ACTIVATE_WORKFLOW=true`로 생성된 workflow가 active 상태이면 `n8n publish:workflow` 실행 후 n8n을 재시작한다.
+   - 완료 메시지에 production webhook 테스트용 `curl -X POST http://localhost:5678/webhook/...` 명령을 출력한다.
 
 ## scripts/lib 파일 사용처
 
@@ -143,7 +144,7 @@ sequenceDiagram
 
 | 변경 대상 | 변경 위치 | 반영 방식 |
 | --- | --- | --- |
-| 실행 시간 | `.env`의 `NEWS_CRON_EXPRESSION`, `NEWS_TIMEZONE` | workflow 재생성/import 필요 |
+| 실행 시간/Webhook | `.env`의 `NEWS_CRON_EXPRESSION`, `NEWS_TIMEZONE`, `NEWS_WEBHOOK_PATH` | workflow 재생성/import 필요 |
 | RSS 목록 | Notion `B2-2 RSS Sources` DB | 다음 workflow 실행부터 반영 |
 | 주제 키워드 | Notion `B2-2 Topic Keywords` DB | 다음 workflow 실행부터 반영 |
 | Ollama URL/모델 | `.env`의 `OLLAMA_BASE_URL`, `OLLAMA_MODEL` | workflow 재생성/import 필요 |

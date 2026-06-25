@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import {
   assignmentsFromCreatedDatabaseResult,
   buildDockerImportCommands,
+  buildProductionWebhookUrl,
   mergeEnvAssignments,
   missingNotionDatabaseEnvNames,
 } from './lib/docker-setup.js';
@@ -153,6 +154,8 @@ async function main() {
   }
 
   console.log('\nDocker n8n setup complete. Open http://localhost:5678 and check the imported workflow.');
+  console.log(`Production webhook test: curl -X POST ${buildProductionWebhookUrl(config.triggerWebhookPath)}`);
+  console.log('Note: /webhook-test URLs only work while the Webhook node is listening in the n8n editor.');
 }
 
 main().catch((error) => {
