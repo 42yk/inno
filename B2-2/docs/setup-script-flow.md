@@ -53,11 +53,12 @@ flowchart TD
 
 4. `writeWorkflow(env)`
    - 환경 변수로부터 workflow 설정을 만든다.
-   - `scripts/lib/workflow.js`로 n8n workflow JSON을 생성한다.
-   - 결과를 `dist/n8n-news-summary.workflow.json`에 저장한다.
+   - `scripts/lib/workflow.js`로 메인 뉴스 요약 workflow와 Discord Error Trigger workflow를 생성한다.
+   - 두 workflow를 `dist/n8n-news-summary.workflow.json`에 저장한다.
 
 5. Docker import 명령 실행
-   - `docker compose up -d`로 n8n 컨테이너를 실행한다.
+   - `docker compose up -d`로 n8n과 Ollama 컨테이너를 실행한다.
+   - `docker compose exec -T ollama ollama pull <OLLAMA_MODEL>`로 모델을 준비한다.
    - 생성된 workflow JSON을 컨테이너의 `/tmp/b2-2-workflow.json`로 복사한다.
    - `n8n import:workflow --input=/tmp/b2-2-workflow.json`로 workflow를 import한다.
    - `N8N_ACTIVATE_WORKFLOW=true`로 생성된 workflow가 active 상태이면 `n8n publish:workflow` 실행 후 n8n을 재시작한다.
@@ -71,7 +72,7 @@ flowchart TD
 | `env-file.js` | `.env` 파일을 key-value 객체로 읽는다. | `readEnvFile` | setup 전용 |
 | `notion-client.js` | setup 단계에서 Notion API를 호출하는 최소 client다. | `createNotionDatabase`, `queryNotionDatabase`, `createNotionPage` | `test/notion-client.test.js` |
 | `notion-databases.js` | Notion DB 생성 body와 기본 RSS/주제 seed 생성 body를 만든다. | `buildDatabaseRequests`, `buildDefaultSeedRequests`, `envSnippet` | `test/notion-databases.test.js` |
-| `workflow.js` | n8n에 import할 workflow JSON을 생성한다. | `buildWorkflow` | `test/workflow.test.js`, 생성 결과 `dist/n8n-news-summary.workflow.json` |
+| `workflow.js` | n8n에 import할 메인 workflow와 Discord error workflow JSON을 생성한다. | `buildWorkflow`, `buildDiscordErrorWorkflow`, `buildWorkflows` | `test/workflow.test.js`, 생성 결과 `dist/n8n-news-summary.workflow.json` |
 
 ## 모듈 간 의존 흐름
 
@@ -147,4 +148,3 @@ sequenceDiagram
 | 주제 키워드 | Notion `B2-2 Topic Keywords` DB | 다음 workflow 실행부터 반영 |
 | Ollama URL/모델 | `.env`의 `OLLAMA_BASE_URL`, `OLLAMA_MODEL` | workflow 재생성/import 필요 |
 | Discord webhook | `.env`의 `DISCORD_WEBHOOK_URL` | workflow 재생성/import 필요 |
-

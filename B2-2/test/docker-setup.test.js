@@ -42,6 +42,7 @@ test('merges generated Notion database ids into env file content', () => {
 test('builds Docker CLI workflow import commands without n8n API key', () => {
   assert.deepEqual(buildDockerImportCommands('dist/workflow.json'), [
     ['docker', 'compose', 'up', '-d'],
+    ['docker', 'compose', 'exec', '-T', 'ollama', 'ollama', 'pull', 'gemma3:1b'],
     ['docker', 'compose', 'cp', 'dist/workflow.json', 'n8n:/tmp/b2-2-workflow.json'],
     [
       'docker',
@@ -70,6 +71,7 @@ test('builds Docker CLI workflow import commands with activation and restart whe
 
   assert.deepEqual(buildDockerImportCommands(tempPath), [
     ['docker', 'compose', 'up', '-d'],
+    ['docker', 'compose', 'exec', '-T', 'ollama', 'ollama', 'pull', 'gemma3:1b'],
     ['docker', 'compose', 'cp', tempPath, 'n8n:/tmp/b2-2-workflow.json'],
     [
       'docker',
@@ -90,6 +92,60 @@ test('builds Docker CLI workflow import commands with activation and restart whe
       'n8n',
       'publish:workflow',
       '--id=test-id',
+    ],
+    ['docker', 'compose', 'restart', 'n8n'],
+  ]);
+});
+
+test('builds publish commands for multiple active workflows in one import file', (t) => {
+  const tempPath = 'dist/test-temp-workflows.json';
+  fs.mkdirSync('dist', { recursive: true });
+  fs.writeFileSync(
+    tempPath,
+    JSON.stringify([
+      { id: 'main-id', active: true },
+      { id: 'error-id', active: true },
+      { id: 'inactive-id', active: false },
+    ]),
+  );
+
+  t.after(() => {
+    try { fs.unlinkSync(tempPath); } catch {}
+  });
+
+  assert.deepEqual(buildDockerImportCommands(tempPath, { ollamaModel: 'custom-model:latest' }), [
+    ['docker', 'compose', 'up', '-d'],
+    ['docker', 'compose', 'exec', '-T', 'ollama', 'ollama', 'pull', 'custom-model:latest'],
+    ['docker', 'compose', 'cp', tempPath, 'n8n:/tmp/b2-2-workflow.json'],
+    [
+      'docker',
+      'compose',
+      'exec',
+      '-T',
+      'n8n',
+      'n8n',
+      'import:workflow',
+      '--input=/tmp/b2-2-workflow.json',
+    ],
+    [
+      'docker',
+      'compose',
+      'exec',
+      '-T',
+      'n8n',
+      'n8n',
+      'publish:workflow',
+      '--id=main-id',
+    ],
+    [
+      'docker',
+      'compose',
+      'exec',
+      '-T',
+      'n8n',
+      'n8n',
+      'publish:workflow',
+      '--id=error-id',
     ],
     ['docker', 'compose', 'restart', 'n8n'],
   ]);

@@ -66,14 +66,14 @@ Discord webhook URL도 secret으로 취급한다. 문서와 스크린샷에는 �
 
 ## Ollama는 왜 credential이 없는가?
 
-Ollama는 로컬 모델 서버를 HTTP로 호출한다.
+Ollama는 같은 Docker Compose 네트워크 안의 모델 서버를 HTTP로 호출한다.
 
 ```text
-OLLAMA_BASE_URL=http://host.docker.internal:11434
-OLLAMA_MODEL=qwen3.6:latest
+OLLAMA_BASE_URL=http://ollama:11434
+OLLAMA_MODEL=gemma3:1b
 ```
 
-기본 로컬 구성에서는 별도 API token이 없으므로 n8n Credential이 필요하지 않다. Docker n8n container에서 호스트의 Ollama로 접근하기 위해 `host.docker.internal`을 사용한다.
+기본 로컬 구성에서는 별도 API token이 없으므로 n8n Credential이 필요하지 않다. Docker Compose의 service DNS를 사용해 n8n container에서 `ollama:11434`로 직접 접근한다.
 
 ## native node로 바꿔도 되는 경우
 
@@ -86,4 +86,3 @@ OLLAMA_MODEL=qwen3.6:latest
 | JSON body를 직접 관리하는 부담을 줄이고 싶다 | Notion 노드가 UI로 속성 매핑을 도와준다. |
 
 다만 이 프로젝트의 기본 제출물은 로컬 Docker 환경에서 재현 가능해야 하므로, 기본 구조는 `.env` 기반 HTTP Request 방식을 유지한다.
-

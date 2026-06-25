@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { loadConfigFromEnv } from '../scripts/lib/config.js';
-import { buildWorkflow } from '../scripts/lib/workflow.js';
+import { buildDiscordErrorWorkflow, buildWorkflow, buildWorkflows } from '../scripts/lib/workflow.js';
 
 function names(workflow) {
   return workflow.nodes.map((node) => node.name);
@@ -22,6 +22,43 @@ function parseJsonBodyExpression(jsonBody, itemJson) {
   const result = Function('$json', `return (${expression});`)(itemJson);
   return JSON.parse(result);
 }
+
+test('adds visual sticky note sections that match the assignment workflow example', () => {
+  const config = loadConfigFromEnv({
+    NOTION_NEWS_DB_ID: 'news-db',
+    NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+    NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+  });
+  const workflow = buildWorkflow(config);
+  const errorWorkflow = buildDiscordErrorWorkflow(config);
+
+  const stickyNotes = [...workflow.nodes, ...errorWorkflow.nodes].filter((node) => {
+    return node.type === 'n8n-nodes-base.stickyNote';
+  });
+  const mainStickyNotes = workflow.nodes.filter((node) => node.type === 'n8n-nodes-base.stickyNote');
+  const errorStickyNotes = errorWorkflow.nodes.filter((node) => node.type === 'n8n-nodes-base.stickyNote');
+
+  assert.equal(stickyNotes.length, 6);
+  assert.equal(mainStickyNotes.length, 5);
+  assert.equal(errorStickyNotes.length, 1);
+  for (const note of stickyNotes) {
+    assert.equal(note.typeVersion, 1);
+    assert.equal(typeof note.parameters.content, 'string');
+    assert.equal(typeof note.parameters.width, 'number');
+    assert.equal(typeof note.parameters.height, 'number');
+  }
+  assert.deepEqual(
+    stickyNotes.map((note) => note.parameters.content.split('\n')[0]),
+    [
+      '## [1] 스케줄 트리거',
+      '## [2] RSS 수집',
+      '## [3] 주제 필터링',
+      '## [4] AI 요약',
+      '## [5] 노션 DB 저장',
+      '## [6] 예외 처리',
+    ],
+  );
+});
 
 test('manual start and schedule use the same runtime entrypoint', () => {
   const workflow = buildWorkflow(
@@ -66,6 +103,20 @@ test('uses the activation flag for the workflow active state', () => {
   );
 
   assert.equal(workflow.active, true);
+});
+
+test('connects the main workflow to a Discord error workflow', () => {
+  const config = loadConfigFromEnv({
+    NOTION_NEWS_DB_ID: 'news-db',
+    NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+    NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+  });
+  const workflow = buildWorkflow(config);
+  const errorWorkflow = buildDiscordErrorWorkflow(config);
+
+  assert.equal(workflow.settings.errorWorkflow, errorWorkflow.id);
+  assert.equal(errorWorkflow.name, 'B2-2 Discord Error Notifier');
+  assert.equal(nodeByName(errorWorkflow, 'Workflow Error Trigger').type, 'n8n-nodes-base.errorTrigger');
 });
 
 test('uses NOTION_API_TOKEN environment variable on every Notion HTTP node', () => {
@@ -120,6 +171,79 @@ test('sends JSON bodies through the HTTP Request JSON body mode', () => {
   }
 });
 
+test('notifies Discord after a Notion save succeeds', () => {
+  const workflow = buildWorkflow(
+    loadConfigFromEnv({
+      NOTION_NEWS_DB_ID: 'news-db',
+      NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+      NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+    }),
+  );
+
+  const buildMessageNode = nodeByName(workflow, 'Build Discord Success Message');
+  const notifyNode = nodeByName(workflow, 'Notify Discord Success');
+
+  assert.match(buildMessageNode.parameters.jsCode, /\[B2-2\] workflow succeeded/);
+  assert.equal(notifyNode.type, 'n8n-nodes-base.httpRequest');
+  assert.equal(notifyNode.typeVersion, 4.4);
+  assert.equal(notifyNode.parameters.method, 'POST');
+  assert.equal(notifyNode.parameters.url, '={{ $env.DISCORD_WEBHOOK_URL }}');
+  assert.equal(notifyNode.parameters.contentType, 'json');
+  assert.equal(notifyNode.parameters.specifyBody, 'json');
+  assert.equal(notifyNode.parameters.jsonBody, '={{ JSON.stringify({ content: $json.discordContent }) }}');
+  assert.equal(notifyNode.continueOnFail, true);
+  assert.equal(notifyNode.retryOnFail, true);
+  assert.deepEqual(workflow.connections['Save Notion Summary'].main[0], [
+    { node: 'Log Result', type: 'main', index: 0 },
+  ]);
+  assert.deepEqual(workflow.connections['Log Result'].main[0], [
+    { node: 'Build Discord Success Message', type: 'main', index: 0 },
+  ]);
+  assert.deepEqual(workflow.connections['Build Discord Success Message'].main[0], [
+    { node: 'Notify Discord Success', type: 'main', index: 0 },
+  ]);
+});
+
+test('builds a Discord error workflow for failed executions', () => {
+  const errorWorkflow = buildDiscordErrorWorkflow(
+    loadConfigFromEnv({
+      NOTION_NEWS_DB_ID: 'news-db',
+      NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+      NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+    }),
+  );
+
+  const notifyNode = nodeByName(errorWorkflow, 'Notify Discord Failure');
+  const buildMessageNode = nodeByName(errorWorkflow, 'Build Discord Failure Message');
+  const exceptionNote = nodeByName(errorWorkflow, 'Section 6 Exception Handling');
+
+  assert.equal(errorWorkflow.nodes.length, 5);
+  assert.equal(exceptionNote.type, 'n8n-nodes-base.stickyNote');
+  assert.match(buildMessageNode.parameters.jsCode, /\[B2-2\] workflow failed/);
+  assert.equal(notifyNode.parameters.url, '={{ $env.DISCORD_WEBHOOK_URL }}');
+  assert.equal(notifyNode.parameters.jsonBody, '={{ JSON.stringify({ content: $json.discordContent }) }}');
+  assert.equal(notifyNode.continueOnFail, true);
+  assert.equal(notifyNode.retryOnFail, true);
+  assert.deepEqual(errorWorkflow.connections['Workflow Error Trigger'].main[0], [
+    { node: 'Build Discord Failure Message', type: 'main', index: 0 },
+  ]);
+});
+
+test('exports both main and error workflows for n8n import', () => {
+  const workflows = buildWorkflows(
+    loadConfigFromEnv({
+      NOTION_NEWS_DB_ID: 'news-db',
+      NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+      NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+    }),
+  );
+
+  assert.deepEqual(workflows.map((workflow) => workflow.name), [
+    'B2-2 RSS AI News Summary',
+    'B2-2 Discord Error Notifier',
+  ]);
+});
+
 test('serializes dynamic HTTP JSON bodies before n8n parses them', () => {
   const workflow = buildWorkflow(
     loadConfigFromEnv({
@@ -160,10 +284,27 @@ test('serializes dynamic HTTP JSON bodies before n8n parses them', () => {
 
   assert.equal(duplicateBody.filter.or[0].rich_text.equals, 'guid-1');
   assert.equal(duplicateBody.filter.or[1].url.equals, 'https://example.com/news/1');
-  assert.equal(ollamaBody.model, 'qwen3.6:latest');
+  assert.equal(ollamaBody.model, 'gemma3:1b');
   assert.match(ollamaBody.prompt, /Sample title/);
   assert.equal(saveBody.properties.Title.title[0].text.content, 'Sample title');
   assert.deepEqual(saveBody.properties['Matched Keywords'].multi_select, [{ name: 'AI' }, { name: 'n8n' }]);
+});
+
+test('uses a static Ollama endpoint URL so n8n does not reset the node settings', () => {
+  const workflow = buildWorkflow(
+    loadConfigFromEnv({
+      OLLAMA_BASE_URL: 'http://ollama:11434',
+      NOTION_NEWS_DB_ID: 'news-db',
+      NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+      NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+    }),
+  );
+
+  const node = nodeByName(workflow, 'Summarize With Ollama');
+  assert.equal(node.parameters.url, 'http://ollama:11434/api/generate');
+  assert.equal(node.parameters.contentType, 'json');
+  assert.equal(node.parameters.specifyBody, 'json');
+  assert.match(node.parameters.jsonBody, /^=\{\{ JSON\.stringify\(/);
 });
 
 test('checks Notion duplicate records before Ollama summary call', () => {

@@ -15,7 +15,7 @@ import { readEnvFile } from './lib/env-file.js';
 import { createNotionDatabase, createNotionPage, queryNotionDatabase } from './lib/notion-client.js';
 import { buildDatabaseRequests, buildDefaultSeedRequests, envSnippet } from './lib/notion-databases.js';
 import { loadConfigFromEnv, validateConfigForWorkflow } from './lib/config.js';
-import { buildWorkflow } from './lib/workflow.js';
+import { buildWorkflows } from './lib/workflow.js';
 
 const execFileAsync = promisify(execFile);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -116,7 +116,7 @@ async function createMissingDatabases(env) {
 function writeWorkflow(env) {
   const config = loadConfigFromEnv(env);
   validateConfigForWorkflow(config);
-  const workflow = buildWorkflow(config);
+  const workflow = buildWorkflows(config);
   fs.mkdirSync(distDir, { recursive: true });
   fs.writeFileSync(workflowPath, `${JSON.stringify(workflow, null, 2)}\n`);
   console.log(`Workflow JSON written: ${workflowPath}`);
@@ -144,7 +144,10 @@ async function main() {
   await seedDefaultConfigRows(env);
   writeWorkflow(env);
 
-  const commands = buildDockerImportCommands('dist/n8n-news-summary.workflow.json');
+  const config = loadConfigFromEnv(env);
+  const commands = buildDockerImportCommands('dist/n8n-news-summary.workflow.json', {
+    ollamaModel: config.ollamaModel,
+  });
   for (const command of commands) {
     await runCommand(command);
   }

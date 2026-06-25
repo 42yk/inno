@@ -2,6 +2,57 @@
 
 ## 전체 흐름
 
+메인 workflow 캔버스는 과제 예시 흐름에 맞춰 Sticky Note로 아래 6개 섹션을 시각적으로 구분한다.
+
+```text
+[1] 스케줄 트리거
+    - Manual Start / Daily Schedule
+        ↓
+[2] RSS 수집
+    - RSS 설정 조회, 피드 읽기, 기사 정규화
+        ↓
+[3] 주제 필터링
+    - 키워드 조회, 매칭, 최신 1건 선택
+        ↓
+[4] AI 요약
+    - 중복 확인 후 Ollama 3줄 요약
+        ↓
+[5] 노션 DB 저장
+    - Title/Summary/URL/Date/Dedupe Key 매핑 저장
+        ↓
+[6] 예외 처리
+    - 스킵 로그, Discord 성공 알림, Error Workflow 장애 알림
+```
+
+## 워크플로우 미리보기
+
+아래 이미지는 n8n 캔버스를 Sticky Note 기준으로 나눈 1번부터 6번까지의 구간이다.
+
+### 1. 스케줄 트리거
+
+![1. 스케줄 트리거](../screenshots/workflow/1..png)
+
+### 2. RSS 수집
+
+![2. RSS 수집](../screenshots/workflow/2.png)
+
+### 3. 주제 필터링
+
+![3. 주제 필터링](../screenshots/workflow/3.png)
+
+### 4. AI 요약
+
+![4. AI 요약](../screenshots/workflow/4.png)
+
+### 5. 노션 DB 저장 및 Discord 알림
+
+![5. 노션 DB 저장](../screenshots/workflow/5.png)
+![5-1. Discord 알림](../screenshots/workflow/5.1.png)
+
+### 6. 예외 처리
+
+![6. 예외 처리](../screenshots/workflow/6.png)
+
 ```text
 [0] Manual Start
     운영 경로를 수동으로 테스트
@@ -171,8 +222,15 @@ NEWS_TIMEZONE=Asia/Seoul
 ### 13. Log Success
 
 - 저장 성공 후 n8n execution log에 `SAVED_TO_NOTION`을 기록한다.
-- Discord 성공 알림은 필수로 두지 않는다.
-- Discord는 오류 알림 채널로만 사용해 알림 피로도를 줄인다.
+- Discord 성공 알림을 전송한다.
+- 알림에는 기사 제목, 원문 링크, 발행일시, 사용 모델을 포함한다.
+- Discord 알림 실패는 저장 성공 결과를 실패로 바꾸지 않고 로그로만 남긴다.
+
+### 14. Notify Discord Success
+
+- `DISCORD_WEBHOOK_URL` 환경변수로 Discord webhook에 HTTP POST를 보낸다.
+- 요청 body는 `{ "content": "..." }` 형식이다.
+- 알림 실패는 최대 2회 재시도하고, 그래도 실패하면 workflow 자체는 계속 성공으로 둔다.
 
 ## Error Workflow 연결
 

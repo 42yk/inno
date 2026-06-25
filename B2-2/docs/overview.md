@@ -26,7 +26,7 @@ Manual Start 또는 Schedule Trigger
 | 구분 | 도구 | 사용 이유 |
 |---|---|---|
 | 자동화 | n8n | 스케줄, RSS 수집, 조건 분기, API 호출 연결 |
-| AI 요약 | Ollama | 로컬 모델을 `http://host.docker.internal:11434`로 호출 |
+| AI 요약 | Ollama | Docker Compose의 Ollama 서비스를 `http://ollama:11434`로 호출 |
 | 저장소 | Notion database | 제목, 요약, 원문 링크, 발행일시를 구조화해 저장 |
 | 오류 알림 | Discord webhook | 조치가 필요한 실패 상황만 팀 채널로 전달 |
 | 운영 로그 | n8n execution log | 정상 스킵과 Discord 실패를 기록 |

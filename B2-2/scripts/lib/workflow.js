@@ -1,4 +1,7 @@
-function node({ name, type, position, parameters = {}, typeVersion = 1 }) {
+export const MAIN_WORKFLOW_ID = '6f9f5eec-3a5a-4ac7-901b-bb12c1f9f322';
+export const DISCORD_ERROR_WORKFLOW_ID = 'c73fd802-6fb8-46d7-a4f0-d059b88f504b';
+
+function node({ name, type, position, parameters = {}, typeVersion = 1, ...extra }) {
   return {
     parameters,
     id: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
@@ -6,6 +9,7 @@ function node({ name, type, position, parameters = {}, typeVersion = 1 }) {
     type,
     typeVersion,
     position,
+    ...extra,
   };
 }
 
@@ -21,6 +25,35 @@ function connect(connections, from, to, outputIndex = 0) {
 
 function jsonStringifyExpression(source) {
   return `={{ JSON.stringify(${source}) }}`;
+}
+
+function stickyNote({ name, position, width, height, color, content }) {
+  return node({
+    name,
+    type: 'n8n-nodes-base.stickyNote',
+    typeVersion: 1,
+    position,
+    parameters: {
+      content,
+      height,
+      width,
+      color,
+    },
+  });
+}
+
+function discordWebhookParameters(bodyExpression) {
+  return {
+    method: 'POST',
+    url: '={{ $env.DISCORD_WEBHOOK_URL }}',
+    sendBody: true,
+    contentType: 'json',
+    specifyBody: 'json',
+    jsonBody: bodyExpression,
+    options: {
+      timeout: 10000,
+    },
+  };
 }
 
 function notionQueryParameters(databaseId, filterExpression) {
@@ -66,15 +99,55 @@ function notionCreatePageParameters(databaseId, bodyExpression) {
 
 export function buildWorkflow(config) {
   const nodes = [
+    stickyNote({
+      name: 'Section 1 Schedule Trigger',
+      position: [-128, -304],
+      width: 500,
+      height: 560,
+      color: 4,
+      content: '## [1] 스케줄 트리거\n매일 설정된 시간에 실행\n\n- 기본: 매일 09:00\n- 타임존: Asia/Seoul\n- Manual Start도 같은 경로 실행',
+    }),
+    stickyNote({
+      name: 'Section 2 RSS Collection',
+      position: [416, -304],
+      width: 1576,
+      height: 560,
+      color: 5,
+      content: '## [2] RSS 수집\nNotion 설정 DB의 RSS 목록에서 기사 수집\n\n- 활성 RSS 목록 조회\n- RSS 0건이면 로그 후 정상 종료\n- 피드 항목을 표준 뉴스 필드로 정규화',
+    }),
+    stickyNote({
+      name: 'Section 3 Topic Filtering',
+      position: [2032, -304],
+      width: 1080,
+      height: 560,
+      color: 6,
+      content: '## [3] 주제 필터링\n키워드 기준으로 조건 만족 기사 1건 선택\n\n- Notion 주제 키워드 DB 조회\n- 제목/본문 키워드 매칭\n- 최신 기사 1건 선택',
+    }),
+    stickyNote({
+      name: 'Section 4 AI Summary',
+      position: [3136, -304],
+      width: 596,
+      height: 560,
+      color: 3,
+      content: '## [4] AI 요약\nOllama로 3줄 이내 요약 생성\n\n- 중복 확인 후에만 AI 호출\n- 모델: OLLAMA_MODEL\n- 빈 응답/3줄 초과는 실패 처리',
+    }),
+    stickyNote({
+      name: 'Section 5 Notion Save',
+      position: [3760, -304],
+      width: 760,
+      height: 560,
+      color: 2,
+      content: '## [5] 노션 DB 저장\n요약 결과를 Notion 결과 DB에 저장\n\n- Title / Summary / URL / Date 매핑\n- Dedupe Key 저장\n- 성공 시 Discord 알림',
+    }),
     node({
       name: 'Manual Start',
       type: 'n8n-nodes-base.manualTrigger',
-      position: [0, 0],
+      position: [-64, -64],
     }),
     node({
       name: 'Daily Schedule',
       type: 'n8n-nodes-base.scheduleTrigger',
-      position: [0, 180],
+      position: [-64, 128],
       parameters: {
         rule: {
           interval: [
@@ -91,7 +164,7 @@ export function buildWorkflow(config) {
       name: 'Query RSS Sources',
       type: 'n8n-nodes-base.httpRequest',
       typeVersion: 4.4,
-      position: [260, 80],
+      position: [208, 16],
       parameters: notionQueryParameters(
         config.notionDatabases.rssConfig,
         '{"filter":{"property":"Enabled","checkbox":{"equals":true}}}',
@@ -100,7 +173,7 @@ export function buildWorkflow(config) {
     node({
       name: 'RSS Sources Empty?',
       type: 'n8n-nodes-base.if',
-      position: [1040, 80],
+      position: [496, 64],
       parameters: {
         conditions: {
           number: [
@@ -116,7 +189,7 @@ export function buildWorkflow(config) {
     node({
       name: 'Log No RSS Sources',
       type: 'n8n-nodes-base.code',
-      position: [1300, -40],
+      position: [768, -64],
       parameters: {
         jsCode: `console.log('NO_RSS_SOURCES');
 return [];`,
@@ -126,7 +199,7 @@ return [];`,
       name: 'Query Topic Keywords',
       type: 'n8n-nodes-base.httpRequest',
       typeVersion: 4.4,
-      position: [1300, 80],
+      position: [768, 64],
       parameters: notionQueryParameters(
         config.notionDatabases.topicConfig,
         '{"filter":{"property":"Enabled","checkbox":{"equals":true}}}',
@@ -135,7 +208,7 @@ return [];`,
     node({
       name: 'Topic Keywords Empty?',
       type: 'n8n-nodes-base.if',
-      position: [1560, 80],
+      position: [1024, 64],
       parameters: {
         conditions: {
           number: [
@@ -151,7 +224,7 @@ return [];`,
     node({
       name: 'Log Topic Config Empty',
       type: 'n8n-nodes-base.code',
-      position: [1820, -40],
+      position: [1280, -64],
       parameters: {
         jsCode: `console.log('TOPIC_CONFIG_EMPTY');
 return [];`,
@@ -160,7 +233,7 @@ return [];`,
     node({
       name: 'Build RSS Source Items',
       type: 'n8n-nodes-base.code',
-      position: [1820, 80],
+      position: [1280, 64],
       parameters: {
         jsCode: `const rows = $items('Query RSS Sources').flatMap((item) => item.json.results || []);
 return rows
@@ -179,7 +252,7 @@ return rows
     node({
       name: 'Read RSS Items',
       type: 'n8n-nodes-base.rssFeedRead',
-      position: [2340, 80],
+      position: [1504, 64],
       parameters: {
         url: '={{ $json.feedUrl }}',
         options: {
@@ -190,7 +263,7 @@ return rows
     node({
       name: 'Normalize RSS Items',
       type: 'n8n-nodes-base.code',
-      position: [2600, 80],
+      position: [1760, 64],
       parameters: {
         jsCode: `return items.map((item) => {
   const source = item.json;
@@ -213,7 +286,7 @@ return rows
     node({
       name: 'Filter Candidates',
       type: 'n8n-nodes-base.code',
-      position: [2860, 80],
+      position: [2096, 64],
       parameters: {
         jsCode: `const fallbackKeywords = ${JSON.stringify(config.defaultTopicKeywords)};
 const topicRows = $items('Query Topic Keywords').flatMap((item) => item.json.results || []);
@@ -232,7 +305,7 @@ return items.filter((item) => {
     node({
       name: 'Select Latest Candidate',
       type: 'n8n-nodes-base.code',
-      position: [3120, 80],
+      position: [2352, 64],
       parameters: {
         jsCode: `const sorted = [...items].sort((a, b) => {
   return new Date(b.json.publishedAt).getTime() - new Date(a.json.publishedAt).getTime();
@@ -244,7 +317,7 @@ return sorted.slice(0, 1);`,
       name: 'Check Notion Duplicate',
       type: 'n8n-nodes-base.httpRequest',
       typeVersion: 4.4,
-      position: [3380, 80],
+      position: [2624, 64],
       parameters: notionQueryParameters(
         config.notionDatabases.news,
         jsonStringifyExpression(`{
@@ -260,7 +333,7 @@ return sorted.slice(0, 1);`,
     node({
       name: 'Skip Duplicate',
       type: 'n8n-nodes-base.if',
-      position: [3640, 80],
+      position: [2880, 64],
       parameters: {
         conditions: {
           number: [
@@ -276,7 +349,7 @@ return sorted.slice(0, 1);`,
     node({
       name: 'Restore Selected Candidate',
       type: 'n8n-nodes-base.code',
-      position: [3900, 180],
+      position: [3184, 80],
       parameters: {
         jsCode: `const candidate = $items('Select Latest Candidate')[0]?.json;
 if (!candidate) {
@@ -289,10 +362,10 @@ return [{ json: candidate }];`,
       name: 'Summarize With Ollama',
       type: 'n8n-nodes-base.httpRequest',
       typeVersion: 4.4,
-      position: [4160, 180],
+      position: [3392, 80],
       parameters: {
         method: 'POST',
-        url: `=${config.ollamaBaseUrl}/api/generate`,
+        url: `${config.ollamaBaseUrl}/api/generate`,
         sendBody: true,
         contentType: 'json',
         specifyBody: 'json',
@@ -309,7 +382,7 @@ return [{ json: candidate }];`,
     node({
       name: 'Validate Summary',
       type: 'n8n-nodes-base.code',
-      position: [4420, 180],
+      position: [3584, 80],
       parameters: {
         jsCode: `const candidate = $items('Restore Selected Candidate')[0]?.json || {};
 const response = $json.response || '';
@@ -327,7 +400,7 @@ return [{ json: { ...candidate, summary: lines.join('\\n') } }];`,
       name: 'Save Notion Summary',
       type: 'n8n-nodes-base.httpRequest',
       typeVersion: 4.4,
-      position: [4680, 180],
+      position: [3808, 80],
       parameters: notionCreatePageParameters(
         config.notionDatabases.news,
         jsonStringifyExpression(`{
@@ -348,9 +421,36 @@ return [{ json: { ...candidate, summary: lines.join('\\n') } }];`,
       ),
     }),
     node({
+      name: 'Build Discord Success Message',
+      type: 'n8n-nodes-base.code',
+      position: [4192, 80],
+      parameters: {
+        jsCode: `const candidate = $items('Validate Summary')[0]?.json || {};
+const content = [
+  '[B2-2] workflow succeeded',
+  'Title: ' + (candidate.title || 'unknown'),
+  'URL: ' + (candidate.originalUrl || 'unknown'),
+  'Published: ' + (candidate.publishedAt || 'unknown'),
+  'Model: ${config.ollamaModel}',
+].join('\\n');
+return [{ json: { discordContent: content } }];`,
+      },
+    }),
+    node({
+      name: 'Notify Discord Success',
+      type: 'n8n-nodes-base.httpRequest',
+      typeVersion: 4.4,
+      position: [4384, 80],
+      parameters: discordWebhookParameters('={{ JSON.stringify({ content: $json.discordContent }) }}'),
+      continueOnFail: true,
+      retryOnFail: true,
+      maxTries: config.maxRetryCount,
+      waitBetweenTries: 1000,
+    }),
+    node({
       name: 'Log Result',
       type: 'n8n-nodes-base.code',
-      position: [4940, 180],
+      position: [4000, 80],
       parameters: {
         jsCode: `console.log('SAVED_TO_NOTION', $json.id || $json);
 return items;`,
@@ -378,10 +478,92 @@ return items;`,
   connect(connections, 'Summarize With Ollama', 'Validate Summary');
   connect(connections, 'Validate Summary', 'Save Notion Summary');
   connect(connections, 'Save Notion Summary', 'Log Result');
+  connect(connections, 'Log Result', 'Build Discord Success Message');
+  connect(connections, 'Build Discord Success Message', 'Notify Discord Success');
 
   return {
-    id: '6f9f5eec-3a5a-4ac7-901b-bb12c1f9f322',
+    id: MAIN_WORKFLOW_ID,
     name: config.workflowName,
+    nodes,
+    connections,
+    settings: {
+      executionOrder: 'v1',
+      timezone: config.schedule.timezone,
+      saveExecutionProgress: true,
+      saveManualExecutions: true,
+      errorWorkflow: DISCORD_ERROR_WORKFLOW_ID,
+    },
+    staticData: null,
+    tags: [],
+    active: config.activateWorkflow,
+  };
+}
+
+export function buildDiscordErrorWorkflow(config) {
+  const nodes = [
+    node({
+      name: 'Workflow Error Trigger',
+      type: 'n8n-nodes-base.errorTrigger',
+      position: [0, 0],
+    }),
+    node({
+      name: 'Build Discord Failure Message',
+      type: 'n8n-nodes-base.code',
+      position: [272, 0],
+      parameters: {
+        jsCode: `const execution = $json.execution || {};
+const workflow = $json.workflow || {};
+const error = execution.error || {};
+const content = [
+  '[B2-2] workflow failed',
+  'Workflow: ' + (workflow.name || 'unknown') + ' (' + (workflow.id || 'unknown') + ')',
+  'Node: ' + (execution.lastNodeExecuted || 'unknown'),
+  'Mode: ' + (execution.mode || 'unknown'),
+  'Execution: ' + (execution.url || execution.id || 'unknown'),
+  'Error: ' + (error.message || 'Unknown error'),
+].join('\\n');
+return [{ json: { discordContent: content } }];`,
+      },
+    }),
+    node({
+      name: 'Notify Discord Failure',
+      type: 'n8n-nodes-base.httpRequest',
+      typeVersion: 4.4,
+      position: [528, 0],
+      parameters: discordWebhookParameters('={{ JSON.stringify({ content: $json.discordContent }) }}'),
+      continueOnFail: true,
+      retryOnFail: true,
+      maxTries: config.maxRetryCount,
+      waitBetweenTries: 1000,
+    }),
+    node({
+      name: 'Log Discord Failure Notification',
+      type: 'n8n-nodes-base.code',
+      position: [784, 0],
+      parameters: {
+        jsCode: `if ($json.error) {
+  console.log('DISCORD_NOTIFY_FAILED', $json.error);
+}
+return items;`,
+      },
+    }),
+    stickyNote({
+      name: 'Section 6 Exception Handling',
+      position: [-64, -272],
+      width: 1068,
+      height: 560,
+      content: '## [6] 예외 처리\n스킵/장애/알림 처리\n\n- 중복이면 Ollama 호출 없이 스킵\n- 실패는 Error Workflow로 전달\n- Discord 실패는 로그만 남김',
+    }),
+  ];
+
+  const connections = {};
+  connect(connections, 'Workflow Error Trigger', 'Build Discord Failure Message');
+  connect(connections, 'Build Discord Failure Message', 'Notify Discord Failure');
+  connect(connections, 'Notify Discord Failure', 'Log Discord Failure Notification');
+
+  return {
+    id: DISCORD_ERROR_WORKFLOW_ID,
+    name: 'B2-2 Discord Error Notifier',
     nodes,
     connections,
     settings: {
@@ -394,4 +576,8 @@ return items;`,
     tags: [],
     active: config.activateWorkflow,
   };
+}
+
+export function buildWorkflows(config) {
+  return [buildWorkflow(config), buildDiscordErrorWorkflow(config)];
 }

@@ -6,7 +6,7 @@
 ## 1. 실행 전 준비
 
 - Docker Desktop을 실행한다.
-- 호스트에서 Ollama를 실행하고 `qwen3.6:latest` 모델을 사용할 수 있게 준비한다.
+- Ollama는 Docker Compose 서비스로 함께 실행된다.
 - Notion integration token을 만든 뒤, 대상 부모 페이지에 integration을 connect한다.
 - Discord 오류 알림을 사용할 경우 webhook URL을 준비한다.
 
@@ -25,11 +25,11 @@ NOTION_PARENT_PAGE_ID=
 DISCORD_WEBHOOK_URL=
 ```
 
-Docker에서 호스트 Ollama를 호출하므로 기본값은 아래처럼 둔다.
+Docker Compose 내부에서 n8n이 Ollama 컨테이너를 호출하므로 기본값은 아래처럼 둔다.
 
 ```bash
-OLLAMA_BASE_URL="http://host.docker.internal:11434"
-OLLAMA_MODEL="qwen3.6:latest"
+OLLAMA_BASE_URL="http://ollama:11434"
+OLLAMA_MODEL="gemma3:1b"
 ```
 
 실행 시간은 필요할 때 바꾼다.
@@ -59,8 +59,9 @@ npm run setup:docker
 2. 생성된 DB ID를 `.env`에 기록한다.
 3. 기본 RSS와 기본 주제 키워드가 없으면 Notion 설정 DB에 등록한다.
 4. `dist/n8n-news-summary.workflow.json`을 생성한다.
-5. `docker compose up -d`로 n8n을 실행한다.
-6. n8n 컨테이너 CLI로 workflow를 import한다.
+5. `docker compose up -d`로 n8n과 Ollama를 실행한다.
+6. Ollama 컨테이너에 `gemma3:1b` 모델을 준비한다.
+7. n8n 컨테이너 CLI로 workflow를 import한다.
 
 처음 접속했을 때 n8n owner 계정 생성 화면이 나오면 계정을 만든 뒤 아래 명령을 한 번 더 실행한다.
 
@@ -95,6 +96,7 @@ Docker 상태 확인:
 ```bash
 docker compose ps
 docker compose logs -f n8n
+docker compose logs -f ollama
 ```
 
 중지:
@@ -103,7 +105,7 @@ docker compose logs -f n8n
 docker compose down
 ```
 
-n8n volume까지 지우고 초기화:
+n8n/Ollama volume까지 지우고 초기화:
 
 ```bash
 docker compose down -v

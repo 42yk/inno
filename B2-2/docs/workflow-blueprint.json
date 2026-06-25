@@ -119,6 +119,16 @@
       "purpose": "Write SAVED_TO_NOTION to the n8n execution log."
     },
     {
+      "id": "build-discord-success-message",
+      "type": "Code",
+      "purpose": "Build a Discord success notification with title, URL, published time, and model."
+    },
+    {
+      "id": "notify-discord-success",
+      "type": "HTTP Request",
+      "purpose": "Send the success notification to DISCORD_WEBHOOK_URL without failing the saved result if Discord is unavailable."
+    },
+    {
       "id": "error-workflow",
       "type": "Error Trigger Workflow",
       "purpose": "Send RSS, Ollama, Notion, and workflow errors to Discord. Log Discord failures only."
@@ -142,7 +152,9 @@
     ["handle-duplicate", "summarize-with-ollama"],
     ["summarize-with-ollama", "validate-summary"],
     ["validate-summary", "create-notion-news-page"],
-    ["create-notion-news-page", "log-success"]
+    ["create-notion-news-page", "log-success"],
+    ["log-success", "build-discord-success-message"],
+    ["build-discord-success-message", "notify-discord-success"]
   ],
   "skipCodesLoggedOnly": [
     "NO_RSS_SOURCES",

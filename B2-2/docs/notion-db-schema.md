@@ -1,23 +1,14 @@
 # Notion 데이터베이스 설계
 
-## 1. News Summaries DB
+## DB 목록
 
-AI가 요약한 최종 뉴스가 저장되는 결과 DB다.
+- [1. RSS Sources DB](#1-rss-sources-db)
+- [2. Topic Keywords DB](#2-topic-keywords-db)
+- [3. News Summaries DB](#3-news-summaries-db)
 
-| 속성명 | 타입 | 필수 | 설명 |
-|---|---|---:|---|
-| Title | Title | Y | 뉴스 제목 |
-| Summary | Rich text | Y | Ollama가 생성한 3줄 이내 요약 |
-| Original URL | URL | Y | 원문 링크 |
-| Published At | Date | Y | RSS 발행일시 |
-| Dedupe Key | Rich text | Y | `guid` 우선, 없으면 원문 링크 |
-| Source | Rich text | N | RSS 출처 이름 |
-| Matched Keywords | Multi-select | N | 매칭된 주제 키워드 |
-| Status | Select | Y | `Saved`, `Skipped`, `Failed` 중 저장 결과 |
-| AI Model | Rich text | N | 사용한 Ollama 모델명 |
-| Saved At | Date | Y | Notion 저장 시각 |
+![스크린샷](../screenshots/notion/1.%20DB.png)
 
-## 2. RSS Sources DB
+## 1. RSS Sources DB
 
 RSS URL을 실시간으로 추가/삭제하기 위한 설정 DB다. n8n은 매 실행마다 이 DB를 조회한다.
 
@@ -36,7 +27,9 @@ RSS URL을 실시간으로 추가/삭제하기 위한 설정 DB다. n8n은 매 �
 - RSS를 영구 삭제하려면 행을 삭제한다.
 - 활성 RSS가 0건이면 워크플로우는 실패하지 않고 `NO_RSS_SOURCES` 로그만 남긴다.
 
-## 3. Topic Keywords DB
+![스크린샷](../screenshots/notion/2.%20RSS%20Sources.png)
+
+## 2. Topic Keywords DB
 
 주제 필터를 실시간으로 변경하기 위한 설정 DB다. n8n은 매 실행마다 이 DB를 조회한다.
 
@@ -53,6 +46,28 @@ RSS URL을 실시간으로 추가/삭제하기 위한 설정 DB다. n8n은 매 �
 - 주제를 바꾸려면 키워드 행을 추가하거나 `Enabled` 상태를 변경한다.
 - 활성 키워드가 0건이면 워크플로우는 `TOPIC_CONFIG_EMPTY` 로그를 남기고 종료한다.
 - 키워드 DB 변경은 다음 스케줄 실행부터 반영된다.
+
+![스크린샷](../screenshots/notion/3.%20Topic%20Keywords.png)
+
+## 3. News Summaries DB
+
+AI가 요약한 최종 뉴스가 저장되는 결과 DB다.
+
+| 속성명 | 타입 | 필수 | 설명 |
+|---|---|---:|---|
+| Title | Title | Y | 뉴스 제목 |
+| Summary | Rich text | Y | Ollama가 생성한 3줄 이내 요약 |
+| Original URL | URL | Y | 원문 링크 |
+| Published At | Date | Y | RSS 발행일시 |
+| Dedupe Key | Rich text | Y | `guid` 우선, 없으면 원문 링크 |
+| Source | Rich text | N | RSS 출처 이름 |
+| Matched Keywords | Multi-select | N | 매칭된 주제 키워드 |
+| Status | Select | Y | `Saved`, `Skipped`, `Failed` 중 저장 결과 |
+| AI Model | Rich text | N | 사용한 Ollama 모델명 |
+| Saved At | Date | Y | Notion 저장 시각 |
+
+![스크린샷](../screenshots/notion/4.%20News%20Summaries.png)
+
 
 ## 중복 확인 조건
 

@@ -35,9 +35,10 @@ export function mergeEnvAssignments(content, assignments) {
   return `${nextLines.join('\n').replace(/\n+$/, '')}\n`;
 }
 
-export function buildDockerImportCommands(workflowPath) {
+export function buildDockerImportCommands(workflowPath, { ollamaModel = 'gemma3:1b' } = {}) {
   const commands = [
     ['docker', 'compose', 'up', '-d'],
+    ['docker', 'compose', 'exec', '-T', 'ollama', 'ollama', 'pull', ollamaModel],
     ['docker', 'compose', 'cp', workflowPath, 'n8n:/tmp/b2-2-workflow.json'],
     [
       'docker',
@@ -54,8 +55,13 @@ export function buildDockerImportCommands(workflowPath) {
   if (fs.existsSync(workflowPath)) {
     try {
       const content = fs.readFileSync(workflowPath, 'utf8');
-      const workflow = JSON.parse(content);
-      if (workflow.active && workflow.id) {
+      const workflowData = JSON.parse(content);
+      const workflows = Array.isArray(workflowData) ? workflowData : [workflowData];
+      const activeWorkflowIds = workflows
+        .filter((workflow) => workflow.active && workflow.id)
+        .map((workflow) => workflow.id);
+
+      for (const workflowId of activeWorkflowIds) {
         commands.push([
           'docker',
           'compose',
@@ -64,8 +70,11 @@ export function buildDockerImportCommands(workflowPath) {
           'n8n',
           'n8n',
           'publish:workflow',
-          `--id=${workflow.id}`,
+          `--id=${workflowId}`,
         ]);
+      }
+
+      if (activeWorkflowIds.length > 0) {
         commands.push(['docker', 'compose', 'restart', 'n8n']);
       }
     } catch (e) {

@@ -5,6 +5,7 @@
 - 최대 재시도 횟수는 `MAX_RETRY_COUNT=2`로 제한한다.
 - 정상 스킵과 오류를 구분한다.
 - 정상 스킵은 Discord 알림 없이 n8n execution log에만 남긴다.
+- Notion 저장까지 성공한 실행은 Discord 성공 알림을 보낸다.
 - API 실패, 인증 실패, 저장 실패처럼 조치가 필요한 오류는 Discord 알림을 시도한다.
 - Discord 알림 실패는 전체 워크플로우 결과를 실패로 되돌리지 않고 로그로만 남긴다.
 - 중복 확인은 Ollama 호출보다 반드시 앞에 둔다.
@@ -81,7 +82,7 @@ Notion 저장 실패 시 Discord로 알린다. 같은 실행에서 Ollama를 다
 | Discord webhook 실패 | 최대 2회 재시도 |
 | 재시도 후 실패 | n8n execution log에만 `DISCORD_NOTIFY_FAILED` 기록 |
 
-Discord는 오류 알림 보조 채널이다. Discord 실패 때문에 저장이 성공한 뉴스를 실패 처리하지 않는다.
+Discord는 성공/오류 알림 보조 채널이다. Discord 실패 때문에 저장이 성공한 뉴스를 실패 처리하지 않는다.
 
 ## 비용 및 중복 방지
 
