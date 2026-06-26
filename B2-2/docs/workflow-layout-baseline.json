@@ -6,7 +6,7 @@
       {
         "parameters": {
           "content": "## [1] 스케줄/Webhook 트리거\n매일 설정된 시간 또는 Webhook으로 실행\n\n- 기본: 매일 09:00\n- 타임존: Asia/Seoul\n- Webhook: POST /webhook/NEWS_WEBHOOK_PATH\n- Manual Start는 편집 중 수동 확인용",
-          "height": 720,
+          "height": 768,
           "width": 500,
           "color": 4
         },
@@ -23,7 +23,7 @@
         "parameters": {
           "content": "## [2] RSS 수집\nNotion 설정 DB의 RSS 목록에서 기사 수집\n\n- 활성 RSS 목록 조회\n- RSS 0건이면 로그 후 정상 종료\n- 피드 항목을 표준 뉴스 필드로 정규화",
           "height": 560,
-          "width": 1576,
+          "width": 1832,
           "color": 5
         },
         "id": "section-2-rss-collection",
@@ -47,7 +47,7 @@
         "type": "n8n-nodes-base.stickyNote",
         "typeVersion": 1,
         "position": [
-          2032,
+          2336,
           -304
         ]
       },
@@ -63,7 +63,7 @@
         "type": "n8n-nodes-base.stickyNote",
         "typeVersion": 1,
         "position": [
-          3136,
+          3440,
           -304
         ]
       },
@@ -79,7 +79,7 @@
         "type": "n8n-nodes-base.stickyNote",
         "typeVersion": 1,
         "position": [
-          3760,
+          4064,
           -304
         ]
       },
@@ -308,7 +308,7 @@
         "type": "n8n-nodes-base.rssFeedRead",
         "typeVersion": 1,
         "position": [
-          1504,
+          1456,
           64
         ],
         "retryOnFail": true,
@@ -324,20 +324,72 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 1,
         "position": [
-          1760,
+          1648,
           64
         ]
       },
       {
         "parameters": {
-          "jsCode": "const fallbackKeywords = [\"AI\",\"artificial intelligence\",\"인공지능\",\"생성형 AI\",\"generative AI\",\"LLM\",\"large language model\",\"agent\",\"AI agent\",\"automation\",\"workflow automation\",\"Ollama\",\"n8n\"];\nconst topicRows = $items('Query Topic Keywords').flatMap((item) => item.json.results || []);\nconst keywords = topicRows\n  .map((row) => row.properties?.Keyword?.title?.[0]?.plain_text)\n  .filter(Boolean);\nconst activeKeywords = (keywords.length > 0 ? keywords : fallbackKeywords).map((keyword) => keyword.toLowerCase());\nreturn items.filter((item) => {\n  const text = [item.json.title, item.json.content].join(' ').toLowerCase();\n  const matchedKeywords = activeKeywords.filter((keyword) => text.includes(keyword.toLowerCase()));\n  item.json.matchedKeywords = matchedKeywords;\n  return matchedKeywords.length > 0;\n});"
+          "method": "GET",
+          "url": "={{ $json.originalUrl }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "User-Agent",
+                "value": "Mozilla/5.0 (compatible; B2-2 RSS AI News Summary/1.0)"
+              },
+              {
+                "name": "Accept",
+                "value": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+              }
+            ]
+          },
+          "options": {
+            "timeout": 30000,
+            "response": {
+              "response": {
+                "responseFormat": "text",
+                "outputPropertyName": "articleHtml"
+              }
+            }
+          }
+        },
+        "id": "fetch-article-body",
+        "name": "Fetch Article Body",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1840,
+          64
+        ],
+        "retryOnFail": true,
+        "maxTries": 2,
+        "waitBetweenTries": 1000
+      },
+      {
+        "parameters": {
+          "jsCode": "const sourceItems = $items('Normalize RSS Items');\n\nfunction decodeEntities(value) {\n  return value\n    .replace(/&nbsp;/gi, ' ')\n    .replace(/&amp;/gi, '&')\n    .replace(/&quot;/gi, '\"')\n    .replace(/&#39;/g, \"'\")\n    .replace(/&lt;/gi, '<')\n    .replace(/&gt;/gi, '>')\n    .replace(/&#(\\d+);/g, (_, code) => String.fromCharCode(Number(code)))\n    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)));\n}\n\nfunction htmlToText(html) {\n  const bodyMatch = html.match(/<body[^>]*>([\\s\\S]*?)<\\/body>/i);\n  const source = bodyMatch ? bodyMatch[1] : html;\n  return decodeEntities(source\n    .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')\n    .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')\n    .replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n    .replace(/<!--[\\s\\S]*?-->/g, ' ')\n    .replace(/<\\/(p|div|br|li|tr|h[1-6])\\s*>/gi, '\\n')\n    .replace(/<[^>]+>/g, ' ')\n    .replace(/\\r/g, '\\n')\n    .replace(/[ \\t]+/g, ' ')\n    .replace(/\\n\\s+/g, '\\n')\n    .replace(/\\n{3,}/g, '\\n\\n')\n    .trim());\n}\n\nreturn items.map((item, index) => {\n  const candidate = sourceItems[index]?.json || {};\n  const articleHtml = item.json.articleHtml || item.json.data || '';\n  const articleText = htmlToText(String(articleHtml || ''));\n  const content = (articleText || candidate.content || '').slice(0, 12000);\n  return {\n    json: {\n      ...candidate,\n      articleText,\n      content,\n    },\n  };\n});"
+        },
+        "id": "extract-article-body",
+        "name": "Extract Article Body",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 1,
+        "position": [
+          2048,
+          64
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const fallbackKeywords = [\"AI\",\"artificial intelligence\",\"인공지능\",\"생성형 AI\",\"generative AI\",\"LLM\",\"large language model\",\"agent\",\"AI agent\",\"automation\",\"workflow automation\",\"Ollama\",\"n8n\"];\nconst topicRows = $items('Query Topic Keywords').flatMap((item) => item.json.results || []);\nconst keywords = topicRows\n  .map((row) => row.properties?.Keyword?.title?.[0]?.plain_text)\n  .filter(Boolean);\nconst activeKeywords = (keywords.length > 0 ? keywords : fallbackKeywords).map((keyword) => keyword.toLowerCase());\nreturn items.filter((item) => {\n  const text = [item.json.title, item.json.articleText, item.json.content].join(' ').toLowerCase();\n  const matchedKeywords = activeKeywords.filter((keyword) => text.includes(keyword.toLowerCase()));\n  item.json.matchedKeywords = matchedKeywords;\n  return matchedKeywords.length > 0;\n});"
         },
         "id": "filter-candidates",
         "name": "Filter Candidates",
         "type": "n8n-nodes-base.code",
         "typeVersion": 1,
         "position": [
-          2096,
+          2384,
           64
         ]
       },
@@ -350,7 +402,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 1,
         "position": [
-          2352,
+          2640,
           64
         ]
       },
@@ -388,7 +440,7 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.4,
         "position": [
-          2624,
+          2912,
           64
         ],
         "retryOnFail": true,
@@ -412,7 +464,7 @@
         "type": "n8n-nodes-base.if",
         "typeVersion": 1,
         "position": [
-          2880,
+          3168,
           64
         ]
       },
@@ -425,8 +477,8 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 1,
         "position": [
-          3184,
-          80
+          3472,
+          64
         ]
       },
       {
@@ -446,8 +498,8 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.4,
         "position": [
-          3392,
-          80
+          3680,
+          64
         ],
         "retryOnFail": true,
         "maxTries": 2,
@@ -462,8 +514,8 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 1,
         "position": [
-          3584,
-          80
+          3872,
+          64
         ]
       },
       {
@@ -497,8 +549,8 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.4,
         "position": [
-          3808,
-          80
+          4096,
+          64
         ],
         "retryOnFail": true,
         "maxTries": 2,
@@ -513,8 +565,8 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 1,
         "position": [
-          4192,
-          80
+          4480,
+          64
         ]
       },
       {
@@ -534,8 +586,8 @@
         "type": "n8n-nodes-base.httpRequest",
         "typeVersion": 4.4,
         "position": [
-          4384,
-          80
+          4672,
+          64
         ],
         "continueOnFail": true,
         "retryOnFail": true,
@@ -551,8 +603,8 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 1,
         "position": [
-          4000,
-          80
+          4288,
+          64
         ]
       }
     ],
@@ -671,6 +723,28 @@
         ]
       },
       "Normalize RSS Items": {
+        "main": [
+          [
+            {
+              "node": "Fetch Article Body",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch Article Body": {
+        "main": [
+          [
+            {
+              "node": "Extract Article Body",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Article Body": {
         "main": [
           [
             {

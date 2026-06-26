@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 
 import { loadConfigFromEnv } from '../scripts/lib/config.js';
 import { buildDiscordErrorWorkflow, buildWorkflow, buildWorkflows } from '../scripts/lib/workflow.js';
@@ -57,6 +58,48 @@ test('adds visual sticky note sections that match the assignment workflow exampl
       '## [5] 노션 DB 저장',
       '## [6] 예외 처리',
     ],
+  );
+});
+
+test('uses the saved n8n sticky note layout', () => {
+  const config = loadConfigFromEnv({
+    NOTION_NEWS_DB_ID: 'news-db',
+    NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+    NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+  });
+  const workflow = buildWorkflow(config);
+  const notes = Object.fromEntries(
+    workflow.nodes
+      .filter((node) => node.type === 'n8n-nodes-base.stickyNote')
+      .map((node) => [node.name, node]),
+  );
+
+  assert.deepEqual(notes['Section 1 Schedule Trigger'].position, [-128, -304]);
+  assert.equal(notes['Section 1 Schedule Trigger'].parameters.height, 768);
+  assert.equal(notes['Section 1 Schedule Trigger'].parameters.width, 500);
+  assert.deepEqual(notes['Section 2 RSS Collection'].position, [416, -304]);
+  assert.equal(notes['Section 2 RSS Collection'].parameters.width, 1832);
+  assert.deepEqual(notes['Section 3 Topic Filtering'].position, [2336, -304]);
+  assert.deepEqual(notes['Section 4 AI Summary'].position, [3440, -304]);
+  assert.deepEqual(notes['Section 5 Notion Save'].position, [4064, -304]);
+});
+
+test('workflow document names every executable n8n node', () => {
+  const config = loadConfigFromEnv({
+    NOTION_NEWS_DB_ID: 'news-db',
+    NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+    NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+  });
+  const workflow = buildWorkflow(config);
+  const errorWorkflow = buildDiscordErrorWorkflow(config);
+  const content = fs.readFileSync(new URL('../docs/workflow.md', import.meta.url), 'utf8');
+  const executableNodeNames = [...workflow.nodes, ...errorWorkflow.nodes]
+    .filter((node) => node.type !== 'n8n-nodes-base.stickyNote')
+    .map((node) => node.name);
+
+  assert.deepEqual(
+    executableNodeNames.filter((name) => !content.includes(name)),
+    [],
   );
 });
 
@@ -213,6 +256,46 @@ test('retries RSS feed reads up to the configured retry limit', () => {
   assert.equal(rssNode.retryOnFail, true);
   assert.equal(rssNode.maxTries, 2);
   assert.equal(rssNode.waitBetweenTries, 1000);
+});
+
+test('fetches and extracts article body before filtering candidates', () => {
+  const workflow = buildWorkflow(
+    loadConfigFromEnv({
+      MAX_RETRY_COUNT: '2',
+      NOTION_NEWS_DB_ID: 'news-db',
+      NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+      NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+    }),
+  );
+
+  const fetchNode = nodeByName(workflow, 'Fetch Article Body');
+  const extractNode = nodeByName(workflow, 'Extract Article Body');
+  const filterNode = nodeByName(workflow, 'Filter Candidates');
+
+  assert.ok(indexOf(workflow, 'Normalize RSS Items') < indexOf(workflow, 'Fetch Article Body'));
+  assert.ok(indexOf(workflow, 'Fetch Article Body') < indexOf(workflow, 'Extract Article Body'));
+  assert.ok(indexOf(workflow, 'Extract Article Body') < indexOf(workflow, 'Filter Candidates'));
+  assert.equal(fetchNode.type, 'n8n-nodes-base.httpRequest');
+  assert.equal(fetchNode.typeVersion, 4.4);
+  assert.equal(fetchNode.parameters.method, 'GET');
+  assert.equal(fetchNode.parameters.url, '={{ $json.originalUrl }}');
+  assert.equal(fetchNode.parameters.options.response.response.responseFormat, 'text');
+  assert.equal(fetchNode.parameters.options.response.response.outputPropertyName, 'articleHtml');
+  assert.equal(fetchNode.retryOnFail, true);
+  assert.equal(fetchNode.maxTries, 2);
+  assert.deepEqual(workflow.connections['Normalize RSS Items'].main[0], [
+    { node: 'Fetch Article Body', type: 'main', index: 0 },
+  ]);
+  assert.deepEqual(workflow.connections['Fetch Article Body'].main[0], [
+    { node: 'Extract Article Body', type: 'main', index: 0 },
+  ]);
+  assert.deepEqual(workflow.connections['Extract Article Body'].main[0], [
+    { node: 'Filter Candidates', type: 'main', index: 0 },
+  ]);
+  assert.match(extractNode.parameters.jsCode, /\$items\('Normalize RSS Items'\)/);
+  assert.match(extractNode.parameters.jsCode, /articleHtml/);
+  assert.match(extractNode.parameters.jsCode, /articleText/);
+  assert.match(filterNode.parameters.jsCode, /articleText/);
 });
 
 test('sends JSON bodies through the HTTP Request JSON body mode', () => {
@@ -436,6 +519,13 @@ test('reads RSS URLs and topic keywords from Notion config results at runtime', 
   assert.ok(indexOf(workflow, 'Build RSS Source Items') < indexOf(workflow, 'Read RSS Items'));
   assert.equal(readRssNode.parameters.url, '={{ $json.feedUrl }}');
   assert.match(filterNode.parameters.jsCode, /\$items\('Query Topic Keywords'\)/);
+});
+
+test('workflow document names Filter Candidates explicitly', () => {
+  const content = fs.readFileSync(new URL('../docs/workflow.md', import.meta.url), 'utf8');
+
+  assert.match(content, /\[9\] Filter Candidates/);
+  assert.match(content, /### 9\. Filter Candidates/);
 });
 
 test('daily schedule allows zero RSS sources without reseeding defaults', () => {

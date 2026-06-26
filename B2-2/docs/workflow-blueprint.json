@@ -77,12 +77,22 @@
     {
       "id": "normalize-news-items",
       "type": "Code",
-      "purpose": "Normalize title, originalUrl, guid, dedupeKey, publishedAt, content, and source."
+      "purpose": "Normalize title, originalUrl, guid, dedupeKey, publishedAt, RSS fallback content, and source."
+    },
+    {
+      "id": "fetch-article-body",
+      "type": "HTTP Request",
+      "purpose": "Fetch the original article HTML from originalUrl after reading the RSS item."
+    },
+    {
+      "id": "extract-article-body",
+      "type": "Code",
+      "purpose": "Strip HTML from the article page, store articleText, and use it as the primary content for filtering and summarization."
     },
     {
       "id": "filter-topic-matches",
       "type": "Code",
-      "purpose": "Keep items that match enabled topic keywords."
+      "purpose": "Keep items whose title, articleText, or fallback content matches enabled topic keywords."
     },
     {
       "id": "handle-no-topic-match",
@@ -151,7 +161,9 @@
     ["build-rss-source-items", "loop-rss-sources"],
     ["loop-rss-sources", "read-rss-feed"],
     ["read-rss-feed", "normalize-news-items"],
-    ["normalize-news-items", "filter-topic-matches"],
+    ["normalize-news-items", "fetch-article-body"],
+    ["fetch-article-body", "extract-article-body"],
+    ["extract-article-body", "filter-topic-matches"],
     ["filter-topic-matches", "handle-no-topic-match"],
     ["handle-no-topic-match", "select-one-candidate"],
     ["select-one-candidate", "query-notion-duplicate"],

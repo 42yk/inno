@@ -106,27 +106,50 @@ function notionCreatePageParameters(databaseId, bodyExpression) {
   };
 }
 
+function articleBodyRequestParameters(config) {
+  return {
+    method: 'GET',
+    url: '={{ $json.originalUrl }}',
+    sendHeaders: true,
+    headerParameters: {
+      parameters: [
+        { name: 'User-Agent', value: 'Mozilla/5.0 (compatible; B2-2 RSS AI News Summary/1.0)' },
+        { name: 'Accept', value: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' },
+      ],
+    },
+    options: {
+      timeout: config.rssFetchTimeoutMs,
+      response: {
+        response: {
+          responseFormat: 'text',
+          outputPropertyName: 'articleHtml',
+        },
+      },
+    },
+  };
+}
+
 export function buildWorkflow(config) {
   const nodes = [
     stickyNote({
       name: 'Section 1 Schedule Trigger',
       position: [-128, -304],
       width: 500,
-      height: 720,
+      height: 768,
       color: 4,
       content: '## [1] 스케줄/Webhook 트리거\n매일 설정된 시간 또는 Webhook으로 실행\n\n- 기본: 매일 09:00\n- 타임존: Asia/Seoul\n- Webhook: POST /webhook/NEWS_WEBHOOK_PATH\n- Manual Start는 편집 중 수동 확인용',
     }),
     stickyNote({
       name: 'Section 2 RSS Collection',
       position: [416, -304],
-      width: 1576,
+      width: 1832,
       height: 560,
       color: 5,
       content: '## [2] RSS 수집\nNotion 설정 DB의 RSS 목록에서 기사 수집\n\n- 활성 RSS 목록 조회\n- RSS 0건이면 로그 후 정상 종료\n- 피드 항목을 표준 뉴스 필드로 정규화',
     }),
     stickyNote({
       name: 'Section 3 Topic Filtering',
-      position: [2032, -304],
+      position: [2336, -304],
       width: 1080,
       height: 560,
       color: 6,
@@ -134,7 +157,7 @@ export function buildWorkflow(config) {
     }),
     stickyNote({
       name: 'Section 4 AI Summary',
-      position: [3136, -304],
+      position: [3440, -304],
       width: 596,
       height: 560,
       color: 3,
@@ -142,7 +165,7 @@ export function buildWorkflow(config) {
     }),
     stickyNote({
       name: 'Section 5 Notion Save',
-      position: [3760, -304],
+      position: [4064, -304],
       width: 760,
       height: 560,
       color: 2,
@@ -277,7 +300,7 @@ return rows
     node({
       name: 'Read RSS Items',
       type: 'n8n-nodes-base.rssFeedRead',
-      position: [1504, 64],
+      position: [1456, 64],
       parameters: {
         url: '={{ $json.feedUrl }}',
         options: {
@@ -289,7 +312,7 @@ return rows
     node({
       name: 'Normalize RSS Items',
       type: 'n8n-nodes-base.code',
-      position: [1760, 64],
+      position: [1648, 64],
       parameters: {
         jsCode: `return items.map((item) => {
   const source = item.json;
@@ -310,9 +333,68 @@ return rows
       },
     }),
     node({
+      name: 'Fetch Article Body',
+      type: 'n8n-nodes-base.httpRequest',
+      typeVersion: 4.4,
+      position: [1840, 64],
+      parameters: articleBodyRequestParameters(config),
+      ...retryOnFailOptions(config),
+    }),
+    node({
+      name: 'Extract Article Body',
+      type: 'n8n-nodes-base.code',
+      position: [2048, 64],
+      parameters: {
+        jsCode: `const sourceItems = $items('Normalize RSS Items');
+
+function decodeEntities(value) {
+  return value
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&#(\\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)));
+}
+
+function htmlToText(html) {
+  const bodyMatch = html.match(/<body[^>]*>([\\s\\S]*?)<\\/body>/i);
+  const source = bodyMatch ? bodyMatch[1] : html;
+  return decodeEntities(source
+    .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ')
+    .replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')
+    .replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')
+    .replace(/<!--[\\s\\S]*?-->/g, ' ')
+    .replace(/<\\/(p|div|br|li|tr|h[1-6])\\s*>/gi, '\\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\\r/g, '\\n')
+    .replace(/[ \\t]+/g, ' ')
+    .replace(/\\n\\s+/g, '\\n')
+    .replace(/\\n{3,}/g, '\\n\\n')
+    .trim());
+}
+
+return items.map((item, index) => {
+  const candidate = sourceItems[index]?.json || {};
+  const articleHtml = item.json.articleHtml || item.json.data || '';
+  const articleText = htmlToText(String(articleHtml || ''));
+  const content = (articleText || candidate.content || '').slice(0, 12000);
+  return {
+    json: {
+      ...candidate,
+      articleText,
+      content,
+    },
+  };
+});`,
+      },
+    }),
+    node({
       name: 'Filter Candidates',
       type: 'n8n-nodes-base.code',
-      position: [2096, 64],
+      position: [2384, 64],
       parameters: {
         jsCode: `const fallbackKeywords = ${JSON.stringify(config.defaultTopicKeywords)};
 const topicRows = $items('Query Topic Keywords').flatMap((item) => item.json.results || []);
@@ -321,7 +403,7 @@ const keywords = topicRows
   .filter(Boolean);
 const activeKeywords = (keywords.length > 0 ? keywords : fallbackKeywords).map((keyword) => keyword.toLowerCase());
 return items.filter((item) => {
-  const text = [item.json.title, item.json.content].join(' ').toLowerCase();
+  const text = [item.json.title, item.json.articleText, item.json.content].join(' ').toLowerCase();
   const matchedKeywords = activeKeywords.filter((keyword) => text.includes(keyword.toLowerCase()));
   item.json.matchedKeywords = matchedKeywords;
   return matchedKeywords.length > 0;
@@ -331,7 +413,7 @@ return items.filter((item) => {
     node({
       name: 'Select Latest Candidate',
       type: 'n8n-nodes-base.code',
-      position: [2352, 64],
+      position: [2640, 64],
       parameters: {
         jsCode: `const sorted = [...items].sort((a, b) => {
   return new Date(b.json.publishedAt).getTime() - new Date(a.json.publishedAt).getTime();
@@ -343,7 +425,7 @@ return sorted.slice(0, 1);`,
       name: 'Check Notion Duplicate',
       type: 'n8n-nodes-base.httpRequest',
       typeVersion: 4.4,
-      position: [2624, 64],
+      position: [2912, 64],
       parameters: notionQueryParameters(
         config.notionDatabases.news,
         jsonStringifyExpression(`{
@@ -360,7 +442,7 @@ return sorted.slice(0, 1);`,
     node({
       name: 'Skip Duplicate',
       type: 'n8n-nodes-base.if',
-      position: [2880, 64],
+      position: [3168, 64],
       parameters: {
         conditions: {
           number: [
@@ -376,7 +458,7 @@ return sorted.slice(0, 1);`,
     node({
       name: 'Restore Selected Candidate',
       type: 'n8n-nodes-base.code',
-      position: [3184, 80],
+      position: [3472, 64],
       parameters: {
         jsCode: `const candidate = $items('Select Latest Candidate')[0]?.json;
 if (!candidate) {
@@ -389,7 +471,7 @@ return [{ json: candidate }];`,
       name: 'Summarize With Ollama',
       type: 'n8n-nodes-base.httpRequest',
       typeVersion: 4.4,
-      position: [3392, 80],
+      position: [3680, 64],
       parameters: {
         method: 'POST',
         url: `${config.ollamaBaseUrl}/api/generate`,
@@ -412,7 +494,7 @@ return [{ json: candidate }];`,
     node({
       name: 'Validate Summary',
       type: 'n8n-nodes-base.code',
-      position: [3584, 80],
+      position: [3872, 64],
       parameters: {
         jsCode: `const candidate = $items('Restore Selected Candidate')[0]?.json || {};
 const response = $json.response || '';
@@ -430,7 +512,7 @@ return [{ json: { ...candidate, summary: lines.join('\\n') } }];`,
       name: 'Save Notion Summary',
       type: 'n8n-nodes-base.httpRequest',
       typeVersion: 4.4,
-      position: [3808, 80],
+      position: [4096, 64],
       parameters: notionCreatePageParameters(
         config.notionDatabases.news,
         jsonStringifyExpression(`{
@@ -454,7 +536,7 @@ return [{ json: { ...candidate, summary: lines.join('\\n') } }];`,
     node({
       name: 'Build Discord Success Message',
       type: 'n8n-nodes-base.code',
-      position: [4192, 80],
+      position: [4480, 64],
       parameters: {
         jsCode: `const candidate = $items('Validate Summary')[0]?.json || {};
 const content = [
@@ -471,7 +553,7 @@ return [{ json: { discordContent: content } }];`,
       name: 'Notify Discord Success',
       type: 'n8n-nodes-base.httpRequest',
       typeVersion: 4.4,
-      position: [4384, 80],
+      position: [4672, 64],
       parameters: discordWebhookParameters('={{ JSON.stringify({ content: $json.discordContent }) }}'),
       continueOnFail: true,
       retryOnFail: true,
@@ -481,7 +563,7 @@ return [{ json: { discordContent: content } }];`,
     node({
       name: 'Log Result',
       type: 'n8n-nodes-base.code',
-      position: [4000, 80],
+      position: [4288, 64],
       parameters: {
         jsCode: `console.log('SAVED_TO_NOTION', $json.id || $json);
 return items;`,
@@ -501,7 +583,9 @@ return items;`,
   connect(connections, 'Topic Keywords Empty?', 'Build RSS Source Items', 1);
   connect(connections, 'Build RSS Source Items', 'Read RSS Items');
   connect(connections, 'Read RSS Items', 'Normalize RSS Items');
-  connect(connections, 'Normalize RSS Items', 'Filter Candidates');
+  connect(connections, 'Normalize RSS Items', 'Fetch Article Body');
+  connect(connections, 'Fetch Article Body', 'Extract Article Body');
+  connect(connections, 'Extract Article Body', 'Filter Candidates');
   connect(connections, 'Filter Candidates', 'Select Latest Candidate');
   connect(connections, 'Select Latest Candidate', 'Check Notion Duplicate');
   connect(connections, 'Check Notion Duplicate', 'Skip Duplicate');
