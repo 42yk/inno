@@ -61,6 +61,7 @@ RSS 목록 자체가 0건인 경우는 오류가 아니다. 스케줄은 계속 
 | 빈 응답 | `OLLAMA_EMPTY_RESPONSE` 실패 처리 |
 | JSON 파싱 실패 | `OLLAMA_PARSE_FAILED` 실패 처리 |
 | 3줄 초과 | `SUMMARY_INVALID` 실패 처리 |
+| `- ` bullet 형식 불일치 | `SUMMARY_BULLET_FORMAT_INVALID` 실패 처리 |
 
 Ollama 실패 시 Notion 결과 DB에 저장하지 않는다. 실패 원인, 기사 제목, execution ID를 Discord로 알린다.
 

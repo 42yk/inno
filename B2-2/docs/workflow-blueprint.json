@@ -117,12 +117,12 @@
     {
       "id": "summarize-with-ollama",
       "type": "HTTP Request",
-      "purpose": "Call OLLAMA_BASE_URL/api/generate once for the selected non-duplicate article."
+      "purpose": "Call OLLAMA_BASE_URL/api/generate once for the selected non-duplicate article with prompt v2 few-shot examples and grounded summary guardrails."
     },
     {
       "id": "validate-summary",
       "type": "Code",
-      "purpose": "Reject empty, invalid JSON, or longer-than-three-line summaries."
+      "purpose": "Reject empty, invalid JSON, longer-than-three-line, or non '- ' bullet summaries."
     },
     {
       "id": "create-notion-news-page",
@@ -190,6 +190,7 @@
     "OLLAMA_EMPTY_RESPONSE",
     "OLLAMA_PARSE_FAILED",
     "SUMMARY_INVALID",
+    "SUMMARY_BULLET_FORMAT_INVALID",
     "NOTION_SAVE_SCHEMA_FAILED",
     "NOTION_SAVE_MAPPING_FAILED",
     "NOTION_SAVE_AUTH_FAILED"

@@ -103,6 +103,17 @@ test('workflow document names every executable n8n node', () => {
   );
 });
 
+test('documents prompt version history', () => {
+  const content = fs.readFileSync(new URL('../docs/prompt-history.md', import.meta.url), 'utf8');
+
+  assert.match(content, /## v1/);
+  assert.match(content, /## v2/);
+  assert.match(content, /few-shot/i);
+  assert.match(content, /환각/);
+  assert.match(content, /Gemma/);
+  assert.match(content, /https:\/\/ai\.google\.dev\/gemma\/docs\/core\/prompt-structure/);
+});
+
 test('manual start and schedule use the same runtime entrypoint', () => {
   const workflow = buildWorkflow(
     loadConfigFromEnv({
@@ -456,6 +467,34 @@ test('serializes dynamic HTTP JSON bodies before n8n parses them', () => {
   assert.deepEqual(saveBody.properties['Matched Keywords'].multi_select, [{ name: 'AI' }, { name: 'n8n' }]);
 });
 
+test('uses prompt v2 with few-shot examples and grounded summary constraints', () => {
+  const workflow = buildWorkflow(
+    loadConfigFromEnv({
+      NOTION_NEWS_DB_ID: 'news-db',
+      NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+      NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+    }),
+  );
+
+  const ollamaBody = parseJsonBodyExpression(
+    nodeByName(workflow, 'Summarize With Ollama').parameters.jsonBody,
+    {
+      title: 'Sample title',
+      content: '본문에 포함된 사실만 요약한다. 본문에 없는 시장 점유율 수치는 없다.',
+    },
+  );
+
+  assert.equal(ollamaBody.model, 'gemma3:1b');
+  assert.match(ollamaBody.prompt, /프롬프트 버전: v2/);
+  assert.match(ollamaBody.prompt, /Few-shot 예시 1/);
+  assert.match(ollamaBody.prompt, /Few-shot 예시 2/);
+  assert.match(ollamaBody.prompt, /본문에 직접 근거/);
+  assert.match(ollamaBody.prompt, /환각 검증/);
+  assert.match(ollamaBody.prompt, /최대 3줄/);
+  assert.match(ollamaBody.prompt, /각 줄은 반드시 "- "/);
+  assert.match(ollamaBody.prompt, /Sample title/);
+});
+
 test('uses a static Ollama endpoint URL so n8n does not reset the node settings', () => {
   const workflow = buildWorkflow(
     loadConfigFromEnv({
@@ -502,6 +541,22 @@ test('restores the selected candidate after duplicate lookup before calling Olla
     { node: 'Restore Selected Candidate', type: 'main', index: 0 },
   ]);
   assert.match(validateNode.parameters.jsCode, /\$items\('Restore Selected Candidate'\)/);
+});
+
+test('validates that Ollama summaries use dash-prefixed bullet lines', () => {
+  const workflow = buildWorkflow(
+    loadConfigFromEnv({
+      NOTION_NEWS_DB_ID: 'news-db',
+      NOTION_RSS_CONFIG_DB_ID: 'rss-db',
+      NOTION_TOPIC_CONFIG_DB_ID: 'topic-db',
+    }),
+  );
+
+  const validateNode = nodeByName(workflow, 'Validate Summary');
+
+  assert.match(validateNode.parameters.jsCode, /startsWith\('- '\)/);
+  assert.match(validateNode.parameters.jsCode, /SUMMARY_BULLET_FORMAT_INVALID/);
+  assert.match(validateNode.parameters.jsCode, /lines\.length > 3/);
 });
 
 test('reads RSS URLs and topic keywords from Notion config results at runtime', () => {

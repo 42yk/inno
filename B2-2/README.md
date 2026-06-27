@@ -127,6 +127,7 @@ docker compose down -v
 - [setup 스크립트와 lib 구조](docs/setup-script-flow.md)
 - [인증/credential 관리 전략](docs/credential-strategy.md)
 - [워크플로우 설계](docs/workflow.md)
+- [프롬프트 버전 이력](docs/prompt-history.md)
 - [Notion DB 설계](docs/notion-db-schema.md)
 - [주제 필터링 정책](docs/filter-policy.md)
 - [에러 처리 정책](docs/error-policy.md)

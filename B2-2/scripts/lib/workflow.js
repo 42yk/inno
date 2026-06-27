@@ -1,6 +1,7 @@
 export const MAIN_WORKFLOW_ID = '6f9f5eec-3a5a-4ac7-901b-bb12c1f9f322';
 export const DISCORD_ERROR_WORKFLOW_ID = 'c73fd802-6fb8-46d7-a4f0-d059b88f504b';
 export const MAIN_WEBHOOK_ID = 'b2-2-rss-ai-news-summary';
+export const SUMMARY_PROMPT_VERSION = 'v2';
 
 function node({ name, type, position, parameters = {}, typeVersion = 1, ...extra }) {
   return {
@@ -129,6 +130,49 @@ function articleBodyRequestParameters(config) {
   };
 }
 
+function summaryPromptExpression() {
+  const promptPrefix = [
+    '당신은 기술 뉴스 요약 편집자다.',
+    `프롬프트 버전: ${SUMMARY_PROMPT_VERSION}`,
+    '',
+    '목표: 제공된 제목과 본문만 근거로 한국어 요약을 작성한다.',
+    '',
+    '출력 형식:',
+    '- 최대 3줄만 출력한다.',
+    '- 각 줄은 반드시 "- "로 시작한다.',
+    '- 머리말, 해설, JSON, 검증 과정은 출력하지 않는다.',
+    '',
+    '사실성 규칙:',
+    '- 본문에 직접 근거가 있는 사실만 사용한다.',
+    '- 본문에 없는 수치, 날짜, 원인, 전망, 고유명사, 평가를 만들지 않는다.',
+    '- 근거가 부족하면 "- 본문에서 확인 가능한 핵심 내용이 부족함" 한 줄만 출력한다.',
+    '',
+    '환각 검증:',
+    '- 출력 전 각 줄이 제목 또는 본문에 의해 검증되는지 확인한다.',
+    '- 검증되지 않는 줄은 삭제하거나 본문에 있는 표현으로 고친다.',
+    '',
+    'Few-shot 예시 1',
+    '입력 제목: AI 추론 반도체 B 공개',
+    '입력 본문: 기업 A는 AI 추론용 반도체 B를 공개했다. 전력 사용량을 낮췄고 하반기 공급을 시작한다고 밝혔다.',
+    '출력:',
+    '- 기업 A가 AI 추론용 반도체 B를 공개했다.',
+    '- 회사는 전력 사용량을 낮춘 점을 주요 특징으로 제시했다.',
+    '- 공급 시작 시점은 하반기로 언급됐다.',
+    '',
+    'Few-shot 예시 2',
+    '입력 제목: 의료 영상 분석 AI 시험',
+    '입력 본문: 스타트업 C는 의료 영상 분석 AI 도구를 병원 3곳에서 시험 중이라고 밝혔다. 정확도 수치와 상용화 일정은 공개하지 않았다.',
+    '출력:',
+    '- 스타트업 C가 의료 영상 분석 AI 도구를 병원 3곳에서 시험 중이라고 밝혔다.',
+    '- 본문에는 정확도 수치와 상용화 일정이 공개되지 않았다고 적혀 있다.',
+    '',
+    '실제 입력',
+    '제목: ',
+  ].join('\n');
+
+  return `${JSON.stringify(promptPrefix)} + ($json.title || "") + ${JSON.stringify('\n본문: ')} + ($json.content || "")`;
+}
+
 export function buildWorkflow(config) {
   const nodes = [
     stickyNote({
@@ -161,7 +205,7 @@ export function buildWorkflow(config) {
       width: 596,
       height: 560,
       color: 3,
-      content: '## [4] AI 요약\nOllama로 3줄 이내 요약 생성\n\n- 중복 확인 후에만 AI 호출\n- 모델: OLLAMA_MODEL\n- 빈 응답/3줄 초과는 실패 처리',
+      content: '## [4] AI 요약\nOllama로 3줄 이내 요약 생성\n\n- 중복 확인 후에만 AI 호출\n- 모델: OLLAMA_MODEL\n- v2 프롬프트: few-shot + 환각 검증\n- 빈 응답/형식 오류/3줄 초과는 실패 처리',
     }),
     stickyNote({
       name: 'Section 5 Notion Save',
@@ -481,7 +525,7 @@ return [{ json: candidate }];`,
         jsonBody: jsonStringifyExpression(`{
           model: ${JSON.stringify(config.ollamaModel)},
           stream: false,
-          prompt: "아래 뉴스 내용을 한국어로 3줄 이내로 요약해줘. 과장하지 말고 기사에 있는 사실만 사용해. 각 줄은 하나의 핵심 내용을 담아줘.\\n\\n제목: " + ($json.title || "") + "\\n본문: " + ($json.content || ""),
+          prompt: ${summaryPromptExpression()},
         }`),
         options: {
           timeout: config.ollamaTimeoutMs,
@@ -505,7 +549,12 @@ if (!response.trim()) {
 if (lines.length > 3) {
   throw new Error('SUMMARY_INVALID');
 }
-return [{ json: { ...candidate, summary: lines.join('\\n') } }];`,
+const invalidLine = lines.find((line) => !line.startsWith('- '));
+if (invalidLine) {
+  throw new Error('SUMMARY_BULLET_FORMAT_INVALID');
+}
+const normalizedLines = lines.map((line) => line.replace(/^-\\s+/, '- '));
+return [{ json: { ...candidate, summary: normalizedLines.join('\\n'), promptVersion: ${JSON.stringify(SUMMARY_PROMPT_VERSION)} } }];`,
       },
     }),
     node({
