@@ -343,7 +343,11 @@ test('notifies Discord after a Notion save succeeds', () => {
   const buildMessageNode = nodeByName(workflow, 'Build Discord Success Message');
   const notifyNode = nodeByName(workflow, 'Notify Discord Success');
 
-  assert.match(buildMessageNode.parameters.jsCode, /\[B2-2\] workflow succeeded/);
+  assert.match(buildMessageNode.parameters.jsCode, /타이틀: /);
+  assert.match(buildMessageNode.parameters.jsCode, /기사 원문: /);
+  assert.match(buildMessageNode.parameters.jsCode, /요약: /);
+  assert.doesNotMatch(buildMessageNode.parameters.jsCode, /Published: /);
+  assert.doesNotMatch(buildMessageNode.parameters.jsCode, /Model: /);
   assert.equal(notifyNode.type, 'n8n-nodes-base.httpRequest');
   assert.equal(notifyNode.typeVersion, 4.4);
   assert.equal(notifyNode.parameters.method, 'POST');
@@ -467,7 +471,7 @@ test('serializes dynamic HTTP JSON bodies before n8n parses them', () => {
   assert.deepEqual(saveBody.properties['Matched Keywords'].multi_select, [{ name: 'AI' }, { name: 'n8n' }]);
 });
 
-test('uses prompt v2 with few-shot examples and grounded summary constraints', () => {
+test('uses prompt v1 without v2 few-shot guardrails', () => {
   const workflow = buildWorkflow(
     loadConfigFromEnv({
       NOTION_NEWS_DB_ID: 'news-db',
@@ -485,13 +489,13 @@ test('uses prompt v2 with few-shot examples and grounded summary constraints', (
   );
 
   assert.equal(ollamaBody.model, 'gemma3:1b');
-  assert.match(ollamaBody.prompt, /프롬프트 버전: v2/);
-  assert.match(ollamaBody.prompt, /Few-shot 예시 1/);
-  assert.match(ollamaBody.prompt, /Few-shot 예시 2/);
-  assert.match(ollamaBody.prompt, /본문에 직접 근거/);
-  assert.match(ollamaBody.prompt, /환각 검증/);
-  assert.match(ollamaBody.prompt, /최대 3줄/);
-  assert.match(ollamaBody.prompt, /각 줄은 반드시 "- "/);
+  assert.match(ollamaBody.prompt, /아래 뉴스 내용을 한국어로 3줄 이내로 요약해줘/);
+  assert.match(ollamaBody.prompt, /과장하지 말고 기사에 있는 사실만 사용해/);
+  assert.match(ollamaBody.prompt, /각 줄은 하나의 핵심 내용을 담아줘/);
+  assert.doesNotMatch(ollamaBody.prompt, /프롬프트 버전: v2/);
+  assert.doesNotMatch(ollamaBody.prompt, /Few-shot 예시/);
+  assert.doesNotMatch(ollamaBody.prompt, /환각 검증/);
+  assert.doesNotMatch(ollamaBody.prompt, /각 줄은 반드시 "- "/);
   assert.match(ollamaBody.prompt, /Sample title/);
 });
 
@@ -543,7 +547,7 @@ test('restores the selected candidate after duplicate lookup before calling Olla
   assert.match(validateNode.parameters.jsCode, /\$items\('Restore Selected Candidate'\)/);
 });
 
-test('validates that Ollama summaries use dash-prefixed bullet lines', () => {
+test('validates v1 Ollama summaries by emptiness and line count only', () => {
   const workflow = buildWorkflow(
     loadConfigFromEnv({
       NOTION_NEWS_DB_ID: 'news-db',
@@ -554,8 +558,9 @@ test('validates that Ollama summaries use dash-prefixed bullet lines', () => {
 
   const validateNode = nodeByName(workflow, 'Validate Summary');
 
-  assert.match(validateNode.parameters.jsCode, /startsWith\('- '\)/);
-  assert.match(validateNode.parameters.jsCode, /SUMMARY_BULLET_FORMAT_INVALID/);
+  assert.doesNotMatch(validateNode.parameters.jsCode, /startsWith\('- '\)/);
+  assert.doesNotMatch(validateNode.parameters.jsCode, /SUMMARY_BULLET_FORMAT_INVALID/);
+  assert.match(validateNode.parameters.jsCode, /OLLAMA_EMPTY_RESPONSE/);
   assert.match(validateNode.parameters.jsCode, /lines\.length > 3/);
 });
 

@@ -117,12 +117,12 @@
     {
       "id": "summarize-with-ollama",
       "type": "HTTP Request",
-      "purpose": "Call OLLAMA_BASE_URL/api/generate once for the selected non-duplicate article with prompt v2 few-shot examples and grounded summary guardrails."
+      "purpose": "Call OLLAMA_BASE_URL/api/generate once for the selected non-duplicate article with prompt v1 three-line summary instructions."
     },
     {
       "id": "validate-summary",
       "type": "Code",
-      "purpose": "Reject empty, invalid JSON, longer-than-three-line, or non '- ' bullet summaries."
+      "purpose": "Reject empty, invalid JSON, or longer-than-three-line summaries."
     },
     {
       "id": "create-notion-news-page",
@@ -137,7 +137,7 @@
     {
       "id": "build-discord-success-message",
       "type": "Code",
-      "purpose": "Build a Discord success notification with title, URL, published time, and model."
+      "purpose": "Build a Discord success notification with title, original article URL, and summary."
     },
     {
       "id": "notify-discord-success",
@@ -190,7 +190,6 @@
     "OLLAMA_EMPTY_RESPONSE",
     "OLLAMA_PARSE_FAILED",
     "SUMMARY_INVALID",
-    "SUMMARY_BULLET_FORMAT_INVALID",
     "NOTION_SAVE_SCHEMA_FAILED",
     "NOTION_SAVE_MAPPING_FAILED",
     "NOTION_SAVE_AUTH_FAILED"

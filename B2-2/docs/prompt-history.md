@@ -3,6 +3,8 @@
 이 문서는 Ollama `gemma3:1b` 요약 프롬프트의 변경 이력을 기록한다.
 프롬프트를 바꾸면 `scripts/lib/workflow.js`의 `SUMMARY_PROMPT_VERSION`과 이 문서를 함께 갱신한다.
 
+현재 운영 프롬프트 버전은 `v1`이다. v2는 이력 참고용으로 남긴다.
+
 ## 참고 자료
 
 - Google Gemma 문서: [Gemma prompt structure](https://ai.google.dev/gemma/docs/core/prompt-structure)
@@ -12,6 +14,7 @@
 ## v1
 
 초기 프롬프트는 한국어 3줄 이내 요약과 기사 사실만 사용한다는 제약만 포함했다.
+현재 workflow는 이 버전의 프롬프트를 사용한다.
 
 ```text
 아래 뉴스 내용을 한국어로 3줄 이내로 요약해줘.
@@ -31,6 +34,7 @@
 ## v2
 
 Gemma instruction-tuned 모델은 별도 system role보다 초기 user prompt 안에 지시문을 넣는 구조가 적합하므로, 하나의 prompt에 역할, 출력 계약, few-shot 예시, 환각 검증 절차를 포함한다.
+현재 운영에서는 v1으로 롤백되어 이 섹션은 변경 이력으로만 유지한다.
 
 변경 사항:
 
@@ -86,5 +90,5 @@ Few-shot 예시 2
 운영 기준:
 
 - 요약 호출은 기사 1건당 1회만 수행한다. 재시도는 HTTP 실패에 한해 `MAX_RETRY_COUNT`까지 수행한다.
-- 모델 출력이 3줄을 초과하거나 `- ` bullet 형식을 지키지 않으면 저장하지 않는다.
+- 모델 출력이 비어 있거나 3줄을 초과하면 저장하지 않는다.
 - 프롬프트 변경 후에는 `npm test`로 JSON body 직렬화와 검증 규칙을 확인하고, `npm run setup:docker`로 n8n에 다시 import한다.
