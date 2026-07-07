@@ -27,8 +27,18 @@ def add_prompt(prompts):
     print("\n[알림] 프롬프트 추가 기능은 준비 중입니다.")
 
 def show_list(prompts):
-    """[뼈대] 프롬프트 목록을 보여줍니다."""
-    print("\n[알림] 프롬프트 목록 보기 기능은 브랜치에서 구현될 예정입니다.")
+    """프롬프트 목록을 보여줍니다."""
+    if not prompts:
+        print("\n[안내] 등록된 프롬프트가 없습니다. 먼저 프롬프트를 추가해주세요.")
+        return
+
+    print("\n=== 프롬프트 목록 ===")
+    for idx, p in enumerate(prompts, 1):
+        fav_star = " ⭐" if p.get("favorite") else ""
+        print(f"{idx}. [{p.get('category')}] {p.get('title')}{fav_star}")
+
+    print(f"\n총 {len(prompts)}개의 프롬프트")
+
 
 def show_category_prompts(prompts):
     """[뼈대] 카테고리별로 조회합니다."""
