@@ -10,3 +10,5 @@ A1-1/prompts.md
 __pycache__/
 *.pyc
 subject.md
+.vscode
+PLAN.md
