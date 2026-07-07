@@ -75,6 +75,7 @@ def add_prompt(prompts):
     }
     
     prompts.append(new_prompt)
+    prompt_storage.save_to_json(DATA_FILE, prompts)
     print(f"\n[성공] '{title}' 프롬프트가 추가되었습니다. (ID: {new_id})")
 
 
@@ -200,6 +201,7 @@ def show_prompt_detail(prompts):
 
     # 상세 조회 시 조회수 누적 (+1)
     target_prompt["views"] = target_prompt.get("views", 0) + 1
+    prompt_storage.save_to_json(DATA_FILE, prompts)
 
     while True:
         # 상세 정보 출력
@@ -260,6 +262,7 @@ def show_prompt_detail(prompts):
                     target_prompt["content"] = new_content
                 target_prompt["category"] = new_category
                 
+                prompt_storage.save_to_json(DATA_FILE, prompts)
                 print("\n[성공] 프롬프트가 수정되었습니다.")
                 
             case "2":
@@ -267,6 +270,7 @@ def show_prompt_detail(prompts):
                 confirm = input("\n정말 이 프롬프트를 삭제하시겠습니까? (y/n): ").strip().lower()
                 if confirm in ["y", "ye", "yes"]:
                     prompts.remove(target_prompt)
+                    prompt_storage.save_to_json(DATA_FILE, prompts)
                     print("\n[성공] 프롬프트가 삭제되었습니다.")
                     break
                 else:
@@ -303,6 +307,7 @@ def toggle_favorite(prompts):
 
     # 토글 처리
     target_prompt["favorite"] = not target_prompt.get("favorite", False)
+    prompt_storage.save_to_json(DATA_FILE, prompts)
     status_str = "등록" if target_prompt["favorite"] else "해제"
     print(f"\n[성공] '{target_prompt.get('title')}' 프롬프트가 즐겨찾기에 {status_str}되었습니다.")
 
