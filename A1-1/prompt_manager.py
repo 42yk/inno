@@ -107,12 +107,71 @@ def show_list(prompts):
 
 
 def show_category_prompts(prompts):
-    """[뼈대] 카테고리별로 조회합니다."""
-    print("\n[알림] 카테고리별 조회 기능은 준비 중입니다.")
+    """카테고리별로 프롬프트를 필터링하여 조회합니다."""
+    if not prompts:
+        print("\n[안내] 등록된 프롬프트가 없습니다.")
+        return
+
+    # 현재 존재하는 모든 카테고리 추출 (중복 제거)
+    existing_categories = sorted(list(set([p.get("category") for p in prompts if p.get("category")])))
+    
+    if not existing_categories:
+        print("\n[안내] 카테고리 정보가 없습니다.")
+        return
+
+    print("\n=== 카테고리별 조회 ===")
+    for idx, cat in enumerate(existing_categories, 1):
+        print(f"{idx}. {cat}")
+        
+    while True:
+        choice = input("조회할 카테고리 번호: ").strip()
+        try:
+            choice_idx = int(choice) - 1
+            if 0 <= choice_idx < len(existing_categories):
+                selected_cat = existing_categories[choice_idx]
+                break
+            else:
+                print("[경고] 올바른 범위의 번호를 입력해주세요.")
+        except ValueError:
+            print("[경고] 숫자를 입력해주세요.")
+
+    filtered = [p for p in prompts if p.get("category") == selected_cat]
+    
+    print(f"\n=== 카테고리 [{selected_cat}] 조회 결과 ===")
+    for idx, p in enumerate(filtered, 1):
+        fav_star = " ⭐" if p.get("favorite") else ""
+        print(f"{idx}. {p.get('title')}{fav_star} [조회수: {p.get('views', 0)}회]")
+        
+    print(f"\n총 {len(filtered)}개의 프롬프트")
 
 def search_prompts(prompts):
-    """[뼈대] 키워드로 검색합니다."""
-    print("\n[알림] 검색 기능은 준비 중입니다.")
+    """키워드를 입력받아 제목 또는 내용에 포함된 프롬프트를 검색합니다."""
+    if not prompts:
+        print("\n[안내] 등록된 프롬프트가 없습니다.")
+        return
+
+    print("\n=== 프롬프트 검색 ===")
+    keyword = input("검색 키워드 입력: ").strip()
+    if not keyword:
+        print("[경고] 키워드가 입력되지 않아 검색을 취소합니다.")
+        return
+
+    filtered = []
+    for p in prompts:
+        title = p.get("title", "")
+        content = p.get("content", "")
+        if keyword.lower() in title.lower() or keyword.lower() in content.lower():
+            filtered.append(p)
+
+    if not filtered:
+        print(f"\n[안내] '{keyword}' 키워드를 포함하는 프롬프트가 없습니다.")
+        return
+
+    print(f"\n=== '{keyword}' 검색 결과 (총 {len(filtered)}개) ===")
+    for idx, p in enumerate(filtered, 1):
+        fav_star = " ⭐" if p.get("favorite") else ""
+        print(f"{idx}. [{p.get('category')}] {p.get('title')}{fav_star} [조회수: {p.get('views', 0)}회]")
+
 
 def show_prompt_detail(prompts):
     """[뼈대] 상세 보기를 지원합니다."""
