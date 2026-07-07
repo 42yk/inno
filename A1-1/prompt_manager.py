@@ -27,8 +27,32 @@ def add_prompt(prompts):
     print("\n[알림] 프롬프트 추가 기능은 준비 중입니다.")
 
 def show_list(prompts):
-    """[뼈대] 프롬프트 목록을 보여줍니다."""
-    print("\n[알림] 프롬프트 목록 보기 기능은 브랜치에서 구현될 예정입니다.")
+    """프롬프트 목록을 보여줍니다."""
+    if not prompts:
+        print("\n[안내] 등록된 프롬프트가 없습니다. 먼저 프롬프트를 추가해주세요.")
+        return
+
+    print("\n--- 정렬 조건 선택 ---")
+    print("1. 등록순 (기본)")
+    print("2. 인기순 (조회수 기준)")
+    sort_choice = input("선택: ").strip()
+
+    # 정렬 처리
+    if sort_choice == "2":
+        display_list = sorted(prompts, key=lambda x: (-x.get("views", 0), x.get("id", 0)))
+        print("\n=== 프롬프트 목록 (인기순) ===")
+    else:
+        display_list = sorted(prompts, key=lambda x: x.get("id", 0))
+        print("\n=== 프롬프트 목록 (등록순) ===")
+
+    for idx, p in enumerate(display_list, 1):
+        fav_star = " ⭐" if p.get("favorite") else ""
+        views_count = f" [조회수: {p.get('views', 0)}회]"
+        print(f"{idx}. [{p.get('category')}] {p.get('title')}{fav_star}{views_count}")
+
+    print(f"\n총 {len(display_list)}개의 프롬프트")
+
+
 
 def show_category_prompts(prompts):
     """[뼈대] 카테고리별로 조회합니다."""
