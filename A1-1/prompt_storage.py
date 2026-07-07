@@ -28,6 +28,7 @@ DEFAULT_PROMPTS = [
     }
 ]
 
+# JSON 파일에서 프롬프트 데이터를 불러오고, 파일이 없으면 기본 데이터를 생성하는 함수입니다.
 def load_from_json(file_path):
     """JSON 파일에서 프롬프트 데이터를 불러옵니다. 파일이 없으면 기본 데이터를 반환하고 새로 저장합니다."""
     if not os.path.exists(file_path):
@@ -42,6 +43,7 @@ def load_from_json(file_path):
         print(f"\n[오류] JSON 불러오기 중 오류가 발생했습니다: {e}")
         return list(DEFAULT_PROMPTS)
 
+# 현재 프롬프트 데이터를 JSON 파일에 저장하는 함수입니다.
 def save_to_json(file_path, data):
     """프롬프트 데이터를 JSON 파일로 저장합니다."""
     try:
@@ -56,6 +58,7 @@ def save_to_json(file_path, data):
         print(f"\n[오류] JSON 저장 중 오류가 발생했습니다: {e}")
         return False
 
+# 프롬프트 데이터를 카테고리별 Markdown 문서로 내보내는 함수입니다.
 def export_to_markdown(file_path, data):
     """프롬프트 데이터를 카테고리별로 분류하여 깔끔한 Markdown 파일로 내보냅니다."""
     try:

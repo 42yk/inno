@@ -5,8 +5,8 @@ node_modules/
 
 .idea
 
-A1-1/prompts.json
-A1-1/prompts.md
+prompts.json
+prompts.md
 __pycache__/
 *.pyc
 subject.md
