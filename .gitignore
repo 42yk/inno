@@ -7,3 +7,5 @@ node_modules/
 
 A1-1/prompts.json
 A1-1/prompts.md
+__pycache__/
+*.pyc
