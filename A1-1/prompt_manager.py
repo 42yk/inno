@@ -174,8 +174,108 @@ def search_prompts(prompts):
 
 
 def show_prompt_detail(prompts):
-    """[뼈대] 상세 보기를 지원합니다."""
-    print("\n[알림] 상세 보기 기능은 준비 중입니다.")
+    """프롬프트 상세 정보를 조회하고 수정/삭제 서브 메뉴를 제공합니다."""
+    if not prompts:
+        print("\n[안내] 등록된 프롬프트가 없습니다.")
+        return
+
+    print("\n=== 프롬프트 상세 보기 ===")
+    id_input = input("조회할 프롬프트 ID 입력: ").strip()
+    
+    # ID를 통한 프롬프트 검색
+    target_prompt = None
+    try:
+        target_id = int(id_input)
+        for p in prompts:
+            if p.get("id") == target_id:
+                target_prompt = p
+                break
+    except ValueError:
+        print("[경고] 올바른 형식의 ID(숫자)를 입력해주세요.")
+        return
+
+    if not target_prompt:
+        print(f"[경고] ID가 {id_input}인 프롬프트를 찾을 수 없습니다.")
+        return
+
+    # 상세 조회 시 조회수 누적 (+1)
+    target_prompt["views"] = target_prompt.get("views", 0) + 1
+
+    while True:
+        # 상세 정보 출력
+        print("\n" + "─" * 40)
+        print(f"ID: {target_prompt.get('id')}")
+        print(f"제목: {target_prompt.get('title')}")
+        print(f"카테고리: {target_prompt.get('category')}")
+        print(f"즐겨찾기: {'⭐' if target_prompt.get('favorite') else '☆'}")
+        print(f"조회수: {target_prompt.get('views')}회")
+        print("─" * 40)
+        print("내용:")
+        print(target_prompt.get("content"))
+        print("─" * 40)
+
+        # 서브 메뉴
+        print("1. 수정")
+        print("2. 삭제")
+        print("3. 이전 메뉴로")
+        sub_choice = input("선택: ").strip()
+
+        match sub_choice:
+            case "1":
+                # 수정 기능
+                print("\n=== 프롬프트 수정 ===")
+                print("(수정하지 않으려면 그냥 Enter키를 누르세요)")
+                new_title = input(f"새 제목 [{target_prompt.get('title')}]: ").strip()
+                new_content = input(f"새 내용 (기존 내용 유지 시 Enter): ").strip()
+                
+                print(f"현재 카테고리: {target_prompt.get('category')}")
+                print("--- 카테고리 목록 ---")
+                for idx, cat in enumerate(CATEGORIES, 1):
+                    print(f"{idx}. {cat}")
+                print("7. 직접 입력")
+                print("8. 수정 안 함 (기존 유지)")
+                
+                new_category = None
+                while True:
+                    cat_choice = input("카테고리 선택(번호 입력): ").strip()
+                    if not cat_choice or cat_choice == "8":
+                        new_category = target_prompt.get("category")
+                        break
+                    elif cat_choice in [str(i) for i in range(1, 7)]:
+                        new_category = CATEGORIES[int(cat_choice) - 1]
+                        break
+                    elif cat_choice == "7":
+                        while True:
+                            new_category = input("새 카테고리 이름: ").strip()
+                            if new_category:
+                                break
+                            print("[경고] 카테고리 이름은 비어있을 수 없습니다.")
+                        break
+                    else:
+                        print("[경고] 올바른 번호(1~8)를 입력해주세요.")
+
+                if new_title:
+                    target_prompt["title"] = new_title
+                if new_content:
+                    target_prompt["content"] = new_content
+                target_prompt["category"] = new_category
+                
+                print("\n[성공] 프롬프트가 수정되었습니다.")
+                
+            case "2":
+                # 삭제 기능
+                confirm = input("\n정말 이 프롬프트를 삭제하시겠습니까? (y/n): ").strip().lower()
+                if confirm in ["y", "ye", "yes"]:
+                    prompts.remove(target_prompt)
+                    print("\n[성공] 프롬프트가 삭제되었습니다.")
+                    break
+                else:
+                    print("\n[알림] 삭제를 취소했습니다.")
+            case "3":
+                break
+            case _:
+                print("\n[경고] 잘못된 입력입니다. 1~3 사이의 번호를 선택해주세요.")
+
 
 def toggle_favorite(prompts):
     """[뼈대] 즐겨찾기를 추가하거나 해제합니다."""
