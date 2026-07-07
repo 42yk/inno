@@ -32,12 +32,26 @@ def show_list(prompts):
         print("\n[안내] 등록된 프롬프트가 없습니다. 먼저 프롬프트를 추가해주세요.")
         return
 
-    print("\n=== 프롬프트 목록 ===")
-    for idx, p in enumerate(prompts, 1):
-        fav_star = " ⭐" if p.get("favorite") else ""
-        print(f"{idx}. [{p.get('category')}] {p.get('title')}{fav_star}")
+    print("\n--- 정렬 조건 선택 ---")
+    print("1. 등록순 (기본)")
+    print("2. 인기순 (조회수 기준)")
+    sort_choice = input("선택: ").strip()
 
-    print(f"\n총 {len(prompts)}개의 프롬프트")
+    # 정렬 처리
+    if sort_choice == "2":
+        display_list = sorted(prompts, key=lambda x: (-x.get("views", 0), x.get("id", 0)))
+        print("\n=== 프롬프트 목록 (인기순) ===")
+    else:
+        display_list = sorted(prompts, key=lambda x: x.get("id", 0))
+        print("\n=== 프롬프트 목록 (등록순) ===")
+
+    for idx, p in enumerate(display_list, 1):
+        fav_star = " ⭐" if p.get("favorite") else ""
+        views_count = f" [조회수: {p.get('views', 0)}회]"
+        print(f"{idx}. [{p.get('category')}] {p.get('title')}{fav_star}{views_count}")
+
+    print(f"\n총 {len(display_list)}개의 프롬프트")
+
 
 
 def show_category_prompts(prompts):
