@@ -278,12 +278,52 @@ def show_prompt_detail(prompts):
 
 
 def toggle_favorite(prompts):
-    """[뼈대] 즐겨찾기를 추가하거나 해제합니다."""
-    print("\n[알림] 즐겨찾기 관리 기능은 준비 중입니다.")
+    """특정 프롬프트의 즐겨찾기 설정을 해제하거나 추가합니다 (토글)."""
+    if not prompts:
+        print("\n[안내] 등록된 프롬프트가 없습니다.")
+        return
+
+    print("\n=== 즐겨찾기 관리 (토글) ===")
+    id_input = input("즐겨찾기 상태를 변경할 프롬프트 ID 입력: ").strip()
+    
+    target_prompt = None
+    try:
+        target_id = int(id_input)
+        for p in prompts:
+            if p.get("id") == target_id:
+                target_prompt = p
+                break
+    except ValueError:
+        print("[경고] 올바른 형식의 ID(숫자)를 입력해주세요.")
+        return
+
+    if not target_prompt:
+        print(f"[경고] ID가 {id_input}인 프롬프트를 찾을 수 없습니다.")
+        return
+
+    # 토글 처리
+    target_prompt["favorite"] = not target_prompt.get("favorite", False)
+    status_str = "등록" if target_prompt["favorite"] else "해제"
+    print(f"\n[성공] '{target_prompt.get('title')}' 프롬프트가 즐겨찾기에 {status_str}되었습니다.")
 
 def show_favorite_prompts(prompts):
-    """[뼈대] 즐겨찾기 목록을 조회합니다."""
-    print("\n[알림] 즐겨찾기 목록 보기 기능은 준비 중입니다.")
+    """즐겨찾기된 프롬프트만 모아서 목록으로 출력합니다."""
+    if not prompts:
+        print("\n[안내] 등록된 프롬프트가 없습니다.")
+        return
+
+    favorites = [p for p in prompts if p.get("favorite")]
+    
+    if not favorites:
+        print("\n[안내] 즐겨찾기에 등록된 프롬프트가 없습니다. 마음에 드는 프롬프트를 즐겨찾기 해보세요!")
+        return
+
+    print("\n=== 즐겨찾기 목록 ===")
+    for idx, p in enumerate(favorites, 1):
+        print(f"{idx}. [{p.get('category')}] {p.get('title')} ⭐ [조회수: {p.get('views', 0)}회]")
+        
+    print(f"\n총 {len(favorites)}개의 즐겨찾기 프롬프트")
+
 
 def export_markdown_menu(prompts):
     """[뼈대] 마크다운 파일로 내보냅니다."""
