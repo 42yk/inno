@@ -23,8 +23,60 @@ def show_menu():
     print("===========================")
 
 def add_prompt(prompts):
-    """[뼈대] 새로운 프롬프트를 추가합니다."""
-    print("\n[알림] 프롬프트 추가 기능은 준비 중입니다.")
+    """새로운 프롬프트를 추가합니다."""
+    print("\n=== 프롬프트 추가 ===")
+    
+    # 제목 입력
+    while True:
+        title = input("제목: ").strip()
+        if title:
+            break
+        print("[경고] 제목은 비어있을 수 없습니다. 다시 입력해주세요.")
+
+    # 내용 입력
+    while True:
+        content = input("내용: ").strip()
+        if content:
+            break
+        print("[경고] 내용은 비어있을 수 없습니다. 다시 입력해주세요.")
+
+    # 카테고리 선택
+    print("\n--- 카테고리 목록 ---")
+    for idx, cat in enumerate(CATEGORIES, 1):
+        print(f"{idx}. {cat}")
+    print("7. 직접 입력")
+    
+    while True:
+        cat_choice = input("카테고리 선택(번호 입력): ").strip()
+        if cat_choice in [str(i) for i in range(1, 7)]:
+            category = CATEGORIES[int(cat_choice) - 1]
+            break
+        elif cat_choice == "7":
+            while True:
+                category = input("새 카테고리 이름: ").strip()
+                if category:
+                    break
+                print("[경고] 카테고리 이름은 비어있을 수 없습니다.")
+            break
+        else:
+            print("[경고] 올바른 번호(1~7)를 입력해주세요.")
+
+    # 고유 ID 생성 (최대 ID + 1)
+    new_id = max([p.get("id", 0) for p in prompts]) + 1 if prompts else 1
+
+    # 새 프롬프트 객체 생성
+    new_prompt = {
+        "id": new_id,
+        "title": title,
+        "content": content,
+        "category": category,
+        "favorite": False,
+        "views": 0
+    }
+    
+    prompts.append(new_prompt)
+    print(f"\n[성공] '{title}' 프롬프트가 추가되었습니다. (ID: {new_id})")
+
 
 def show_list(prompts):
     """프롬프트 목록을 보여줍니다."""
