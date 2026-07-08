@@ -110,6 +110,11 @@ sequenceDiagram
 - `{date}_raw.json`: 1차 추천 JSON, 맛집 검색 결과, 오류 목록
 - `{date}_travel_plan.md`: 최종 여행 리포트
 
+현재 생성된 결과물은 아래에서 바로 확인할 수 있습니다.
+
+- 2026-07-07: [원본 JSON](results/2026-07-07_raw.json), [여행 리포트](results/2026-07-07_travel_plan.md)
+- 2026-08-30: [원본 JSON](results/2026-08-30_raw.json), [여행 리포트](results/2026-08-30_travel_plan.md)
+
 원본 JSON 예시:
 
 ```json
