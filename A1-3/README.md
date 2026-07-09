@@ -4,6 +4,8 @@
 
 ## 배포 URL
 
+> https://inno-a1-3-r1zcggdxr-ykk1.vercel.app/
+
 ## 주요 기능
 
 - 고정 헤더와 `Home`, `AI 메뉴 추천`, `랭킹` 3개 본문 화면 fetch 전환
