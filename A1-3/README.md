@@ -19,6 +19,8 @@
 
 ## 서비스 기획
 
+아래는 서비스 기획 요약입니다. 상세 기획서는 [docs/service-plan.md](docs/service-plan.md)를 참고합니다.
+
 ### 목적
 
 식사 메뉴를 빠르게 정하지 못하는 사용자가 현재 상황을 입력하면 조건에 맞는 메뉴를 추천받을 수 있도록 돕습니다. 추천된 메뉴는 랭킹에 집계되어 다른 사용자가 많이 추천받은 메뉴도 확인할 수 있습니다.
@@ -52,6 +54,13 @@
 | Database | Redis, Upstash Redis                |
 | Deploy   | Vercel                              |
 
+## 제출 증빙
+
+- 데스크톱 화면: [images/PC.png](images/PC.png)
+- 모바일 화면: [images/mobile.png](images/mobile.png)
+- 모바일 AI 기능 동작 화면: [images/mobile2.png](images/mobile2.png)
+- AI 코딩 도구 사용 과정 로그와 증빙 이미지는 [logs/](logs/)를 참고합니다.
+
 ## 프로젝트 구조
 
 ```text
@@ -65,7 +74,11 @@ A1-3/
   docs/                  # README를 제외한 Markdown 문서
     ai-failure-flow.md   # Gemini 요청 및 Redis 저장 장애 처리 시퀀스 문서
     service-plan.md      # 서비스 목적, 사용자, 화면 구성, 핵심 기능 기획 문서
-  logs/                  # AI 코딩 도구 사용 과정 증빙 이미지
+  images/                # 서비스 스크린샷 제출 자료
+    PC.png               # 데스크톱 화면 스크린샷
+    mobile.png           # 모바일 화면 스크린샷
+    mobile2.png          # 모바일 AI 기능 동작 스크린샷
+  logs/                  # AI 코딩 도구 사용 과정 증빙 자료
     log.png              # AI 코딩 도구 사용 과정 증빙 이미지
     ai-coding-log.md     # AI 코딩 도구 사용 과정 요약 로그
   frontend/              # 프론트엔드 정적 파일
