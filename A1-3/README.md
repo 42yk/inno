@@ -13,6 +13,7 @@
 - Redis Sorted Set 기반 인기 메뉴 TOP 10 랭킹
 - `APP_PROFILE=dev|prod` 기준 로컬/배포 환경 분리
 - API 오류, 필수값 누락, 입력 범위 오류, 응답 지연 안내
+- Gemini 요청과 Redis 저장 실패 흐름을 정리한 [AI 기능 장애 처리 시퀀스](docs/ai-failure-flow.md)
 
 ## 서비스 기획
 
@@ -37,6 +38,7 @@
 - 입력: 식사 시간, 예산, 인원, 음식 종류, 맵기
 - 출력: 추천 메뉴명, 추천 이유, 예상 가격, 함께 먹기 좋은 사이드 메뉴 또는 음료
 - 실패 처리: 필수값 누락, 예산/인원 범위 오류, API 오류, 응답 지연 메시지
+- 장애 처리 흐름: [AI 기능 장애 처리 시퀀스](docs/ai-failure-flow.md)
 
 ## 기술 스택
 
@@ -53,14 +55,17 @@
 ```text
 A1-3/
   README.md              # 서비스 소개, 실행 방법, 배포 방법, API 안내 문서
-  ai-coding-log.md       # AI 코딩 도구 사용 과정 요약 로그
-  service-plan.md        # 서비스 목적, 사용자, 화면 구성, 핵심 기능 기획 문서
   .env.example           # 로컬/배포 환경 변수 예시
-  log.png                # AI 코딩 도구 사용 과정 증빙 이미지
   docker-compose.yml     # 로컬 개발용 Redis 컨테이너 설정
   local_server.py        # 정적 파일과 API를 함께 확인하는 로컬 개발 서버
   requirements.txt       # Python API 실행 패키지 목록
   vercel.json            # Vercel 프론트엔드 정적 파일 라우팅 설정
+  docs/                  # README를 제외한 Markdown 문서
+    ai-failure-flow.md   # Gemini 요청 및 Redis 저장 장애 처리 시퀀스 문서
+    service-plan.md      # 서비스 목적, 사용자, 화면 구성, 핵심 기능 기획 문서
+  logs/                  # AI 코딩 도구 사용 과정 증빙 이미지
+    log.png              # AI 코딩 도구 사용 과정 증빙 이미지
+    ai-coding-log.md     # AI 코딩 도구 사용 과정 요약 로그
   frontend/              # 프론트엔드 정적 파일
     index.html           # 고정 헤더와 본문을 주입할 앱 shell
     css/
