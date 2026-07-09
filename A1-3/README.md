@@ -71,7 +71,7 @@ A1-3/
   local_server.py        # 정적 파일과 API를 함께 확인하는 로컬 개발 서버
   requirements.txt       # Python API 실행 패키지 목록
   vercel.json            # Vercel 프론트엔드 정적 파일 라우팅 설정
-  docs/                  # README를 제외한 Markdown 문서
+  docs/                  # 서비스 기획 및 장애 처리 문서
     ai-failure-flow.md   # Gemini 요청 및 Redis 저장 장애 처리 시퀀스 문서
     service-plan.md      # 서비스 목적, 사용자, 화면 구성, 핵심 기능 기획 문서
   images/                # 서비스 스크린샷 제출 자료
