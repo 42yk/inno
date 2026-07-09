@@ -6,7 +6,7 @@
 
 ## 주요 기능
 
-- `Home`, `AI 메뉴 추천`, `랭킹` 3개 섹션으로 구성된 단일 페이지
+- 고정 헤더와 `Home`, `AI 메뉴 추천`, `랭킹` 3개 본문 화면 fetch 전환
 - 식사 시간, 예산, 인원, 음식 종류, 맵기를 입력받는 추천 폼
 - Gemini Interactions API 기반 메뉴 추천
 - 추천 메뉴명, 추천 이유, 예상 가격, 함께 먹기 좋은 사이드 메뉴/음료 표시
@@ -62,11 +62,15 @@ A1-3/
   requirements.txt       # Python API 실행 패키지 목록
   vercel.json            # Vercel 프론트엔드 정적 파일 라우팅 설정
   frontend/              # 프론트엔드 정적 파일
-    index.html           # 단일 페이지 화면 구조와 섹션 네비게이션
+    index.html           # 고정 헤더와 본문을 주입할 앱 shell
     css/
-      style.css          # 반응형 레이아웃, 폼, 결과 패널, 랭킹 UI 스타일
+      style.css          # 반응형 레이아웃, 화면 전환, 폼, 결과 패널, 랭킹 UI 스타일
     js/
-      app.js             # 입력 검증, API 요청, 추천 결과 렌더링, 랭킹 조회
+      app.js             # 본문 HTML fetch 전환, 입력 검증, API 요청, 결과/랭킹 렌더링
+    views/
+      home.html          # Home 본문 화면 fragment
+      recommend.html     # AI 메뉴 추천 본문 화면 fragment
+      ranking.html       # 인기 메뉴 랭킹 본문 화면 fragment
     images/
       favicon.svg        # 브라우저 탭에 표시되는 서비스 아이콘
   api/                   # Vercel Python Serverless Functions
@@ -90,7 +94,7 @@ API 키와 토큰은 코드에 저장하지 말고 `.env` 또는 Vercel Environm
 
 ```bash
 APP_PROFILE=dev
-REDIS_URL=redis://localhost:6379/0
+REDIS_URL=redis://localhost:6380/0
 # 선택: 있으면 실제 Gemini 호출, 없으면 mock 추천 사용
 GEMINI_API_KEY=
 GEMINI_MODEL=gemini-3.1-flash-lite
@@ -108,33 +112,41 @@ UPSTASH_REDIS_REST_TOKEN=Upstash_REST_TOKEN
 
 ## 로컬 실행
 
-1. 의존성을 설치합니다.
+로컬 실행은 Vercel 배포 환경과 별개로, 내 컴퓨터의 `localhost`에서 화면과 API 흐름을 확인하는 개발용 실행 방법입니다.
+본문 화면은 `fetch("/views/...")`로 불러오므로 HTML 파일을 직접 열지 말고 반드시 로컬 개발 서버로 접속합니다.
+아래 명령은 모두 사용자 홈 디렉터리 기준 프로젝트 경로인 `~/inno-ai-native/A1-3`에서 실행합니다.
+
+1. 프로젝트 디렉터리로 이동합니다.
 
 ```bash
-python3 -m pip install -r requirements.txt
+cd ~/inno-ai-native/A1-3
 ```
 
-2. 로컬 Redis를 실행합니다.
+2. 의존성을 현재 사용자 홈 디렉터리 기준 Python 환경에 설치합니다. 별도의 `venv`를 만들지 않고, 시스템 site-packages 대신 사용자 site-packages를 사용하기 위해 `--user` 옵션을 사용합니다. Homebrew Python처럼 externally managed environment로 막히는 경우를 피하기 위해 `--break-system-packages`를 함께 지정합니다.
+
+```bash
+python3 -m pip install --user --break-system-packages -r requirements.txt
+```
+
+3. 로컬 Redis를 실행합니다.
 
 ```bash
 docker compose up -d redis
 ```
 
-3. 로컬 개발 서버를 실행합니다.
+프로젝트 Redis는 다른 서비스의 기본 Redis 포트와 충돌하지 않도록 내 컴퓨터의 `6380` 포트에 연결됩니다.
+
+4. 로컬 개발 서버를 실행합니다.
 
 ```bash
-APP_PROFILE=dev REDIS_URL=redis://localhost:6379/0 python3 local_server.py
+APP_PROFILE=dev REDIS_URL=redis://localhost:6380/0 python3 local_server.py
 ```
 
-4. 브라우저에서 `http://127.0.0.1:8000`에 접속합니다.
+`local_server.py`는 로컬 테스트용 웹 서버입니다. `frontend/`의 정적 파일을 `localhost`에 호스팅하고, `/views/...` 화면 fragment와 `/api/recommend`, `/api/ranking` API 요청도 같은 주소에서 확인할 수 있게 연결합니다.
 
-Gemini 키가 없으면 dev profile에서는 mock 추천이 반환됩니다. 배포용 prod profile에서는 `GEMINI_API_KEY`가 필수입니다.
+5. 브라우저에서 `http://127.0.0.1:8000`에 접속합니다.
 
-Vercel CLI가 설치되어 있다면 아래 명령으로 Vercel 환경에 더 가깝게 확인할 수 있습니다.
-
-```bash
-APP_PROFILE=dev REDIS_URL=redis://localhost:6379/0 vercel dev
-```
+Gemini 키가 없으면 dev profile에서는 mock 추천이 반환됩니다. 실제 Gemini 호출을 테스트하려면 로컬 환경에도 `GEMINI_API_KEY`를 설정합니다.
 
 ## 배포 방법
 

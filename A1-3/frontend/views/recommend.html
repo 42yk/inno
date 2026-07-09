@@ -1,0 +1,93 @@
+<section
+  id="recommend"
+  class="recommend section view active-view"
+  data-view="recommend"
+  aria-labelledby="recommend-title"
+>
+  <div class="section-heading">
+    <p class="eyebrow">AI 메뉴 추천</p>
+    <h2 id="recommend-title">조건을 입력하면 메뉴를 추천합니다</h2>
+  </div>
+
+  <div class="workspace">
+    <form id="recommend-form" class="recommend-form" novalidate>
+      <label for="mealTime">
+        <span>식사 시간</span>
+        <select id="mealTime" name="mealTime" aria-label="식사 시간" required>
+          <option value="">선택해주세요</option>
+          <option value="아침">아침</option>
+          <option value="점심">점심</option>
+          <option value="저녁">저녁</option>
+          <option value="야식">야식</option>
+        </select>
+      </label>
+
+      <label for="budget">
+        <span>예산</span>
+        <input
+          id="budget"
+          name="budget"
+          aria-label="예산"
+          type="number"
+          inputmode="numeric"
+          min="1000"
+          max="100000"
+          step="1000"
+          placeholder="예: 12000"
+          required
+        />
+      </label>
+
+      <label for="people">
+        <span>인원</span>
+        <input
+          id="people"
+          name="people"
+          aria-label="인원"
+          type="number"
+          inputmode="numeric"
+          min="1"
+          max="20"
+          step="1"
+          placeholder="예: 2"
+          required
+        />
+      </label>
+
+      <label for="foodType">
+        <span>음식 종류</span>
+        <select id="foodType" name="foodType" aria-label="음식 종류" required>
+          <option value="">선택해주세요</option>
+          <option value="한식">한식</option>
+          <option value="중식">중식</option>
+          <option value="일식">일식</option>
+          <option value="양식">양식</option>
+          <option value="분식">분식</option>
+          <option value="패스트푸드">패스트푸드</option>
+          <option value="상관없음">상관없음</option>
+        </select>
+      </label>
+
+      <label for="spicyLevel">
+        <span>맵기</span>
+        <select id="spicyLevel" name="spicyLevel" aria-label="맵기" required>
+          <option value="">선택해주세요</option>
+          <option value="안 매움">안 매움</option>
+          <option value="보통">보통</option>
+          <option value="매움">매움</option>
+        </select>
+      </label>
+
+      <button class="button primary form-button" type="submit">추천받기</button>
+      <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+    </form>
+
+    <aside class="result-panel" aria-labelledby="result-title">
+      <p class="eyebrow">추천 결과</p>
+      <h3 id="result-title">아직 추천 전입니다</h3>
+      <div id="result-content" class="result-content empty">
+        <p>조건을 입력하고 추천받기 버튼을 누르면 메뉴와 추천 이유가 표시됩니다.</p>
+      </div>
+    </aside>
+  </div>
+</section>

@@ -1,10 +1,14 @@
-const form = document.querySelector("#recommend-form");
-const message = document.querySelector("#form-message");
-const resultTitle = document.querySelector("#result-title");
-const resultContent = document.querySelector("#result-content");
-const rankingList = document.querySelector("#ranking-list");
-const rankingMessage = document.querySelector("#ranking-message");
-const refreshRankingButton = document.querySelector("#refresh-ranking");
+const appView = document.querySelector("#app-view");
+const navLinks = Array.from(document.querySelectorAll(".nav-links a"));
+
+const VIEW_PATHS = {
+  home: "/views/home.html",
+  recommend: "/views/recommend.html",
+  ranking: "/views/ranking.html",
+};
+
+const viewNames = Object.keys(VIEW_PATHS);
+const viewCache = new Map();
 
 const ERROR_MESSAGES = {
   required: "필수 항목을 입력해주세요.",
@@ -17,12 +21,141 @@ const ERROR_MESSAGES = {
   loading: "AI가 메뉴를 추천하고 있습니다...",
 };
 
+let activeViewName = "";
+let activeRequestId = 0;
+
+function getViewFromHash() {
+  const viewName = window.location.hash.replace("#", "");
+  return viewNames.includes(viewName) ? viewName : "home";
+}
+
+function setActiveNav(viewName) {
+  navLinks.forEach((link) => {
+    const isActive = link.getAttribute("href") === `#${viewName}`;
+    if (isActive) {
+      link.setAttribute("aria-current", "page");
+    } else {
+      link.removeAttribute("aria-current");
+    }
+  });
+}
+
+function setViewLoading(viewName) {
+  appView.innerHTML = `
+    <section class="section view loading-view" data-view="${escapeHtml(viewName)}">
+      <p class="eyebrow">Loading</p>
+      <h1>화면을 불러오는 중입니다</h1>
+    </section>
+  `;
+}
+
+function setViewError() {
+  appView.innerHTML = `
+    <section class="section view loading-view" data-view="error">
+      <p class="eyebrow">오류</p>
+      <h1>화면을 불러오지 못했습니다</h1>
+      <p class="hero-text">잠시 후 다시 시도해주세요.</p>
+    </section>
+  `;
+}
+
+async function fetchViewHtml(viewName) {
+  if (viewCache.has(viewName)) {
+    return viewCache.get(viewName);
+  }
+
+  const response = await fetch(VIEW_PATHS[viewName]);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch ${viewName} view`);
+  }
+
+  const html = await response.text();
+  viewCache.set(viewName, html);
+  return html;
+}
+
+async function loadView(viewName) {
+  const requestId = ++activeRequestId;
+  const shouldShowLoading = activeViewName !== viewName;
+
+  if (shouldShowLoading) {
+    setViewLoading(viewName);
+  }
+
+  try {
+    const html = await fetchViewHtml(viewName);
+    if (requestId !== activeRequestId) {
+      return;
+    }
+
+    appView.innerHTML = html;
+    activeViewName = viewName;
+    document.body.dataset.currentView = viewName;
+    setActiveNav(viewName);
+    window.scrollTo({ top: 0, behavior: "auto" });
+    initView(viewName);
+  } catch (error) {
+    if (requestId !== activeRequestId) {
+      return;
+    }
+
+    activeViewName = "";
+    setActiveNav(viewName);
+    setViewError();
+  }
+}
+
+function handleRoute() {
+  loadView(getViewFromHash());
+}
+
+function navigateToView(viewName) {
+  if (!viewNames.includes(viewName)) {
+    return;
+  }
+
+  if (window.location.hash !== `#${viewName}`) {
+    history.pushState(null, "", `#${viewName}`);
+  }
+  loadView(viewName);
+}
+
+function initView(viewName) {
+  if (viewName === "recommend") {
+    initRecommendView();
+  }
+
+  if (viewName === "ranking") {
+    initRankingView();
+  }
+}
+
+function initRecommendView() {
+  const form = document.querySelector("#recommend-form");
+  if (!form) {
+    return;
+  }
+
+  form.addEventListener("submit", submitRecommendation);
+}
+
+function initRankingView() {
+  const refreshRankingButton = document.querySelector("#refresh-ranking");
+  refreshRankingButton?.addEventListener("click", loadRanking);
+  loadRanking();
+}
+
 function setMessage(text, type = "") {
+  const message = document.querySelector("#form-message");
+  if (!message) {
+    return;
+  }
+
   message.textContent = text;
   message.className = `form-message ${type}`.trim();
 }
 
-function parseForm() {
+function parseForm(form) {
   const formData = new FormData(form);
   return {
     mealTime: String(formData.get("mealTime") || "").trim(),
@@ -73,6 +206,12 @@ function formatWon(value) {
 }
 
 function renderResult(result) {
+  const resultTitle = document.querySelector("#result-title");
+  const resultContent = document.querySelector("#result-content");
+  if (!resultTitle || !resultContent) {
+    return;
+  }
+
   resultTitle.textContent = "추천 메뉴가 도착했습니다";
   resultContent.className = "result-content";
   resultContent.innerHTML = `
@@ -94,6 +233,12 @@ function renderResult(result) {
 }
 
 function renderRanking(items) {
+  const rankingList = document.querySelector("#ranking-list");
+  const rankingMessage = document.querySelector("#ranking-message");
+  if (!rankingList || !rankingMessage) {
+    return;
+  }
+
   rankingList.innerHTML = "";
 
   if (!items.length) {
@@ -121,6 +266,12 @@ function renderRanking(items) {
 }
 
 async function loadRanking() {
+  const rankingList = document.querySelector("#ranking-list");
+  const rankingMessage = document.querySelector("#ranking-message");
+  if (!rankingList || !rankingMessage) {
+    return;
+  }
+
   rankingMessage.textContent = "랭킹을 불러오는 중입니다.";
 
   try {
@@ -140,7 +291,8 @@ async function loadRanking() {
 async function submitRecommendation(event) {
   event.preventDefault();
 
-  const data = parseForm();
+  const form = event.currentTarget;
+  const data = parseForm(form);
   const validationMessage = validateInput(data);
   if (validationMessage) {
     setMessage(validationMessage, "error");
@@ -169,7 +321,6 @@ async function submitRecommendation(event) {
 
     renderResult(payload.result);
     setMessage("");
-    await loadRanking();
   } catch (error) {
     setMessage(error.message || ERROR_MESSAGES.api, "error");
   }
@@ -184,6 +335,21 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
-form.addEventListener("submit", submitRecommendation);
-refreshRankingButton.addEventListener("click", loadRanking);
-window.addEventListener("DOMContentLoaded", loadRanking);
+document.addEventListener("click", (event) => {
+  const link = event.target.closest('a[href^="#"]');
+  if (!link) {
+    return;
+  }
+
+  const viewName = link.getAttribute("href").slice(1);
+  if (!viewNames.includes(viewName)) {
+    return;
+  }
+
+  event.preventDefault();
+  navigateToView(viewName);
+});
+
+window.addEventListener("DOMContentLoaded", handleRoute);
+window.addEventListener("hashchange", handleRoute);
+window.addEventListener("popstate", handleRoute);

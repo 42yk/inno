@@ -13,6 +13,10 @@
       "destination": "/frontend/js/$1"
     },
     {
+      "source": "/views/(.*)",
+      "destination": "/frontend/views/$1"
+    },
+    {
       "source": "/images/(.*)",
       "destination": "/frontend/images/$1"
     }

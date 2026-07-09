@@ -16,9 +16,9 @@
 
 ## 페이지 구성
 
-단일 페이지 안에서 상단 메뉴와 버튼으로 섹션 이동을 제공합니다.
+단일 페이지 안에서 헤더는 고정하고, 상단 메뉴와 버튼으로 본문 HTML fragment를 fetch해 화면만 전환합니다.
 
-| 섹션 | 목적 | 주요 내용 |
+| 화면 | 목적 | 주요 내용 |
 | --- | --- | --- |
 | Home | 서비스 소개 및 진입 | Hero, 서비스 설명, 추천/랭킹 이동 버튼 |
 | AI 메뉴 추천 | 조건 기반 메뉴 추천 | 입력 폼, 추천 결과, 오류/지연 메시지 |
@@ -68,7 +68,7 @@
 Browser
   │
   ▼
-frontend/index.html + css/style.css + js/app.js
+frontend/index.html + views/*.html + css/style.css + js/app.js
   │
   ├── fetch("/api/recommend")
   └── fetch("/api/ranking")

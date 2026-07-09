@@ -29,7 +29,7 @@ def get_settings() -> Settings:
         app_profile=profile,
         gemini_api_key=os.getenv("GEMINI_API_KEY", "").strip(),
         gemini_model=os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite").strip(),
-        redis_url=os.getenv("REDIS_URL", "redis://localhost:6379/0").strip(),
+        redis_url=os.getenv("REDIS_URL", "redis://localhost:6380/0").strip(),
         upstash_redis_rest_url=os.getenv("UPSTASH_REDIS_REST_URL", "").strip().rstrip("/"),
         upstash_redis_rest_token=os.getenv("UPSTASH_REDIS_REST_TOKEN", "").strip(),
     )

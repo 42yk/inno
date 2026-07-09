@@ -35,6 +35,10 @@ a {
   text-decoration: none;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 button,
 input,
 select {
@@ -89,8 +93,13 @@ select {
 }
 
 .nav-links a:hover,
-.nav-links a:focus-visible {
+.nav-links a:focus-visible,
+.nav-links a[aria-current="page"] {
   color: var(--accent-dark);
+}
+
+.view {
+  min-height: calc(100svh - var(--header-height));
 }
 
 .section {
