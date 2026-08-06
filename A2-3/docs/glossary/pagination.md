@@ -1,7 +1,7 @@
 # 페이지네이션
 
 - 용어집 색인: [`README.md`](README.md)
-- 목록 흐름: [`../data-flow.md`](../data-flow.md#8-list-필터정렬페이지-조회)
+- 목록 흐름: [`../data-flow.md`](../data-flow.md#7-list-필터정렬페이지-조회)
 
 페이지네이션(Pagination)은 많은 결과를 한 번에 모두 보여주지 않고 일정한 크기의 페이지로 나누어 조회하는 방식이다.
 

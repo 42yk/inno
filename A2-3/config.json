@@ -1,0 +1,15 @@
+{
+  "database_path": "data/reviews.db",
+  "gemini_model": "gemini-3.1-flash-lite",
+  "duplicate_policy": "skip",
+  "minimum_review_length": 5,
+  "analysis_batch_size": 20,
+  "extraction_chunk_characters": 50000,
+  "ai_retry_count": 2,
+  "default_page_size": 20,
+  "maximum_page_size": 100,
+  "chart_font_candidates": ["AppleGothic", "Malgun Gothic", "NanumGothic"],
+  "log_level": "INFO",
+  "log_file": "logs/app.log",
+  "output_directory": "output"
+}

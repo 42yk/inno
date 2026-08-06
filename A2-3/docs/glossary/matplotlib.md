@@ -1,7 +1,7 @@
 # matplotlib
 
 - 용어집 색인: [`README.md`](README.md)
-- 대시보드 흐름: [`../data-flow.md`](../data-flow.md#11-dashboard-종합-리포트와-차트-생성)
+- 대시보드 흐름: [`../data-flow.md`](../data-flow.md#10-dashboard-종합-리포트와-차트-생성)
 
 matplotlib은 Python에서 데이터를 그래프와 차트로 표현하는 시각화 라이브러리다. 데이터 값으로 Figure와 Axes를 구성하고 선, 막대, 텍스트, 범례 등을 그린 뒤 PNG 같은 이미지 파일로 저장할 수 있다.
 

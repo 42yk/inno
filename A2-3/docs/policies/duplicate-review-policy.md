@@ -1,7 +1,7 @@
 # 중복 리뷰 처리 정책
 
 - 작성일: 2026-08-05
-- 적용 범위: `import`, `add`, `clean` 및 파생 분석 데이터
+- 적용 범위: `import`, `clean` 및 파생 분석 데이터
 
 ## 1. 목적
 
@@ -38,7 +38,7 @@ fingerprint = SHA256(JSON([normalized_text, normalized_product, normalized_date]
 
 ## 3. 정책 선택
 
-기본 정책은 `config.json`의 `duplicate_policy`에서 읽고 초기값은 `skip`이다. `import`와 `add`의 `--duplicate-policy skip|upsert` 옵션이 있으면 해당 실행에서만 설정값을 덮어쓴다.
+기본 정책은 `config.json`의 `duplicate_policy`에서 읽고 초기값은 `skip`이다. `import`의 `--duplicate-policy skip|upsert` 옵션이 있으면 해당 실행에서만 설정값을 덮어쓴다.
 
 ### 3.1 `skip`
 

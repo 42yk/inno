@@ -1,7 +1,7 @@
 # SQLite와 JSONL
 
 - 용어집 색인: [`README.md`](README.md)
-- 관련 아키텍처: [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md)
+- 관련 아키텍처: [`../architecture/README.md`](../architecture/README.md)
 
 ## SQLite란
 

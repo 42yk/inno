@@ -2,7 +2,7 @@
 
 - 대상: 데이터 처리와 Python CLI가 익숙하지 않은 학습자
 - 프로젝트 흐름: [`../data-flow.md`](../data-flow.md)
-- 아키텍처: [`../../ARCHITECTURE.md`](../../ARCHITECTURE.md)
+- 아키텍처: [`../architecture/README.md`](../architecture/README.md)
 
 용어를 한 파일에 계속 추가하지 않고 주제별 문서로 관리한다. 필요한 개념만 골라 읽는다.
 
@@ -26,7 +26,7 @@ docs/glossary/
 | [`data-stages.md`](data-stages.md) | 데이터 분석에서 Raw와 Clean의 정의와 차이 |
 | [`pagination.md`](pagination.md) | 페이지네이션의 목적, 계산식, 안정된 정렬 |
 | [`matplotlib.md`](matplotlib.md) | matplotlib의 역할과 이 프로젝트의 정적 차트 방식 |
-| [`project-terms.md`](project-terms.md) | 서브커맨드, 신뢰도, 지문, upsert, stale, DTO, Service, Repository, Client |
+| [`project-terms.md`](project-terms.md) | 서브커맨드, 분석 상태, 신뢰도, 지문, upsert, stale, DTO, Service, Repository, Client |
 
 ## 관리 원칙
 

@@ -18,7 +18,7 @@
 
 ## 2. 아키텍처 규칙
 
-이 프로젝트는 단순 레이어드 모놀리스다. 상세 허용·금지 의존성은 [`../ARCHITECTURE.md`](../ARCHITECTURE.md)가 단일 기준이다.
+이 프로젝트는 단순 레이어드 모놀리스다. 상세 구조는 [`architecture/README.md`](architecture/README.md)와 연결된 아키텍처 문서를 따른다.
 
 1. CLI는 Service 공개 API와 DTO만 호출한다.
 2. Service는 처리 순서를 조정하며 필요한 Repository, Client, File I/O, Output의 공개 API를 호출할 수 있다.
@@ -31,7 +31,7 @@
 
 ## 3. 계층 간 데이터 규칙
 
-상세 타입, 모듈 API, 오류, 트랜잭션 계약은 [`layer-communication.md`](layer-communication.md)를 따른다.
+상세 타입과 모듈 API는 [`architecture/data-communication.md`](architecture/data-communication.md), 오류와 트랜잭션은 [`architecture/runtime-boundaries.md`](architecture/runtime-boundaries.md)를 따른다.
 
 - 계층 경계는 이름이 있는 Request DTO, Result DTO, 내부 모델로 통과한다.
 - `argparse.Namespace`, `sqlite3.Row`, Gemini SDK 응답, pandas DataFrame, matplotlib Figure를 소유 모듈 밖으로 반환하지 않는다.
@@ -43,7 +43,7 @@
 
 ## 4. 데이터 불변 조건
 
-- `import`와 `add`는 raw만 저장하고 자동 정제하지 않는다.
+- `import`는 raw만 저장하고 자동 정제하지 않는다.
 - `clean`만 clean 데이터를 생성한다.
 - raw 입력 원문은 보존하고 파생 데이터는 다시 만들 수 있어야 한다.
 - 중복 지문은 정규화 본문·제품명·작성일로 계산한다.
@@ -61,6 +61,7 @@
 - `.env`, 생성 DB, 로그, output 파일을 커밋하지 않는다.
 - `.env.sample`에는 실제 키를 넣지 않는다.
 - API 키와 전체 리뷰 본문을 로그에 기록하지 않는다.
+- 로그 레벨, 이벤트, 회전, 허용 필드는 [`policies/logging.md`](policies/logging.md)를 따른다.
 - AI를 호출하지 않는 명령은 API 키 없이 동작해야 한다.
 - 외부 경계 입력과 Gemini 구조화 응답을 검증한 뒤 사용한다.
 - SQL은 매개변수화하고 정렬 필드는 허용 목록으로 제한한다.
@@ -92,15 +93,18 @@
 
 | 변경 내용 | 함께 갱신할 문서 |
 | --- | --- |
-| 서브커맨드·옵션·출력 | `data-flow.md`, `../README.md` |
-| 계층·패키지·의존성 | `../ARCHITECTURE.md` |
-| DTO·모듈 API·오류·트랜잭션 | `layer-communication.md` |
+| 서브커맨드·옵션·기본값·종료 코드 | `policies/cli-commands.md`, `data-flow.md`, `../README.md` |
+| 계층·패키지·의존성 | `architecture/README.md`, `architecture/modules.md` |
+| DTO·모듈 API | `architecture/data-communication.md` |
+| 데이터 소유권·트랜잭션·오류·테스트 경계 | `architecture/runtime-boundaries.md` |
+| 로그 레벨·이벤트·민감정보·회전 | `policies/logging.md` |
 | 중복·정규화·upsert | `policies/duplicate-review-policy.md` |
 | 범위·데이터 모델·인수 기준 | 승인된 설계 문서 |
 | 용어 의미·학습 설명 | `glossary/README.md`와 해당 주제 문서 |
 | 작업 지침이나 문서 경로 | 이 문서, `../AGENTS.md`, `README.md` |
 
 - 루트 `AGENTS.md`에 상세 규칙을 다시 복제하지 않는다.
+- `superpowers/`의 설계 기록만으로 현재 기준을 대신하지 않고 관련 독립 문서를 함께 유지한다.
 - 문서를 이동하면 `README.md`, `../AGENTS.md`, 상대 링크를 함께 수정한다.
 - 문서와 구현이 다르면 차이를 숨기지 말고 요구사항과 사용자 결정을 확인해 함께 정렬한다.
 - 완료된 문서에 미완료 표식이나 모호한 처리 지침을 남기지 않는다.

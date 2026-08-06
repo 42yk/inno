@@ -1,8 +1,9 @@
 # 데이터 처리 흐름
 
-- 상태: 구현 전 목표 동작
+- 상태: 현재 구현 동작
 - 대상: CLI 사용자, 기능 개발자, 테스트 작성자
-- 관련 문서: [`../ARCHITECTURE.md`](../ARCHITECTURE.md), [`layer-communication.md`](layer-communication.md), [`glossary/README.md`](glossary/README.md)
+- 명령 정책: [`policies/cli-commands.md`](policies/cli-commands.md)
+- 관련 문서: [`architecture/README.md`](architecture/README.md), [`architecture/data-communication.md`](architecture/data-communication.md), [`glossary/README.md`](glossary/README.md)
 
 ## 1. 전체 흐름
 
@@ -11,9 +12,7 @@
 ```mermaid
 flowchart LR
     CSV["CSV / XLSX"] --> IMPORT["import"]
-    MANUAL["CLI 입력"] --> ADD["add"]
     IMPORT --> RAW[("raw_reviews")]
-    ADD --> RAW
 
     RAW --> CLEAN_CMD["clean"]
     CLEAN_CMD -->|"유효"| CLEAN[("clean_reviews")]
@@ -45,7 +44,7 @@ flowchart LR
 
 | 단계 | 입력 | 새로 저장하거나 변경하는 데이터 | 다음 단계 |
 | --- | --- | --- | --- |
-| `import`, `add` | 파일 행 또는 CLI 값 | `raw_reviews` | `clean` |
+| `import` | CSV/XLSX 파일 행 | `raw_reviews` | `clean` |
 | `clean` | raw 리뷰 | `clean_reviews`, raw 정제 상태 | `analyze` |
 | `analyze` | clean 리뷰 | `sentiment_analyses` | `extract` 또는 조회 |
 | `extract` | 필터된 clean·감정 결과 | `insight_extractions` | `dashboard` |
@@ -57,17 +56,22 @@ flowchart LR
 
 ```mermaid
 stateDiagram-v2
-    [*] --> RawPending: import / add
+    [*] --> RawPending: import 신규 저장
     RawPending --> Cleaned: clean 성공
     RawPending --> Rejected: clean 실패
-    Rejected --> RawPending: raw upsert 또는 재정제 요청
+    Rejected --> Cleaned: clean 재평가 성공
+    Rejected --> Rejected: clean 재평가 실패
+    Rejected --> RawPending: raw upsert
+    Cleaned --> RawPending: raw upsert
+    Cleaned --> Rejected: clean 재평가 실패
     Cleaned --> Analyzed: analyze 성공
-    Analyzed --> Cleaned: raw upsert 또는 정제 결과 변경
-    Analyzed --> InsightReady: extract 성공
-    InsightReady --> Cleaned: 관련 데이터 변경 시 insight stale
+    Analyzed --> Analyzed: analyze 재실행 성공
+    Analyzed --> RawPending: raw upsert
+    Analyzed --> Cleaned: clean 결과 변경
+    Analyzed --> Rejected: clean 재평가 실패
 ```
 
-raw는 원본 보존을 위한 상태이며 삭제하지 않는다. clean과 감정 결과는 파생 데이터이므로 raw upsert나 정제 규칙 변경 시 다시 만들 수 있다.
+raw는 원본 보존을 위한 상태이며 삭제하지 않는다. clean과 감정 결과는 파생 데이터이므로 raw upsert나 정제 규칙 변경 시 다시 만들 수 있다. 인사이트는 리뷰 한 건의 상태가 아니라 집계 결과이므로 위 상태도에 넣지 않으며, 근거 데이터가 바뀌면 별도로 stale 처리한다.
 
 ## 2. 권장 실행 순서
 
@@ -83,7 +87,18 @@ python main.py export --format xlsx --output output/reviews.xlsx
 
 `list`, `show`, `stats`는 데이터가 준비된 어느 시점에도 사용할 수 있다. 단, 감정 필터와 감정 통계는 `analyze` 이후에 의미가 있다. `dashboard`는 같은 필터 범위의 유효한 `extract` 결과가 먼저 존재해야 한다.
 
-아래 출력은 형식과 의미를 설명하기 위한 예시이며 실제 건수와 ID는 입력 데이터에 따라 달라진다.
+### 2.1 조회 명령의 분석 상태 분류
+
+`list`, `show`, `stats`는 감정 결과의 존재 여부를 다음 두 상태로 해석한다.
+
+| 분석 상태 | 판정 기준 | CLI 표기 |
+| --- | --- | --- |
+| 미분석 | 조회 대상 리뷰에 연결된 감정 결과가 없음 | `미분석`; 개별 분석 필드는 `N/A` |
+| 완료 | 검증된 감정 결과가 저장되어 있음 | 감정, 신뢰도, 모델, 분석 시각 |
+
+`미분석`과 `N/A`는 사용자에게 상태를 설명하는 표시값이지 감정 enum이나 DB 저장값이 아니다. 일부 리뷰만 분석된 경우 각 리뷰는 위 기준으로 독립적으로 분류한다.
+
+아래 출력은 형식과 의미를 설명하기 위한 예시이며 실제 건수와 ID는 입력 데이터에 따라 달라진다. 정확한 옵션, 기본값, 상호 배타 조건, 종료 코드는 [CLI 서브커맨드 정책](policies/cli-commands.md)을 따른다.
 
 ## 3. `import`: 파일 리뷰 수집
 
@@ -122,38 +137,7 @@ python main.py import \
 
 결과는 `raw_reviews`에 저장되며 새 행의 `clean_status`는 `pending`이다.
 
-## 4. `add`: 리뷰 한 건 수집
-
-### 입력과 처리
-
-```text
-CLI 옵션
-  → RawReviewInput 변환
-  → 중복 지문 계산
-  → skip 또는 upsert 적용
-  → raw_reviews 저장
-```
-
-### 실행 예시
-
-```bash
-python main.py add \
-  --text "배송은 빨랐지만 포장이 찌그러졌어요" \
-  --rating 3 \
-  --date 2026-08-05 \
-  --product "텀블러"
-```
-
-### 결과 예시
-
-```text
-[INFO] raw 리뷰 저장 완료: ID=31, 상태=pending
-[INFO] 다음 단계: python main.py clean --id 31
-```
-
-중복이면 설정된 정책에 따라 기존 ID를 유지하고 skip 또는 upsert 결과를 출력한다.
-
-## 5. `clean`: 원본 검증과 정제
+## 4. `clean`: 원본 검증과 정제
 
 ### 입력과 처리
 
@@ -188,7 +172,7 @@ python main.py clean --pending
 
 정제 실패는 원본 삭제를 의미하지 않는다. `show`에서 원문과 거절 사유를 확인할 수 있다.
 
-## 6. `analyze`: 리뷰별 감정 분석
+## 5. `analyze`: 리뷰별 감정 분석
 
 ### 입력과 처리
 
@@ -224,7 +208,7 @@ python main.py analyze --unanalyzed --limit 20
 
 일부 실패가 있으면 성공한 결과는 저장하고 종료 코드 `2`를 반환한다.
 
-## 7. `extract`: 키워드·요약·개선 제안 추출
+## 6. `extract`: 키워드·요약·개선 제안 추출
 
 ### 입력과 처리
 
@@ -266,19 +250,47 @@ python main.py extract \
 
 저장된 필터 범위는 `dashboard`가 정확히 같은 범위의 인사이트를 찾을 때 사용한다.
 
-## 8. `list`: 필터·정렬·페이지 조회
+## 7. `list`: 필터·정렬·페이지 조회
 
 ### 입력과 처리
 
 ```text
 CLI 필터와 페이지 정보
   → ReviewListRequest 검증
-  → clean_reviews + sentiment_analyses 조회
+  → clean_reviews를 기준으로 감정 결과를 선택적으로 결합
   → 안정된 정렬과 LIMIT/OFFSET 적용
   → ReviewListResult 반환
 ```
 
-### 실행 예시
+감정 필터가 없으면 미분석 리뷰도 목록에 포함한다. `--sentiment`를 사용하면 해당 감정으로 분석된 리뷰만 남는다. 감정이나 신뢰도로 정렬할 때 미분석 리뷰는 정렬 방향과 관계없이 마지막에 둔다.
+
+### 감정 분석 전 예시
+
+```bash
+python main.py list --page 1 --size 5
+```
+
+```text
+=== 리뷰 목록: 1/6 페이지, 총 28건 ===
+[1] ★★★★★ | 2026-07-02 | 사용하기 편하고 만족스러워요 | 미분석
+[2] ★★☆☆☆ | 2026-07-03 | 배송이 너무 늦었어요 | 미분석
+...
+```
+
+### 일부 감정 분석 후 예시
+
+```bash
+python main.py list --page 1 --size 5
+```
+
+```text
+=== 리뷰 목록: 1/6 페이지, 총 28건 ===
+[1] ★★★★★ | 2026-07-02 | 사용하기 편하고 만족스러워요 | positive (0.94)
+[2] ★★☆☆☆ | 2026-07-03 | 배송이 너무 늦었어요 | 미분석
+...
+```
+
+### 감정 필터 예시
 
 ```bash
 python main.py list \
@@ -301,7 +313,7 @@ python main.py list \
 
 페이지네이션의 의미와 계산식은 [`glossary/pagination.md`](glossary/pagination.md)를 참고한다.
 
-## 9. `show`: 리뷰 한 건 상세 조회
+## 8. `show`: 리뷰 한 건 상세 조회
 
 ### 입력과 처리
 
@@ -318,7 +330,7 @@ python main.py list \
 python main.py show 12
 ```
 
-### 결과 예시
+### 감정 분석 전 결과
 
 ```text
 === 리뷰 ID=12 ===
@@ -328,14 +340,33 @@ python main.py show 12
 작성일: 2026-07-28
 제품: 텀블러
 정제 상태: cleaned
+분석 상태: 미분석
+감정: N/A
+신뢰도: N/A
+분석 모델: N/A
+분석 시각: N/A
+```
+
+### 감정 분석 후 결과
+
+```text
+=== 리뷰 ID=12 ===
+원문: 배송이   너무 늦었어요
+정제문: 배송이 너무 늦었어요
+별점: 2
+작성일: 2026-07-28
+제품: 텀블러
+정제 상태: cleaned
+분석 상태: 완료
 감정: negative
 신뢰도: 0.91
 분석 모델: gemini-3.1-flash-lite
+분석 시각: 2026-08-06T14:20:00+09:00
 ```
 
-정제에 실패한 raw ID라면 clean·감정 결과 대신 `rejection_reason`을 출력한다.
+정제 전 `pending`이면 정제문은 `N/A`, 분석 상태는 `미분석`, 나머지 분석 필드는 `N/A`다. 정제에 실패한 raw ID라면 `rejection_reason`을 추가하고 같은 방식으로 정제문과 분석 결과가 없음을 표시한다.
 
-## 10. `stats`: 통계와 품질 지표 조회
+## 9. `stats`: 통계와 품질 지표 조회
 
 ### 입력과 처리
 
@@ -352,21 +383,35 @@ python main.py show 12
 python main.py stats --date-from 2026-07-01 --date-to 2026-07-31
 ```
 
-### 결과 예시
+### 감정 분석 전 결과
+
+```text
+=== 리뷰 분석 통계 ===
+clean 리뷰: 28건
+분석 완료: 0건 (0.0%)
+긍정 0건 (N/A) | 중립 0건 (N/A) | 부정 0건 (N/A)
+평균 별점: 3.68
+평균 신뢰도: N/A
+별점·감정 일치율: N/A
+```
+
+### 부분 분석 후 결과
 
 ```text
 === 리뷰 분석 통계 ===
 clean 리뷰: 28건
 분석 완료: 26건 (92.9%)
-긍정 16건 | 중립 4건 | 부정 6건
+긍정 16건 (61.5%) | 중립 4건 (15.4%) | 부정 6건 (23.1%)
 평균 별점: 3.68
 평균 신뢰도: 0.86
 별점·감정 일치율: 80.8%
 ```
 
-별점이 있는 분석 리뷰가 없으면 일치율은 `N/A`로 표시한다.
+감정 필터가 없으면 clean 리뷰 수와 평균 별점에는 미분석 리뷰도 포함한다. 감정별 건수·비율과 평균 신뢰도는 분석 완료 리뷰만 사용한다. 별점이 있는 분석 리뷰가 없으면 일치율은 `N/A`로 표시한다. 모든 clean 리뷰의 분석이 끝나면 분석 완료율은 `100.0%`가 된다.
 
-## 11. `dashboard`: 종합 리포트와 차트 생성
+`--sentiment`를 사용하면 해당 감정으로 분석된 리뷰만 통계 범위에 포함되므로 미분석 리뷰는 제외된다. 필터 결과에 clean 리뷰가 없으면 건수는 `0건`, 분모가 필요한 비율과 평균은 `N/A`로 표시한다.
+
+## 10. `dashboard`: 종합 리포트와 차트 생성
 
 ### 입력과 처리
 
@@ -404,7 +449,7 @@ python main.py dashboard \
 
 차트에 필요한 날짜나 별점이 없으면 해당 PNG 안에 “표시할 데이터 없음”을 기록한다.
 
-## 12. `export`: 분석 결과 파일 내보내기
+## 11. `export`: 분석 결과 파일 내보내기
 
 ### 입력과 처리
 
@@ -435,24 +480,25 @@ python main.py export \
 
 CSV는 UTF-8 BOM으로 기록하고, XLSX는 스프레드시트에서 바로 열 수 있는 열 이름을 사용한다.
 
-## 13. 읽기·쓰기 영향 요약
+## 12. 읽기·쓰기 영향 요약
 
-| 명령 | raw 읽기 | raw 쓰기 | clean 읽기 | clean 쓰기 | 감정 쓰기 | 인사이트 쓰기 | 파일 쓰기 | Gemini 호출 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `import` | 중복 확인 | O | - | - | - | stale 처리 가능 | - | - |
-| `add` | 중복 확인 | O | - | - | - | stale 처리 가능 | - | - |
-| `clean` | O | 상태 변경 | O | O | 무효화 가능 | stale 처리 가능 | - | - |
-| `analyze` | - | - | O | - | O | - | - | O |
-| `extract` | - | - | O | - | - | O | - | O |
-| `list` | - | - | O | - | - | - | - | - |
-| `show` | O | - | O | - | - | - | - | - |
-| `stats` | - | - | O | - | - | - | - | - |
-| `dashboard` | - | - | O | - | - | - | TXT/MD/PNG | - |
-| `export` | - | - | O | - | - | - | CSV/XLSX | - |
+`R/W` 열은 각 저장 영역의 읽기와 쓰기 영향을 함께 나타낸다.
 
-`import`와 `add`에서 stale 처리는 `upsert`로 기존 raw가 바뀐 경우에만 발생한다.
+| 명령 | raw R/W | clean R/W | 감정 R/W | 인사이트 R/W | 파일 쓰기 | Gemini 호출 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `import` | 중복 조회 / insert·upsert | - / upsert 시 삭제 | - / upsert 시 삭제 | - / upsert 시 stale | - | - |
+| `clean` | 조회 / 상태 변경 | 기존값 조회 / 저장·삭제 | - / 결과 변경 시 삭제 | - / 결과 변경 시 stale | - | - |
+| `analyze` | - | 대상 조회 / - | 기존값 조회 / 저장 | - | - | O |
+| `extract` | - | 대상 조회 / - | 필터 시 조회 / - | - / 저장 | - | O |
+| `list` | - | 조회 / - | 조회 / - | - | - | - |
+| `show` | 조회 / - | 조회 / - | 조회 / - | - | - | - |
+| `stats` | - | 조회 / - | 조회 / - | - | - | - |
+| `dashboard` | - | 조회 / - | 조회 / - | 조회 / - | TXT/MD/PNG | - |
+| `export` | - | 조회 / - | 조회 / - | - | CSV/XLSX | - |
 
-## 14. 실패 후 재개
+`import`에서 stale 처리는 `upsert`로 기존 raw가 바뀐 경우에만 발생한다.
+
+## 13. 실패 후 재개
 
 - import 파일 오류: 파일을 수정한 뒤 같은 명령을 다시 실행한다.
 - clean 개별 거절: raw 원인을 확인하고 올바른 값으로 upsert한 뒤 `clean --id`를 실행한다.

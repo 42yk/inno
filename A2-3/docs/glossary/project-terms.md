@@ -1,15 +1,19 @@
 # 프로젝트 용어
 
 - 용어집 색인: [`README.md`](README.md)
-- 데이터 통신 계약: [`../layer-communication.md`](../layer-communication.md)
+- 데이터 통신 계약: [`../architecture/data-communication.md`](../architecture/data-communication.md)
 
 ## 서브커맨드
 
-하나의 CLI 프로그램 아래에 있는 개별 명령이다. `python main.py import`에서 `import`가 서브커맨드다. 각 서브커맨드는 독립된 옵션과 책임을 갖는다.
+하나의 CLI 프로그램 아래에 있는 개별 명령이다. `python main.py import`에서 `import`가 서브커맨드다. 각 서브커맨드는 독립된 옵션과 책임을 갖는다. 전체 명령 계약은 [`../policies/cli-commands.md`](../policies/cli-commands.md)를 참고한다.
 
 ## 감정 신뢰도
 
 Gemini가 분류한 감정 결과를 얼마나 확신하는지를 `0.0`~`1.0`으로 표현한 값이다. 긍정·부정의 강도를 의미하지 않는다. 예를 들어 `negative (0.91)`은 강한 부정이 아니라 부정 분류에 대한 높은 신뢰를 뜻한다.
+
+## 분석 상태
+
+조회 대상 리뷰에 연결된 감정 결과가 없으면 `unanalyzed`, 검증된 감정 결과가 저장되어 있으면 `analyzed`다. CLI는 각각 `미분석`, `완료`로 표시한다. `미분석`과 분석 필드의 `N/A`는 화면 표시값이며 감정 데이터로 저장하지 않는다.
 
 ## 지문(Fingerprint)
 
