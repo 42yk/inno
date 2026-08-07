@@ -5,4 +5,4 @@ __pycache__/
 .pytest_cache/
 data/*.db
 logs/
-output/
+/output/
