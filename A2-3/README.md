@@ -10,12 +10,16 @@ CSV/XLSX 고객 리뷰를 SQLite에 raw/clean으로 나누어 저장하고, Gemi
 프로젝트 루트에서 다음을 실행합니다.
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
+python3 --version
 ```
 
-Windows PowerShell에서는 가상환경 활성화 명령으로 `.venv\Scripts\Activate.ps1`을 사용합니다.
+출력된 버전이 Python 3.10 이상인지 확인한 뒤 의존성을 사용자 영역에 설치합니다. 3.10 미만이라면 먼저 PATH에서 3.10 이상인 `python3`가 선택되도록 설정해야 합니다.
+
+```bash
+python3 -m pip install --user --break-system-packages -r requirements.txt
+```
+
+설치와 실행에 같은 인터프리터를 사용하도록 이후 예시도 `python3`로 실행합니다.
 
 `analyze` 또는 `extract`에서 실제 AI 호출이 필요하면 예시 파일을 복사하고 키를 입력합니다.
 
@@ -47,25 +51,48 @@ GEMINI_API_KEY=your_actual_key
 권장 순서입니다.
 
 ```bash
-python main.py import --file data/sample_reviews.csv
-python main.py clean --pending
-python main.py analyze --unanalyzed
-python main.py extract
-python main.py stats
-python main.py dashboard --output-dir output --report-format md
-python main.py export --format xlsx --output output/reviews.xlsx
+python3 main.py import --file data/sample_reviews.csv
+python3 main.py clean --pending
+python3 main.py analyze --unanalyzed
+python3 main.py extract
+python3 main.py stats
+python3 main.py dashboard --output-dir output --report-format md
+python3 main.py export --format xlsx --output output/reviews.xlsx
 ```
 
 `dashboard`는 같은 제품·기간 필터로 생성된 최신 `extract` 결과가 필요합니다. 인사이트가 없거나 원천 리뷰가 바뀌어 stale 상태라면 안내된 필터로 `extract`를 다시 실행합니다. 대시보드는 Gemini를 암묵적으로 호출하지 않습니다.
 
+## 완성 결과 예시
+
+아래 파일은 샘플 데이터로 전체 파이프라인을 실행한 결과의 공개 스냅샷입니다. 실제 CLI 실행 결과는 기본적으로 Git에서 제외되는 `output/`에 생성되며, 문서용 사본은 `public/examples/`에 보관합니다.
+
+### 감정 분포
+
+![긍정, 중립, 부정 리뷰의 비율을 나타낸 감정 분포 원형 차트](public/examples/sentiment_distribution.png)
+
+### 일별 감정 비율 추이
+
+![날짜별 긍정, 중립, 부정 리뷰 비율을 나타낸 선 차트](public/examples/sentiment_trend.png)
+
+### 별점별 감정 건수
+
+![별점별 긍정, 중립, 부정 리뷰 건수를 나타낸 누적 막대 차트](public/examples/rating_sentiment_matrix.png)
+
+분석 결과 원본은 다음 형식으로 내려받아 확인할 수 있습니다.
+
+| 형식 | 예시 파일 |
+| --- | --- |
+| CSV | [reviews.csv](public/examples/reviews.csv) |
+| XLSX | [reviews.xlsx](public/examples/reviews.xlsx) |
+
 ## 아홉 개 명령
 
-전체 옵션은 `python main.py --help`와 `python main.py <command> --help`에서 확인할 수 있습니다.
+전체 옵션은 `python3 main.py --help`와 `python3 main.py <command> --help`에서 확인할 수 있습니다.
 
 ### 1. `import`
 
 ```bash
-python main.py import --file reviews.csv [--duplicate-policy skip|upsert]
+python3 main.py import --file reviews.csv [--duplicate-policy skip|upsert]
 ```
 
 파일 전체 구조를 먼저 검증한 뒤 raw 리뷰를 저장합니다. 기본 중복 정책은 `config.json`에서 읽습니다.
@@ -73,7 +100,7 @@ python main.py import --file reviews.csv [--duplicate-policy skip|upsert]
 ### 2. `clean`
 
 ```bash
-python main.py clean [--pending | --all | --id RAW_ID]
+python3 main.py clean [--pending | --all | --id RAW_ID]
 ```
 
 기본 대상은 `pending`입니다. 본문·별점·날짜·최소 길이를 검증하고 clean 저장 또는 사유가 있는 정상 거절로 기록합니다.
@@ -81,7 +108,7 @@ python main.py clean [--pending | --all | --id RAW_ID]
 ### 3. `analyze`
 
 ```bash
-python main.py analyze [--unanalyzed | --all | --id CLEAN_ID] [--limit COUNT] [--force]
+python3 main.py analyze [--unanalyzed | --all | --id CLEAN_ID] [--limit COUNT] [--force]
 ```
 
 기본 대상은 미분석 clean 리뷰입니다. 실제 대상이 있을 때 `.env`의 키로 Gemini를 호출하며, 성공 배치는 저장하고 최종 실패 배치는 안전한 코드로 집계합니다.
@@ -89,7 +116,7 @@ python main.py analyze [--unanalyzed | --all | --id CLEAN_ID] [--limit COUNT] [-
 ### 4. `extract`
 
 ```bash
-python main.py extract [--sentiment positive|negative|neutral] [--product NAME] \
+python3 main.py extract [--sentiment positive|negative|neutral] [--product NAME] \
   [--date-from YYYY-MM-DD] [--date-to YYYY-MM-DD] [--limit COUNT]
 ```
 
@@ -98,7 +125,7 @@ python main.py extract [--sentiment positive|negative|neutral] [--product NAME] 
 ### 5. `list`
 
 ```bash
-python main.py list [--sentiment positive|negative|neutral] [--rating 1..5] \
+python3 main.py list [--sentiment positive|negative|neutral] [--rating 1..5] \
   [--date-from YYYY-MM-DD] [--date-to YYYY-MM-DD] [--page N] [--size N] \
   [--sort-by id|review_date|rating|sentiment|confidence] [--order asc|desc]
 ```
@@ -108,7 +135,7 @@ python main.py list [--sentiment positive|negative|neutral] [--rating 1..5] \
 ### 6. `show`
 
 ```bash
-python main.py show RAW_ID
+python3 main.py show RAW_ID
 ```
 
 raw 원문, 정제 상태와 거절 사유, nullable clean 필드, 감정·신뢰도·모델·분석 시각을 표시합니다.
@@ -116,7 +143,7 @@ raw 원문, 정제 상태와 거절 사유, nullable clean 필드, 감정·신�
 ### 7. `stats`
 
 ```bash
-python main.py stats [--sentiment positive|negative|neutral] [--product NAME] \
+python3 main.py stats [--sentiment positive|negative|neutral] [--product NAME] \
   [--date-from YYYY-MM-DD] [--date-to YYYY-MM-DD]
 ```
 
@@ -125,7 +152,7 @@ clean 리뷰 수, 분석 완료율, 감정 분포, 평균 별점, 평균 신뢰�
 ### 8. `dashboard`
 
 ```bash
-python main.py dashboard [--product NAME] [--date-from YYYY-MM-DD] \
+python3 main.py dashboard [--product NAME] [--date-from YYYY-MM-DD] \
   [--date-to YYYY-MM-DD] [--top COUNT] [--output-dir PATH] \
   [--report-format txt|md]
 ```
@@ -141,7 +168,7 @@ python main.py dashboard [--product NAME] [--date-from YYYY-MM-DD] \
 ### 9. `export`
 
 ```bash
-python main.py export --format csv|xlsx --output PATH \
+python3 main.py export --format csv|xlsx --output PATH \
   [--sentiment positive|negative|neutral] [--rating-min 1..5]
 ```
 
@@ -176,8 +203,8 @@ API 키, 리뷰 원문, AI 프롬프트와 원본 응답은 로그에 기록하�
 전체 테스트는 실제 Gemini 호출 없이 실행됩니다.
 
 ```bash
-python -m pytest -q
-python -m pytest tests/e2e/test_offline_pipeline.py -q
+python3 -m pytest -q
+python3 -m pytest tests/e2e/test_offline_pipeline.py -q
 ```
 
 E2E 테스트는 `tests/fakes.py`의 DTO 호환 Fake Gemini를 주입해 아홉 명령, SQLite 상태, PNG/MD, CSV/XLSX를 검증합니다. 일반 CLI의 `analyze`와 `extract`는 처리 대상이 있으면 공식 `google-genai` SDK와 실제 API 키를 사용합니다.
