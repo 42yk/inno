@@ -24,7 +24,7 @@ class _IsoTimezoneFormatter(logging.Formatter):
         return datetime.fromtimestamp(record.created).astimezone().isoformat(timespec="seconds")
 
 
-# 중복 없이 콘솔과 회전 파일 로그 핸들러를 구성한다.
+# 중복 없이 콘솔과 로그 파일 순환 핸들러를 구성한다.
 def configure_logging(config: AppConfig, stream: TextIO | None = None) -> logging.Logger:
     """Configure one console and one rotating file handler without duplicates."""
     logger = logging.getLogger(_LOGGER_NAME)
@@ -50,7 +50,7 @@ def configure_logging(config: AppConfig, stream: TextIO | None = None) -> loggin
     return logger
 
 
-# 설정된 경로에 용량 기반 회전 파일 핸들러를 만든다.
+# 설정된 경로에 용량 기반 로그 파일 순환 핸들러를 만든다.
 def _file_handler(config: AppConfig) -> RotatingFileHandler:
     config.log_file.parent.mkdir(parents=True, exist_ok=True)
     return RotatingFileHandler(

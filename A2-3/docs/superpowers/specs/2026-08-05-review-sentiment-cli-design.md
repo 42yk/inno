@@ -406,7 +406,7 @@ CSV와 XLSX에는 clean 필드와 감정·신뢰도·분석 시각을 한 행으
 
 `.env.sample`에는 `GEMINI_API_KEY=replace_with_your_key` 형태만 제공한다. 실제 `.env`는 `.gitignore`에 포함하며 키가 없을 때 `analyze`, `extract`만 명확한 설정 오류로 실패한다. 나머지 명령과 모든 도움말은 키 없이 동작한다.
 
-로깅은 표준 `logging` 모듈의 콘솔 및 회전 파일 핸들러와 한 줄 key-value 이벤트 형식을 사용한다. 정상 단계와 집계는 INFO, 행 단위 거절·재시도는 WARNING, 명령을 계속할 수 없는 파일·DB·API 오류는 ERROR로 기록한다. 중복 skip은 정상 정책이므로 INFO다. 성공 행을 ID별로 모두 기록하지 않고 건수로 집계하며, API 키와 전체 리뷰 본문은 로그에 기록하지 않는다. 현재 세부 기준은 `docs/policies/logging.md`를 따른다.
+로깅은 표준 `logging` 모듈의 콘솔 핸들러와 로그 파일 순환 핸들러, 한 줄 key-value 이벤트 형식을 사용한다. 정상 단계와 집계는 INFO, 행 단위 거절·재시도는 WARNING, 명령을 계속할 수 없는 파일·DB·API 오류는 ERROR로 기록한다. 중복 skip은 정상 정책이므로 INFO다. 성공 행을 ID별로 모두 기록하지 않고 건수로 집계하며, API 키와 전체 리뷰 본문은 로그에 기록하지 않는다. 현재 세부 기준은 `docs/policies/logging.md`를 따른다.
 
 ## 10. 오류 처리와 종료 규칙
 
