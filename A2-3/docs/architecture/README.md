@@ -68,11 +68,13 @@ flowchart TB
 
 | 문서 | 책임 |
 | --- | --- |
-| [`modules.md`](modules.md) | 모듈 책임, 허용 의존성, 목표 패키지 구조 |
+| [`modules.md`](modules.md) | 패키지별 책임, `AppDependencies` 조립, 허용 의존성, 목표 패키지 구조 |
 | [`data-communication.md`](data-communication.md) | DTO, 내부 모델, 모듈 간 송수신 데이터와 대표 흐름 |
 | [`runtime-boundaries.md`](runtime-boundaries.md) | 데이터 소유권, 트랜잭션, 오류, 테스트 경계 |
 | [`../data-flow.md`](../data-flow.md) | 사용자 관점의 전체 처리 흐름과 명령별 예시 |
 | [`../policies/logging.md`](../policies/logging.md) | 로그 레벨, 이벤트, 출력, 민감정보 정책 |
+| [`../analysis/decision-policy.md`](../analysis/decision-policy.md) | 분석 결과를 알림과 개선 조치로 연결하는 운영 기준 |
+| [`../analysis/visualization-methodology.md`](../analysis/visualization-methodology.md) | 차트 선택 이유와 통계적 해석 범위 |
 
 ## 5. 변경 원칙
 

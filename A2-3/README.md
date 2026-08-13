@@ -78,6 +78,8 @@ python3 main.py export --format xlsx --output output/reviews.xlsx
 
 ![별점별 긍정, 중립, 부정 리뷰 건수를 나타낸 누적 막대 차트](public/examples/rating_sentiment_matrix.png)
 
+이 차트는 별점×감정 교차표의 건수를 보여주는 기술통계이며 통계적 상관이나 인과를 증명하지 않습니다. 누적 막대를 선택한 이유, 한계, 100% 누적 막대·히트맵·회귀 같은 대안은 [시각화와 집계 방법론](docs/analysis/visualization-methodology.md)을 참고합니다.
+
 분석 결과 원본은 다음 형식으로 내려받아 확인할 수 있습니다.
 
 | 형식 | 예시 파일 |
@@ -212,3 +214,8 @@ E2E 테스트는 `tests/fakes.py`의 DTO 호환 Fake Gemini를 주입해 아홉 
 ## 개발 문서
 
 현재 기준 문서의 지도는 [docs/README.md](docs/README.md), 승인된 설계 기록은 [2026-08-05 design](docs/superpowers/specs/2026-08-05-review-sentiment-cli-design.md)에 있습니다.
+
+- [모듈 구조와 의존성](docs/architecture/modules.md): 패키지 책임과 `AppDependencies` 조립 관계
+- [감정 지표 운영 의사결정 정책](docs/analysis/decision-policy.md): 임계치, 알림→조치, 키워드 우선순위, 급증 원인 가설
+- [시각화와 집계 방법론](docs/analysis/visualization-methodology.md): 누적 막대 선택 근거, 한계, 대안 분석
+- [감정 분석 정확도 검증과 프롬프트 실험 계획](docs/quality/sentiment-validation-plan.md): 샘플링 검수, 정량 메트릭, 프롬프트 A/B 기준

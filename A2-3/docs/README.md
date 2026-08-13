@@ -35,6 +35,19 @@
 | [`policies/logging.md`](policies/logging.md) | 로그 레벨, 이벤트, 출력, 회전, 민감정보 | 로깅 동작이나 이벤트 변경 시 |
 | [`policies/configuration.md`](policies/configuration.md) | `config.json` 키, 기본값, 검증, 경로 해석, `.env` | 설정이나 비밀정보 정책 변경 시 |
 
+## 분석과 운영 의사결정
+
+| 문서 | 내용 | 갱신 시점 |
+| --- | --- | --- |
+| [`analysis/decision-policy.md`](analysis/decision-policy.md) | 부정률 임계치, 알림→조치, 부정 키워드 우선순위, 급증 원인 가설 | 운영 임계치·우선순위 산식·조사 절차 변경 시 |
+| [`analysis/visualization-methodology.md`](analysis/visualization-methodology.md) | 별점×감정 누적 막대 선택 근거, 통계적 한계, 대안 비교 | 차트 집계·표현 방식 또는 해석 기준 변경 시 |
+
+## 품질 검증
+
+| 문서 | 내용 | 갱신 시점 |
+| --- | --- | --- |
+| [`quality/sentiment-validation-plan.md`](quality/sentiment-validation-plan.md) | 층화 샘플링, 이중 검수, 정확도 메트릭, 프롬프트 A/B 실험 | 라벨 기준·합격선·실험 절차 변경 시 |
+
 ## 장애 시나리오
 
 | 문서 | 내용 | 갱신 시점 |
@@ -69,6 +82,9 @@
 - 로그 이벤트와 비밀정보 보호: `policies/logging.md`
 - 설정 키·기본값·경로 해석: `policies/configuration.md`
 - 중복과 upsert: `policies/duplicate-review-policy.md`
+- 감정 임계치·개선 우선순위·급증 조사: `analysis/decision-policy.md`
+- 시각화 선택과 통계적 해석: `analysis/visualization-methodology.md`
+- 감정 정확도와 프롬프트 실험: `quality/sentiment-validation-plan.md`
 - 낯선 용어: `glossary/README.md`
 
 ## 문서 운영 규칙
