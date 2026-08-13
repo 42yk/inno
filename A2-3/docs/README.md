@@ -34,6 +34,7 @@
 | [`policies/duplicate-review-policy.md`](policies/duplicate-review-policy.md) | 중복 지문과 skip/upsert, 파생 데이터 무효화 | 중복 판정이나 upsert 변경 시 |
 | [`policies/logging.md`](policies/logging.md) | 로그 레벨, 이벤트, 출력, 회전, 민감정보 | 로깅 동작이나 이벤트 변경 시 |
 | [`policies/configuration.md`](policies/configuration.md) | `config.json` 키, 기본값, 검증, 경로 해석, `.env` | 설정이나 비밀정보 정책 변경 시 |
+| [`policies/raw-clean-data.md`](policies/raw-clean-data.md) | raw/clean 분리 이유, 필드별 보존·정제·거절, 재처리 정책 | 입력 필드·정제 규칙·보존 범위·무효화 변경 시 |
 
 ## 분석과 운영 의사결정
 
@@ -41,6 +42,7 @@
 | --- | --- | --- |
 | [`analysis/decision-policy.md`](analysis/decision-policy.md) | 부정률 임계치, 알림→조치, 부정 키워드 우선순위, 급증 원인 가설 | 운영 임계치·우선순위 산식·조사 절차 변경 시 |
 | [`analysis/visualization-methodology.md`](analysis/visualization-methodology.md) | 별점×감정 누적 막대 선택 근거, 통계적 한계, 대안 비교 | 차트 집계·표현 방식 또는 해석 기준 변경 시 |
+| [`analysis/prompt-design.md`](analysis/prompt-design.md) | 감정·인사이트 프롬프트 입력·출력, 라벨 기준, confidence 규약과 예시 | 프롬프트·JSON Schema·응답 검증·버전 변경 시 |
 
 ## 품질 검증
 
@@ -82,8 +84,10 @@
 - 로그 이벤트와 비밀정보 보호: `policies/logging.md`
 - 설정 키·기본값·경로 해석: `policies/configuration.md`
 - 중복과 upsert: `policies/duplicate-review-policy.md`
+- raw/clean 보존·정제·거절: `policies/raw-clean-data.md`
 - 감정 임계치·개선 우선순위·급증 조사: `analysis/decision-policy.md`
 - 시각화 선택과 통계적 해석: `analysis/visualization-methodology.md`
+- AI 라벨·출력·confidence 규약: `analysis/prompt-design.md`
 - 감정 정확도와 프롬프트 실험: `quality/sentiment-validation-plan.md`
 - 낯선 용어: `glossary/README.md`
 

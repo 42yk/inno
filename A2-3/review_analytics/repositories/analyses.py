@@ -66,7 +66,12 @@ class AnalysisRepository:
         try:
             with _connection(self._database_path) as connection:
                 with connection:
+                    replaced_existing = False
                     for result in results:
+                        replaced_existing = replaced_existing or connection.execute(
+                            "SELECT 1 FROM sentiment_analyses WHERE clean_review_id = ?",
+                            (result.clean_review_id,),
+                        ).fetchone() is not None
                         connection.execute(
                             """
                             INSERT INTO sentiment_analyses (
@@ -88,6 +93,10 @@ class AnalysisRepository:
                                 result.prompt_version,
                                 result.analyzed_at or _utc_now(),
                             ),
+                        )
+                    if replaced_existing:
+                        connection.execute(
+                            "UPDATE insight_extractions SET is_stale = 1 WHERE is_stale = 0"
                         )
             return len(results)
         except sqlite3.Error as exc:

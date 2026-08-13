@@ -1,7 +1,7 @@
 # SQLite 저장 스키마
 
 - 상태: 현재 구현 계약
-- 관련 계약: [`data-communication.md`](data-communication.md), [`runtime-boundaries.md`](runtime-boundaries.md), [`../policies/duplicate-review-policy.md`](../policies/duplicate-review-policy.md)
+- 관련 계약: [`data-communication.md`](data-communication.md), [`runtime-boundaries.md`](runtime-boundaries.md), [`../policies/raw-clean-data.md`](../policies/raw-clean-data.md), [`../policies/duplicate-review-policy.md`](../policies/duplicate-review-policy.md)
 
 ## 공통 규칙
 
@@ -51,12 +51,14 @@
 | `id` | `INTEGER PRIMARY KEY` | 내부 분석 ID다. |
 | `clean_review_id` | `INTEGER NOT NULL UNIQUE REFERENCES clean_reviews(id) ON DELETE CASCADE` | 분석된 하나의 clean 리뷰다. |
 | `sentiment` | `TEXT NOT NULL CHECK (sentiment IN ('positive', 'negative', 'neutral'))` | 검증된 모델 분류값이다. |
-| `confidence` | `REAL NOT NULL CHECK (confidence >= 0.0 AND confidence <= 1.0)` | 검증된 신뢰도다. |
+| `confidence` | `REAL NOT NULL CHECK (confidence >= 0.0 AND confidence <= 1.0)` | 범위가 검증된 모델 자기평가 확신도다. 정답 확률은 아니다. |
 | `model_name` | `TEXT NOT NULL` | 모델 식별자다. |
 | `prompt_version` | `TEXT NOT NULL` | 프롬프트 버전이다. |
 | `analyzed_at` | `TEXT NOT NULL` | 분석 완료 시각이다. |
 
 `clean_review_id`의 자동 고유 인덱스가 현재 분석 결과 하나만 존재하도록 보장한다. `idx_sentiment_analyses_sentiment(sentiment)`와 `idx_sentiment_analyses_confidence(confidence)`를 추가한다.
+
+감정 라벨과 confidence의 의미·출력 계약은 [`../analysis/prompt-design.md`](../analysis/prompt-design.md)를 따른다.
 
 ## `insight_extractions`
 

@@ -20,7 +20,7 @@ from review_analytics.models import (
 )
 
 
-_SENTIMENT_PROMPT_VERSION = "sentiment-v1"
+_SENTIMENT_PROMPT_VERSION = "sentiment-v2"
 _INSIGHT_PROMPT_VERSION = "insight-v1"
 _MERGE_PROMPT_VERSION = "insight-merge-v1"
 _UNTRUSTED_DATA_INSTRUCTION = (
@@ -30,6 +30,13 @@ _UNTRUSTED_DATA_INSTRUCTION = (
 _SENTIMENT_SYSTEM_INSTRUCTION = (
     _UNTRUSTED_DATA_INSTRUCTION
     + "Classify each review's sentiment as exactly one of positive, negative, or neutral. "
+    "Use positive when the dominant overall attitude expresses satisfaction, praise, approval, or a beneficial "
+    "experience. Use negative when the dominant overall attitude expresses dissatisfaction, a defect, harm, "
+    "failure, complaint, or a request for corrective action. Use neutral when the review is mainly factual, a "
+    "question, or has no clear positive or negative attitude. For mixed sentiment, choose the label matching the "
+    "dominant overall attitude; if no attitude clearly dominates, choose neutral. "
+    "Set confidence to your certainty that the selected label follows these rules using only the review text: "
+    "0.0 means very uncertain and 1.0 means very certain. It is not a calibrated probability. "
     "Return exactly one result for each supplied review_id with a confidence score from 0.0 to 1.0."
 )
 _INSIGHT_SYSTEM_INSTRUCTION = (
@@ -76,8 +83,11 @@ _INSIGHT_SCHEMA = {
     "properties": {
         "positive_keywords": {"type": "array", "items": _KEYWORD_SCHEMA},
         "negative_keywords": {"type": "array", "items": _KEYWORD_SCHEMA},
-        "summary": {"type": "string"},
-        "recommendations": {"type": "array", "items": {"type": "string"}},
+        "summary": {"type": "string", "minLength": 1},
+        "recommendations": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1},
+        },
     },
     "required": ["positive_keywords", "negative_keywords", "summary", "recommendations"],
     "additionalProperties": False,
@@ -247,9 +257,9 @@ class GeminiClient:
             negative = _keywords(payload.get("negative_keywords"))
             summary = payload.get("summary")
             recommendations = payload.get("recommendations")
-            if type(summary) is not str or type(recommendations) is not list:
+            if type(summary) is not str or not summary.strip() or type(recommendations) is not list:
                 _invalid_response()
-            if any(type(item) is not str for item in recommendations):
+            if any(type(item) is not str or not item.strip() for item in recommendations):
                 _invalid_response()
             return InsightResult(
                 positive_keywords=positive,

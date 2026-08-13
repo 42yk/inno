@@ -53,6 +53,7 @@
 - Gemini 호출 중에는 SQLite 쓰기 트랜잭션을 열지 않는다.
 
 중복 세부 규칙은 [`policies/duplicate-review-policy.md`](policies/duplicate-review-policy.md), 명령별 상태 변화는 [`data-flow.md`](data-flow.md)를 따른다.
+필드별 raw 보존 범위와 clean 정제·거절·재처리 계약은 [`policies/raw-clean-data.md`](policies/raw-clean-data.md)를 따른다.
 
 ## 5. 설정과 비밀정보
 
@@ -99,6 +100,8 @@
 | 데이터 소유권·트랜잭션·오류·테스트 경계 | `architecture/runtime-boundaries.md` |
 | 로그 레벨·이벤트·민감정보·회전 | `policies/logging.md` |
 | 중복·정규화·upsert | `policies/duplicate-review-policy.md` |
+| raw/clean 필드·보존 범위·정제·거절 | `policies/raw-clean-data.md`, `data-flow.md`, `architecture/storage-schema.md` |
+| AI 프롬프트·라벨·출력 스키마·confidence·버전 | `analysis/prompt-design.md`, `quality/sentiment-validation-plan.md` |
 | 범위·데이터 모델·인수 기준 | 승인된 설계 문서 |
 | 용어 의미·학습 설명 | `glossary/README.md`와 해당 주제 문서 |
 | 작업 지침이나 문서 경로 | 이 문서, `../AGENTS.md`, `README.md` |

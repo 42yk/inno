@@ -2,6 +2,7 @@
 
 - 용어집 색인: [`README.md`](README.md)
 - 처리 흐름: [`../data-flow.md`](../data-flow.md)
+- 상세 정책: [`../policies/raw-clean-data.md`](../policies/raw-clean-data.md)
 
 ## Raw 데이터란
 
@@ -61,4 +62,4 @@ product_name="텀블러"
 | 오류 데이터 | 포함 가능 | 포함하지 않음 |
 | 재생성 | 원본이므로 유지 | raw와 정제 규칙으로 재생성 가능 |
 
-raw와 clean을 분리하면 정제 실수로 원본을 잃지 않고, 정제 규칙이 바뀌어도 외부 파일을 다시 구하지 않고 재처리할 수 있다.
+raw와 clean을 분리하면 정제 실수로 원본을 잃지 않고, 정제 규칙이 바뀌어도 외부 파일을 다시 구하지 않고 재처리할 수 있다. 여기서 원본은 파일 리더가 읽은 논리적 셀 값을 뜻하며 파일 바이트나 XLSX 서식까지 보존하는 것은 아니다. 필드별 보존·정제·거절 기준과 upsert 예외는 [Raw/Clean 데이터 분리와 보존 정책](../policies/raw-clean-data.md)을 따른다.

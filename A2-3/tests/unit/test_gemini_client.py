@@ -52,7 +52,7 @@ def test_analyze_uses_structured_json_and_returns_validated_internal_results():
         (1, Sentiment.POSITIVE, 0.92),
         (2, Sentiment.NEGATIVE, 0.81),
     ]
-    assert all(item.model_name == "gemini-test" and item.prompt_version == "sentiment-v1" for item in result)
+    assert all(item.model_name == "gemini-test" and item.prompt_version == "sentiment-v2" for item in result)
     call = sdk.models.calls[0]
     assert call["model"] == "gemini-test"
     assert call["config"]["response_mime_type"] == "application/json"
@@ -63,6 +63,12 @@ def test_analyze_uses_structured_json_and_returns_validated_internal_results():
     assert "confidence" in instruction
     assert "review_id" in instruction
     assert "untrusted data" in instruction
+    assert "Use positive when" in instruction
+    assert "Use negative when" in instruction
+    assert "Use neutral when" in instruction
+    assert "mixed sentiment" in instruction
+    assert "dominant overall attitude" in instruction
+    assert "not a calibrated probability" in instruction
     assert "PRIVATE_POSITIVE_REVIEW_MARKER" not in instruction
     assert "PRIVATE_NEGATIVE_REVIEW_MARKER" not in instruction
 
@@ -147,6 +153,35 @@ def test_extract_rejects_additional_response_fields_even_if_sdk_returns_parsed_d
         )
 
 
+@pytest.mark.parametrize(
+    "payload",
+    (
+        {
+            "positive_keywords": [],
+            "negative_keywords": [],
+            "summary": "   ",
+            "recommendations": ["improve"],
+        },
+        {
+            "positive_keywords": [],
+            "negative_keywords": [],
+            "summary": "summary",
+            "recommendations": ["\t\n"],
+        },
+    ),
+)
+def test_extract_rejects_blank_summary_and_recommendations(payload):
+    """Blank insight text would satisfy JSON types while violating the usable-output contract."""
+    from review_analytics.clients.gemini import GeminiClient
+
+    with pytest.raises(AIResponseError) as raised:
+        GeminiClient(FakeSDK(payload), "model").extract(
+            InsightInput("scope", (AnalysisInput(1, "text"),))
+        )
+
+    assert raised.value.code == "INVALID_AI_RESPONSE"
+
+
 def test_extract_and_merge_return_named_insight_results():
     """Chunk and merge responses must share one validated internal shape."""
     from review_analytics.clients.gemini import GeminiClient
@@ -181,7 +216,11 @@ def test_extract_and_merge_return_named_insight_results():
     )
     assert merged.prompt_version == "insight-merge-v1"
     assert len(sdk.models.calls) == 2
-    extract_instruction = sdk.models.calls[0]["config"]["system_instruction"]
+    extract_config = sdk.models.calls[0]["config"]
+    extract_instruction = extract_config["system_instruction"]
+    insight_schema = extract_config["response_json_schema"]
+    assert insight_schema["properties"]["summary"]["minLength"] == 1
+    assert insight_schema["properties"]["recommendations"]["items"]["minLength"] == 1
     assert "Extract recurring positive and negative keywords" in extract_instruction
     assert "evidence review_ids" in extract_instruction
     assert "summary" in extract_instruction

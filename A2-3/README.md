@@ -46,6 +46,12 @@ GEMINI_API_KEY=your_actual_key
 
 제출용 [샘플 데이터](data/sample_reviews.csv)는 34행이며 세 제품, 여러 날짜와 별점, 선택값 누락, 중복, 정제 거절 사례를 포함합니다.
 
+### Raw/Clean 분리
+
+`import`는 외부 파일에서 읽은 논리적 셀 값과 출처를 raw에 보존하고, 값의 유효성은 판단하지 않습니다. `clean`은 별도의 파생 행에서 본문 NFKC·공백 정리, 별점 1~5 검증, 날짜 `YYYY-MM-DD` 변환, 제품명 정규화를 수행합니다. 정제 실패 시 raw를 삭제하지 않고 거절 코드를 남기므로 규칙이 바뀌어도 같은 원본으로 재처리할 수 있습니다.
+
+필드별 보존값, clean 변환, 거절 순서, upsert와 파생 데이터 무효화는 [Raw/Clean 데이터 분리와 보존 정책](docs/policies/raw-clean-data.md)을 참고합니다.
+
 ## 빠른 시작
 
 권장 순서입니다.
@@ -114,6 +120,10 @@ python3 main.py analyze [--unanalyzed | --all | --id CLEAN_ID] [--limit COUNT] [
 ```
 
 기본 대상은 미분석 clean 리뷰입니다. 실제 대상이 있을 때 `.env`의 키로 Gemini를 호출하며, 성공 배치는 저장하고 최종 실패 배치는 안전한 코드로 집계합니다.
+
+감정은 리뷰 본문만으로 `positive|negative|neutral` 중 하나를 선택하며, confidence는 정답 확률이 아닌 라벨 선택에 대한 모델의 자기평가 확신도입니다. 라벨 경계, 복합 감정 처리, JSON 출력 예시는 [AI 프롬프트 설계와 출력 계약](docs/analysis/prompt-design.md)을 참고합니다.
+
+기존 DB의 감정 결과를 새 프롬프트 계약으로 전환할 때는 `python3 main.py analyze --all --force`를 실행합니다. 기존 결과가 교체되면 저장된 인사이트는 stale 처리되므로, 사용하는 필터 범위마다 `extract`를 다시 실행한 뒤 대시보드와 리포트를 생성해야 합니다.
 
 ### 4. `extract`
 
@@ -219,3 +229,5 @@ E2E 테스트는 `tests/fakes.py`의 DTO 호환 Fake Gemini를 주입해 아홉 
 - [감정 지표 운영 의사결정 정책](docs/analysis/decision-policy.md): 임계치, 알림→조치, 키워드 우선순위, 급증 원인 가설
 - [시각화와 집계 방법론](docs/analysis/visualization-methodology.md): 누적 막대 선택 근거, 한계, 대안 분석
 - [감정 분석 정확도 검증과 프롬프트 실험 계획](docs/quality/sentiment-validation-plan.md): 샘플링 검수, 정량 메트릭, 프롬프트 A/B 기준
+- [Raw/Clean 데이터 분리와 보존 정책](docs/policies/raw-clean-data.md): 원본 보존 범위, 필드별 정제, 거절과 재처리
+- [AI 프롬프트 설계와 출력 계약](docs/analysis/prompt-design.md): 입력·출력 형식, 라벨 기준, confidence 해석과 예시

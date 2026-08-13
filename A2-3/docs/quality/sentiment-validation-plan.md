@@ -3,6 +3,7 @@
 - 상태: 실행 전 검증 계획
 - 대상 출력: `positive`, `negative`, `neutral`, confidence `0.0..1.0`
 - 추적 키: 모델 이름과 `prompt_version`
+- 프롬프트 계약: [`../analysis/prompt-design.md`](../analysis/prompt-design.md)
 
 현재 저장소에는 네트워크 없는 기능 테스트와 Gemini 구조화 응답 검증이 있지만, 사람이 만든 정답셋에 대한 정확도 실험 결과는 없다. 이 문서는 실험 절차와 합격 기준을 정의하며, 실제 성능 수치를 주장하지 않는다.
 

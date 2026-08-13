@@ -3,7 +3,7 @@
 - 상태: 현재 구현 동작
 - 대상: CLI 사용자, 기능 개발자, 테스트 작성자
 - 명령 정책: [`policies/cli-commands.md`](policies/cli-commands.md)
-- 관련 문서: [`architecture/README.md`](architecture/README.md), [`architecture/data-communication.md`](architecture/data-communication.md), [`glossary/README.md`](glossary/README.md)
+- 관련 문서: [`architecture/README.md`](architecture/README.md), [`architecture/data-communication.md`](architecture/data-communication.md), [`policies/raw-clean-data.md`](policies/raw-clean-data.md), [`glossary/README.md`](glossary/README.md)
 
 ## 1. 전체 흐름
 
@@ -118,6 +118,7 @@ CSV/XLSX 파일
 - `import`는 정제하지 않고 raw만 저장한다.
 - 파일 자체가 잘못되면 아무 행도 저장하지 않는다.
 - 개별 값의 품질 문제는 raw에 보존한 뒤 `clean`에서 판정한다.
+- raw 보존 범위, 필드별 clean 변환, 거절 순서는 [Raw/Clean 데이터 분리와 보존 정책](policies/raw-clean-data.md)을 따른다.
 
 ### 실행 예시
 

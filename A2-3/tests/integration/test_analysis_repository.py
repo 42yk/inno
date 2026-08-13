@@ -79,6 +79,28 @@ def test_sentiment_batch_replaces_existing_analysis_without_changing_identity(
     assert scalar(database_path, "SELECT sentiment FROM sentiment_analyses") == "negative"
 
 
+def test_replacing_sentiment_marks_current_insights_stale(
+    initialized_repositories, database_path, raw_input
+):
+    """A report must not reuse insights derived from sentiment results that force analysis replaced."""
+    reviews, analyses = initialized_repositories
+    _, clean = seed_clean(reviews, raw_input)
+    analyses.save_sentiment_batch(
+        (SentimentResult(clean.id, Sentiment.POSITIVE, 0.9, "fake", "v1"),)
+    )
+    insight_id = analyses.save_insight("{}", "scope", 1, _insight())
+
+    analyses.save_sentiment_batch(
+        (SentimentResult(clean.id, Sentiment.NEGATIVE, 0.8, "fake", "v2"),)
+    )
+
+    assert scalar(
+        database_path,
+        "SELECT is_stale FROM insight_extractions WHERE id = ?",
+        (insight_id,),
+    ) == 1
+
+
 def test_latest_valid_insight_round_trips_json_as_immutable_models(initialized_repositories):
     """Returning stale/old JSON blobs or mutable dicts would violate exact-scope and safe mapping contracts."""
     _, analyses = initialized_repositories
