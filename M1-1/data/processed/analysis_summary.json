@@ -1,0 +1,490 @@
+{
+  "config": {
+    "station_id": 108,
+    "start_date": "1994-01-01",
+    "end_date": "2024-12-31",
+    "monthly_coverage_threshold": 0.8,
+    "annual_coverage_threshold": 0.95,
+    "anomaly_z_threshold": 2.5,
+    "annual_rolling_window": 5,
+    "plausible_temperature_min_c": -50.0,
+    "plausible_temperature_max_c": 50.0
+  },
+  "data_quality": {
+    "row_count": 11323,
+    "unique_date_count": 11323,
+    "expected_date_count": 11323,
+    "actual_start_date": "1994-01-01",
+    "actual_end_date": "2024-12-31",
+    "missing_calendar_date_count": 0,
+    "duplicate_date_count": 0,
+    "missing_counts": {
+      "station_id": 0,
+      "station_name": 0,
+      "date": 0,
+      "avg_temp_c": 0,
+      "min_temp_c": 1,
+      "max_temp_c": 1,
+      "precipitation_mm": 6940,
+      "avg_humidity_pct": 0
+    },
+    "missing_rates_pct": {
+      "station_id": 0.0,
+      "station_name": 0.0,
+      "date": 0.0,
+      "avg_temp_c": 0.0,
+      "min_temp_c": 0.008831581736288969,
+      "max_temp_c": 0.008831581736288969,
+      "precipitation_mm": 61.291177249845454,
+      "avg_humidity_pct": 0.0
+    },
+    "dtypes": {
+      "station_id": "Int64",
+      "station_name": "string",
+      "date": "datetime64[ns]",
+      "avg_temp_c": "Float64",
+      "min_temp_c": "Float64",
+      "max_temp_c": "Float64",
+      "precipitation_mm": "Float64",
+      "avg_humidity_pct": "Float64"
+    },
+    "temperature_order_violation_count": 0,
+    "temperature_order_violation_dates": [],
+    "humidity_range_violation_count": 0,
+    "humidity_range_violation_dates": [],
+    "negative_precipitation_count": 0,
+    "negative_precipitation_dates": [],
+    "temperature_range_violation_count": 0,
+    "temperature_range_violation_dates": []
+  },
+  "trend": {
+    "slope_c_per_decade": 0.302,
+    "r_squared": 0.187,
+    "valid_year_count": 31,
+    "early_period": "1994-2003",
+    "early_decade_mean_c": 12.95,
+    "recent_period": "2015-2024",
+    "recent_decade_mean_c": 13.62,
+    "difference_c": 0.66
+  },
+  "annual_statistics": [
+    {
+      "year": 1994,
+      "avg_temp_c": 13.61,
+      "annual_change_c": null,
+      "rolling_5y_avg_c": null
+    },
+    {
+      "year": 1995,
+      "avg_temp_c": 12.27,
+      "annual_change_c": -1.35,
+      "rolling_5y_avg_c": null
+    },
+    {
+      "year": 1996,
+      "avg_temp_c": 12.26,
+      "annual_change_c": -0.01,
+      "rolling_5y_avg_c": null
+    },
+    {
+      "year": 1997,
+      "avg_temp_c": 12.96,
+      "annual_change_c": 0.7,
+      "rolling_5y_avg_c": null
+    },
+    {
+      "year": 1998,
+      "avg_temp_c": 13.84,
+      "annual_change_c": 0.88,
+      "rolling_5y_avg_c": 12.99
+    },
+    {
+      "year": 1999,
+      "avg_temp_c": 13.26,
+      "annual_change_c": -0.58,
+      "rolling_5y_avg_c": 12.91
+    },
+    {
+      "year": 2000,
+      "avg_temp_c": 12.71,
+      "annual_change_c": -0.54,
+      "rolling_5y_avg_c": 13.0
+    },
+    {
+      "year": 2001,
+      "avg_temp_c": 12.86,
+      "annual_change_c": 0.15,
+      "rolling_5y_avg_c": 13.12
+    },
+    {
+      "year": 2002,
+      "avg_temp_c": 12.91,
+      "annual_change_c": 0.05,
+      "rolling_5y_avg_c": 13.12
+    },
+    {
+      "year": 2003,
+      "avg_temp_c": 12.87,
+      "annual_change_c": -0.04,
+      "rolling_5y_avg_c": 12.92
+    },
+    {
+      "year": 2004,
+      "avg_temp_c": 13.35,
+      "annual_change_c": 0.48,
+      "rolling_5y_avg_c": 12.94
+    },
+    {
+      "year": 2005,
+      "avg_temp_c": 12.14,
+      "annual_change_c": -1.21,
+      "rolling_5y_avg_c": 12.83
+    },
+    {
+      "year": 2006,
+      "avg_temp_c": 13.06,
+      "annual_change_c": 0.92,
+      "rolling_5y_avg_c": 12.87
+    },
+    {
+      "year": 2007,
+      "avg_temp_c": 13.28,
+      "annual_change_c": 0.22,
+      "rolling_5y_avg_c": 12.94
+    },
+    {
+      "year": 2008,
+      "avg_temp_c": 12.96,
+      "annual_change_c": -0.32,
+      "rolling_5y_avg_c": 12.96
+    },
+    {
+      "year": 2009,
+      "avg_temp_c": 12.95,
+      "annual_change_c": -0.01,
+      "rolling_5y_avg_c": 12.88
+    },
+    {
+      "year": 2010,
+      "avg_temp_c": 12.14,
+      "annual_change_c": -0.81,
+      "rolling_5y_avg_c": 12.88
+    },
+    {
+      "year": 2011,
+      "avg_temp_c": 12.08,
+      "annual_change_c": -0.06,
+      "rolling_5y_avg_c": 12.68
+    },
+    {
+      "year": 2012,
+      "avg_temp_c": 12.27,
+      "annual_change_c": 0.19,
+      "rolling_5y_avg_c": 12.48
+    },
+    {
+      "year": 2013,
+      "avg_temp_c": 12.56,
+      "annual_change_c": 0.29,
+      "rolling_5y_avg_c": 12.4
+    },
+    {
+      "year": 2014,
+      "avg_temp_c": 13.4,
+      "annual_change_c": 0.84,
+      "rolling_5y_avg_c": 12.49
+    },
+    {
+      "year": 2015,
+      "avg_temp_c": 13.62,
+      "annual_change_c": 0.22,
+      "rolling_5y_avg_c": 12.79
+    },
+    {
+      "year": 2016,
+      "avg_temp_c": 13.59,
+      "annual_change_c": -0.03,
+      "rolling_5y_avg_c": 13.09
+    },
+    {
+      "year": 2017,
+      "avg_temp_c": 13.07,
+      "annual_change_c": -0.52,
+      "rolling_5y_avg_c": 13.25
+    },
+    {
+      "year": 2018,
+      "avg_temp_c": 13.0,
+      "annual_change_c": -0.07,
+      "rolling_5y_avg_c": 13.34
+    },
+    {
+      "year": 2019,
+      "avg_temp_c": 13.6,
+      "annual_change_c": 0.6,
+      "rolling_5y_avg_c": 13.38
+    },
+    {
+      "year": 2020,
+      "avg_temp_c": 13.27,
+      "annual_change_c": -0.33,
+      "rolling_5y_avg_c": 13.31
+    },
+    {
+      "year": 2021,
+      "avg_temp_c": 13.75,
+      "annual_change_c": 0.48,
+      "rolling_5y_avg_c": 13.34
+    },
+    {
+      "year": 2022,
+      "avg_temp_c": 13.3,
+      "annual_change_c": -0.46,
+      "rolling_5y_avg_c": 13.38
+    },
+    {
+      "year": 2023,
+      "avg_temp_c": 14.11,
+      "annual_change_c": 0.81,
+      "rolling_5y_avg_c": 13.61
+    },
+    {
+      "year": 2024,
+      "avg_temp_c": 14.88,
+      "annual_change_c": 0.77,
+      "rolling_5y_avg_c": 13.86
+    }
+  ],
+  "monthly_period_comparison": [
+    {
+      "month": 1,
+      "early_mean_c": -1.91,
+      "recent_mean_c": -1.58,
+      "difference_c": 0.33
+    },
+    {
+      "month": 2,
+      "early_mean_c": 0.87,
+      "recent_mean_c": 1.06,
+      "difference_c": 0.18
+    },
+    {
+      "month": 3,
+      "early_mean_c": 6.12,
+      "recent_mean_c": 7.6,
+      "difference_c": 1.48
+    },
+    {
+      "month": 4,
+      "early_mean_c": 13.14,
+      "recent_mean_c": 13.66,
+      "difference_c": 0.53
+    },
+    {
+      "month": 5,
+      "early_mean_c": 18.12,
+      "recent_mean_c": 18.77,
+      "difference_c": 0.65
+    },
+    {
+      "month": 6,
+      "early_mean_c": 22.5,
+      "recent_mean_c": 23.41,
+      "difference_c": 0.9
+    },
+    {
+      "month": 7,
+      "early_mean_c": 25.6,
+      "recent_mean_c": 26.56,
+      "difference_c": 0.95
+    },
+    {
+      "month": 8,
+      "early_mean_c": 25.85,
+      "recent_mean_c": 27.08,
+      "difference_c": 1.23
+    },
+    {
+      "month": 9,
+      "early_mean_c": 21.46,
+      "recent_mean_c": 22.72,
+      "difference_c": 1.26
+    },
+    {
+      "month": 10,
+      "early_mean_c": 14.81,
+      "recent_mean_c": 15.43,
+      "difference_c": 0.62
+    },
+    {
+      "month": 11,
+      "early_mean_c": 7.32,
+      "recent_mean_c": 7.94,
+      "difference_c": 0.62
+    },
+    {
+      "month": 12,
+      "early_mean_c": 0.89,
+      "recent_mean_c": 0.11,
+      "difference_c": -0.78
+    }
+  ],
+  "seasonal_period_comparison": [
+    {
+      "season": "봄",
+      "early_mean_c": 12.45,
+      "recent_mean_c": 13.34,
+      "difference_c": 0.89
+    },
+    {
+      "season": "여름",
+      "early_mean_c": 24.68,
+      "recent_mean_c": 25.71,
+      "difference_c": 1.03
+    },
+    {
+      "season": "가을",
+      "early_mean_c": 14.53,
+      "recent_mean_c": 15.36,
+      "difference_c": 0.83
+    },
+    {
+      "season": "겨울",
+      "early_mean_c": -0.08,
+      "recent_mean_c": -0.17,
+      "difference_c": -0.09
+    }
+  ],
+  "extremes": {
+    "warmest_year": 2024,
+    "warmest_year_mean_c": 14.88,
+    "coldest_year": 2011,
+    "coldest_year_mean_c": 12.08,
+    "hot_candidate_count": 43,
+    "cold_candidate_count": 98,
+    "top_hot_candidates": [
+      {
+        "date": "2002-01-15",
+        "avg_temp_c": 12.2,
+        "monthly_anomaly_c": 14.17,
+        "monthly_anomaly_z": 3.236
+      },
+      {
+        "date": "1994-07-24",
+        "avg_temp_c": 33.1,
+        "monthly_anomaly_c": 7.42,
+        "monthly_anomaly_z": 3.103
+      },
+      {
+        "date": "2023-12-09",
+        "avg_temp_c": 13.7,
+        "monthly_anomaly_c": 13.64,
+        "monthly_anomaly_z": 2.958
+      },
+      {
+        "date": "2018-08-02",
+        "avg_temp_c": 33.7,
+        "monthly_anomaly_c": 7.34,
+        "monthly_anomaly_z": 2.917
+      },
+      {
+        "date": "1994-07-23",
+        "avg_temp_c": 32.6,
+        "monthly_anomaly_c": 6.92,
+        "monthly_anomaly_z": 2.894
+      },
+      {
+        "date": "2018-07-31",
+        "avg_temp_c": 32.6,
+        "monthly_anomaly_c": 6.92,
+        "monthly_anomaly_z": 2.894
+      },
+      {
+        "date": "2024-06-20",
+        "avg_temp_c": 29.4,
+        "monthly_anomaly_c": 6.47,
+        "monthly_anomaly_z": 2.884
+      },
+      {
+        "date": "2024-09-18",
+        "avg_temp_c": 29.4,
+        "monthly_anomaly_c": 7.46,
+        "monthly_anomaly_z": 2.881
+      },
+      {
+        "date": "2024-09-10",
+        "avg_temp_c": 29.4,
+        "monthly_anomaly_c": 7.46,
+        "monthly_anomaly_z": 2.881
+      },
+      {
+        "date": "2018-08-01",
+        "avg_temp_c": 33.6,
+        "monthly_anomaly_c": 7.24,
+        "monthly_anomaly_z": 2.877
+      }
+    ],
+    "top_cold_candidates": [
+      {
+        "date": "2008-06-05",
+        "avg_temp_c": 14.9,
+        "monthly_anomaly_c": -8.03,
+        "monthly_anomaly_z": -3.582
+      },
+      {
+        "date": "1997-10-31",
+        "avg_temp_c": 3.1,
+        "monthly_anomaly_c": -12.16,
+        "monthly_anomaly_z": -3.539
+      },
+      {
+        "date": "1998-06-03",
+        "avg_temp_c": 15.1,
+        "monthly_anomaly_c": -7.83,
+        "monthly_anomaly_z": -3.492
+      },
+      {
+        "date": "2005-08-25",
+        "avg_temp_c": 17.6,
+        "monthly_anomaly_c": -8.76,
+        "monthly_anomaly_z": -3.484
+      },
+      {
+        "date": "2002-10-28",
+        "avg_temp_c": 3.3,
+        "monthly_anomaly_c": -11.96,
+        "monthly_anomaly_z": -3.481
+      },
+      {
+        "date": "2012-02-02",
+        "avg_temp_c": -13.7,
+        "monthly_anomaly_c": -14.56,
+        "monthly_anomaly_z": -3.466
+      },
+      {
+        "date": "2010-09-29",
+        "avg_temp_c": 13.0,
+        "monthly_anomaly_c": -8.94,
+        "monthly_anomaly_z": -3.454
+      },
+      {
+        "date": "2016-08-31",
+        "avg_temp_c": 17.7,
+        "monthly_anomaly_c": -8.66,
+        "monthly_anomaly_z": -3.444
+      },
+      {
+        "date": "1998-06-04",
+        "avg_temp_c": 15.3,
+        "monthly_anomaly_c": -7.63,
+        "monthly_anomaly_z": -3.403
+      },
+      {
+        "date": "2008-08-22",
+        "avg_temp_c": 17.9,
+        "monthly_anomaly_c": -8.46,
+        "monthly_anomaly_z": -3.365
+      }
+    ]
+  }
+}

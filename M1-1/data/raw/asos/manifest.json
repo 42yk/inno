@@ -1,0 +1,854 @@
+{
+  "manifest_version": 1,
+  "generated_at": "2026-08-21T05:52:07+00:00",
+  "source": "기상청 기상자료개방포털 ASOS 연도별 파일셋",
+  "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+  "license": "공공저작물 출처표시 제1유형",
+  "station_id": 108,
+  "start_year": 1994,
+  "end_year": 2024,
+  "entry_count": 31,
+  "entries": [
+    {
+      "year": 1994,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:32+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_1994_1994_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180718",
+      "portal_reported_size_kb": 24.81,
+      "files": {
+        "outer_zip": {
+          "path": "1994/downloaded.zip",
+          "size_bytes": 25582,
+          "sha256": "052a26524d7bb382a65f92cbd72853c68f1f64a77904703da7c9685a53f434cd"
+        },
+        "inner_zip": {
+          "path": "1994/SURFACE_ASOS_108_DAY_1994_1994_2018.zip",
+          "size_bytes": 25403,
+          "sha256": "a3cbe92d7d7ae3fe9aedccda53e057ff744259bc9ca8741cf8c0dc60d8a7bd29"
+        },
+        "csv": {
+          "path": "1994/SURFACE_ASOS_108_DAY_1994_1994_2018.csv",
+          "size_bytes": 73365,
+          "sha256": "6d405f039bce2fce41bb026961dbffea9749479de5e93e539fb8b6f5711539ac"
+        }
+      }
+    },
+    {
+      "year": 1995,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:33+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_1995_1995_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180719",
+      "portal_reported_size_kb": 29.49,
+      "files": {
+        "outer_zip": {
+          "path": "1995/downloaded.zip",
+          "size_bytes": 30375,
+          "sha256": "95ced1cc2ac1d7c23048f1a74e4a904608118764c70efe251df39ee34a2d0d65"
+        },
+        "inner_zip": {
+          "path": "1995/SURFACE_ASOS_108_DAY_1995_1995_2018.zip",
+          "size_bytes": 30196,
+          "sha256": "c150503b23eab01465722ca7d6d31177f10d5b7dfe00942dbe06a0c9ba8f9f09"
+        },
+        "csv": {
+          "path": "1995/SURFACE_ASOS_108_DAY_1995_1995_2018.csv",
+          "size_bytes": 86052,
+          "sha256": "ba10a61f7b4e0722cc28c9825913ccd567970ffd2e483f44147ddd6b02ccdfe9"
+        }
+      }
+    },
+    {
+      "year": 1996,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:34+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_1996_1996_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180720",
+      "portal_reported_size_kb": 29.54,
+      "files": {
+        "outer_zip": {
+          "path": "1996/downloaded.zip",
+          "size_bytes": 30430,
+          "sha256": "e0232af0d46dbb5252e9234d41353ea911f3c36dda3ad75b85f41ec5b5d8e903"
+        },
+        "inner_zip": {
+          "path": "1996/SURFACE_ASOS_108_DAY_1996_1996_2018.zip",
+          "size_bytes": 30254,
+          "sha256": "45e2ed983c4887cc00f96cbe10fdac444875b34d265a85342aa49d4a8c205d95"
+        },
+        "csv": {
+          "path": "1996/SURFACE_ASOS_108_DAY_1996_1996_2018.csv",
+          "size_bytes": 86143,
+          "sha256": "b8d1003cffe73513edd35a4c780dedd7dabf0ea3a4e7a78d1a3ea6777c005ee1"
+        }
+      }
+    },
+    {
+      "year": 1997,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:34+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_1997_1997_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180721",
+      "portal_reported_size_kb": 29.48,
+      "files": {
+        "outer_zip": {
+          "path": "1997/downloaded.zip",
+          "size_bytes": 30369,
+          "sha256": "ceb533dfe92de13e92a2641847cce7299efb436f0da5affd0f15aaef663c2885"
+        },
+        "inner_zip": {
+          "path": "1997/SURFACE_ASOS_108_DAY_1997_1997_2018.zip",
+          "size_bytes": 30192,
+          "sha256": "e2f6baa4cf31a1f5ff0b16a4ae687abc67da894333a67eb8661e0c419ad29e40"
+        },
+        "csv": {
+          "path": "1997/SURFACE_ASOS_108_DAY_1997_1997_2018.csv",
+          "size_bytes": 85934,
+          "sha256": "d761319f0856a74d80dbf8d530ce45014e08cc1e55e3b15162c3b344231a2b57"
+        }
+      }
+    },
+    {
+      "year": 1998,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:35+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_1998_1998_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180722",
+      "portal_reported_size_kb": 29.85,
+      "files": {
+        "outer_zip": {
+          "path": "1998/downloaded.zip",
+          "size_bytes": 30748,
+          "sha256": "7730e22726907c81e29051b8812441118d85aedc54dc381ddcbadf3d5e9025ff"
+        },
+        "inner_zip": {
+          "path": "1998/SURFACE_ASOS_108_DAY_1998_1998_2018.zip",
+          "size_bytes": 30568,
+          "sha256": "cc27b83b542b5bcc6c79185d0b1ad58d18e5f6f1e4d6a678198268f0d6fc8eee"
+        },
+        "csv": {
+          "path": "1998/SURFACE_ASOS_108_DAY_1998_1998_2018.csv",
+          "size_bytes": 86363,
+          "sha256": "9e10401cafe9e23eba52a068ffefe85975183c3886cbe0c168209d706c963f94"
+        }
+      }
+    },
+    {
+      "year": 1999,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:36+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_1999_1999_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180723",
+      "portal_reported_size_kb": 29.72,
+      "files": {
+        "outer_zip": {
+          "path": "1999/downloaded.zip",
+          "size_bytes": 30616,
+          "sha256": "b089e85fef4242fead059ef89f04f958db1b07e4c5cf71105f7a50da781f44f2"
+        },
+        "inner_zip": {
+          "path": "1999/SURFACE_ASOS_108_DAY_1999_1999_2018.zip",
+          "size_bytes": 30437,
+          "sha256": "a848aeb3efce804d7ea447667350cbd20082a11cc5b1285c04fc09ba4c39d839"
+        },
+        "csv": {
+          "path": "1999/SURFACE_ASOS_108_DAY_1999_1999_2018.csv",
+          "size_bytes": 85867,
+          "sha256": "7ff43e5a497c6b8201440aa0efa2fcb67b988b4db441086d3b10d024fc219426"
+        }
+      }
+    },
+    {
+      "year": 2000,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:36+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2000_2000_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180724",
+      "portal_reported_size_kb": 29.83,
+      "files": {
+        "outer_zip": {
+          "path": "2000/downloaded.zip",
+          "size_bytes": 30722,
+          "sha256": "861a64f7ecc8919727c58cd9d7b109fbc0edb3ca5551783bfe176db6bae3fd6a"
+        },
+        "inner_zip": {
+          "path": "2000/SURFACE_ASOS_108_DAY_2000_2000_2018.zip",
+          "size_bytes": 30546,
+          "sha256": "da12e0ed82abf46c73c25a105f05bac4f6bc9bcbbfc2b869dbb24312a8f2d52c"
+        },
+        "csv": {
+          "path": "2000/SURFACE_ASOS_108_DAY_2000_2000_2018.csv",
+          "size_bytes": 86360,
+          "sha256": "d48b000c697dcaea89106dc6317c0080ef11645a0e46aecbf8a2575c0f581e6e"
+        }
+      }
+    },
+    {
+      "year": 2001,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:37+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2001_2001_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180725",
+      "portal_reported_size_kb": 29.68,
+      "files": {
+        "outer_zip": {
+          "path": "2001/downloaded.zip",
+          "size_bytes": 30567,
+          "sha256": "579242aaa78cce0d620bb163ce10751d19afb679c204ccc5c6c687ca051f04c8"
+        },
+        "inner_zip": {
+          "path": "2001/SURFACE_ASOS_108_DAY_2001_2001_2018.zip",
+          "size_bytes": 30392,
+          "sha256": "e03de22c15ba1365adf6019c71d474e7c9917c6777f5c540d5a7e924d5d151b4"
+        },
+        "csv": {
+          "path": "2001/SURFACE_ASOS_108_DAY_2001_2001_2018.csv",
+          "size_bytes": 86303,
+          "sha256": "5c898018b64e51bee321fda5937de933a4394b1b0e28ec1a79c73909e64bf549"
+        }
+      }
+    },
+    {
+      "year": 2002,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:37+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2002_2002_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180726",
+      "portal_reported_size_kb": 29.74,
+      "files": {
+        "outer_zip": {
+          "path": "2002/downloaded.zip",
+          "size_bytes": 30633,
+          "sha256": "b73bc4ae102cd32c1cac27006d08ba99c65535118fb08bb8da6dcfcfbe368c3c"
+        },
+        "inner_zip": {
+          "path": "2002/SURFACE_ASOS_108_DAY_2002_2002_2018.zip",
+          "size_bytes": 30455,
+          "sha256": "ee9bf35a4ee8029960562350849b6a4dfe68c6175e64a8b339c2c6bf5f2a85f5"
+        },
+        "csv": {
+          "path": "2002/SURFACE_ASOS_108_DAY_2002_2002_2018.csv",
+          "size_bytes": 86131,
+          "sha256": "caca800ea691c592c419188dd890d63fd76e7c448dc1704bc1b488441a291d9a"
+        }
+      }
+    },
+    {
+      "year": 2003,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:38+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2003_2003_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180727",
+      "portal_reported_size_kb": 29.9,
+      "files": {
+        "outer_zip": {
+          "path": "2003/downloaded.zip",
+          "size_bytes": 30789,
+          "sha256": "e71c67818291ddd43a400eb1f3ba93f7eeeae1498949e9d22571d99bdf9f5050"
+        },
+        "inner_zip": {
+          "path": "2003/SURFACE_ASOS_108_DAY_2003_2003_2018.zip",
+          "size_bytes": 30613,
+          "sha256": "5dd7f2ca21e226536ae2663e0bd72cf64c1c60c113a6d9ac1bb6da4b7a4dbabb"
+        },
+        "csv": {
+          "path": "2003/SURFACE_ASOS_108_DAY_2003_2003_2018.csv",
+          "size_bytes": 86390,
+          "sha256": "f1edf68b2ebac9461d1039ee7ea22ecfe7e0163c3433a2b284f0b4d6286a44eb"
+        }
+      }
+    },
+    {
+      "year": 2004,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:39+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2004_2004_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180728",
+      "portal_reported_size_kb": 29.66,
+      "files": {
+        "outer_zip": {
+          "path": "2004/downloaded.zip",
+          "size_bytes": 30548,
+          "sha256": "455b6139ecdbbf1c603f3b3ab8f790543b799c4eddaa81fd9c337b87bd566ebe"
+        },
+        "inner_zip": {
+          "path": "2004/SURFACE_ASOS_108_DAY_2004_2004_2018.zip",
+          "size_bytes": 30371,
+          "sha256": "227ea7cc8b086194af2d1a7510ff86c8d1ee581c5a7e73de7de1ab4f556fa9ae"
+        },
+        "csv": {
+          "path": "2004/SURFACE_ASOS_108_DAY_2004_2004_2018.csv",
+          "size_bytes": 86673,
+          "sha256": "2c9050a8dabffb57d37fdb08bb57e5c7167f6c277cbaca685e56bc216afcc159"
+        }
+      }
+    },
+    {
+      "year": 2005,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:39+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2005_2005_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180729",
+      "portal_reported_size_kb": 29.82,
+      "files": {
+        "outer_zip": {
+          "path": "2005/downloaded.zip",
+          "size_bytes": 30717,
+          "sha256": "d71995169681fcca05efc27a24ae705d1ee350674af9455b5305567bc691cba3"
+        },
+        "inner_zip": {
+          "path": "2005/SURFACE_ASOS_108_DAY_2005_2005_2018.zip",
+          "size_bytes": 30539,
+          "sha256": "81b8d4bfed042651915b2a55b7972a3fb9e6b2b473a31f261ce25a23ce1c069d"
+        },
+        "csv": {
+          "path": "2005/SURFACE_ASOS_108_DAY_2005_2005_2018.csv",
+          "size_bytes": 86707,
+          "sha256": "b5da8e5a895bc33c1d44f99dbb74225932320048036dc0b1b670359556efcb60"
+        }
+      }
+    },
+    {
+      "year": 2006,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:40+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2006_2006_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180730",
+      "portal_reported_size_kb": 29.74,
+      "files": {
+        "outer_zip": {
+          "path": "2006/downloaded.zip",
+          "size_bytes": 30625,
+          "sha256": "af2c71ce83bb19a38eea4bd9e706d5ec28b1d38f3cdbd74f6bcbd415acfc582d"
+        },
+        "inner_zip": {
+          "path": "2006/SURFACE_ASOS_108_DAY_2006_2006_2018.zip",
+          "size_bytes": 30450,
+          "sha256": "3acd8bbe3f69e9d8cd2ad7471301afcd70395f01299fe4ce31ba70046e12a183"
+        },
+        "csv": {
+          "path": "2006/SURFACE_ASOS_108_DAY_2006_2006_2018.csv",
+          "size_bytes": 86512,
+          "sha256": "3424de5ca384e6fac897e8b8d0d88354e18a07c6df4d53490281bd9478b3ab01"
+        }
+      }
+    },
+    {
+      "year": 2007,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:41+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2007_2007_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180731",
+      "portal_reported_size_kb": 29.94,
+      "files": {
+        "outer_zip": {
+          "path": "2007/downloaded.zip",
+          "size_bytes": 30834,
+          "sha256": "73301b9ebcd049d09e176757bde0429d4b50a94d18e9290b40f4b35538f7c60c"
+        },
+        "inner_zip": {
+          "path": "2007/SURFACE_ASOS_108_DAY_2007_2007_2018.zip",
+          "size_bytes": 30658,
+          "sha256": "62b5e99456956f344cf942c1d4a701bb473418ca49776c80c73562e15dbd16f7"
+        },
+        "csv": {
+          "path": "2007/SURFACE_ASOS_108_DAY_2007_2007_2018.csv",
+          "size_bytes": 86661,
+          "sha256": "9766a9d4d84348fc6fb8a43fa0c96eaaf0bdea80350320598d4626dcd4b06f7b"
+        }
+      }
+    },
+    {
+      "year": 2008,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:42+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2008_2008_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180732",
+      "portal_reported_size_kb": 30.04,
+      "files": {
+        "outer_zip": {
+          "path": "2008/downloaded.zip",
+          "size_bytes": 30941,
+          "sha256": "e30d8ad1ea149c68076414ca3eb3ddbd934402ecd7c05a0747ee21eb9a2f9c04"
+        },
+        "inner_zip": {
+          "path": "2008/SURFACE_ASOS_108_DAY_2008_2008_2018.zip",
+          "size_bytes": 30762,
+          "sha256": "9769e3bd7c53a75c2863c040046c6788b581f044356d8b575228975f7a1eb87a"
+        },
+        "csv": {
+          "path": "2008/SURFACE_ASOS_108_DAY_2008_2008_2018.csv",
+          "size_bytes": 87006,
+          "sha256": "99851da4895beb74d3f4a59cca5dae9a214b8e90a20e7cdd0bc810d09d6b569e"
+        }
+      }
+    },
+    {
+      "year": 2009,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:42+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2009_2009_2018.zip",
+      "fileset_id": "513",
+      "fileset_detail_id": "180733",
+      "portal_reported_size_kb": 30.18,
+      "files": {
+        "outer_zip": {
+          "path": "2009/downloaded.zip",
+          "size_bytes": 31082,
+          "sha256": "924b3aff1f64b1006cfc4bc03fea266236e8c7d62b4ceca3df03a95ae33ed393"
+        },
+        "inner_zip": {
+          "path": "2009/SURFACE_ASOS_108_DAY_2009_2009_2018.zip",
+          "size_bytes": 30905,
+          "sha256": "57cf1fc3edc4d6f6460a9c650dd73887500332bdc945aa94cdb814f2931fc97a"
+        },
+        "csv": {
+          "path": "2009/SURFACE_ASOS_108_DAY_2009_2009_2018.csv",
+          "size_bytes": 86540,
+          "sha256": "cdb83f3c4697e3368d59cf0454bacda6fce97784abcd20c88d3d0f87de8415e6"
+        }
+      }
+    },
+    {
+      "year": 2010,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:43+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2010_2010_2015.zip",
+      "fileset_id": "43",
+      "fileset_detail_id": "4058",
+      "portal_reported_size_kb": 30.55,
+      "files": {
+        "outer_zip": {
+          "path": "2010/downloaded.zip",
+          "size_bytes": 31457,
+          "sha256": "bbd040454dd36ab92cc5f7fe67e73342f5869a721ad11577126bd268117fb10b"
+        },
+        "inner_zip": {
+          "path": "2010/SURFACE_ASOS_108_DAY_2010_2010_2015.zip",
+          "size_bytes": 31284,
+          "sha256": "02a7d39bef218387d24a63c422c3e5bc171b19922eb50028bc30b207be708839"
+        },
+        "csv": {
+          "path": "2010/SURFACE_ASOS_108_DAY_2010_2010_2015.csv",
+          "size_bytes": 86991,
+          "sha256": "ed7ee07f0bec5616fe4f85d44997f860dfbc5d2b2d442beac9498789bc6261c2"
+        }
+      }
+    },
+    {
+      "year": 2011,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:44+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2011_2011_2015.zip",
+      "fileset_id": "43",
+      "fileset_detail_id": "4059",
+      "portal_reported_size_kb": 30.3,
+      "files": {
+        "outer_zip": {
+          "path": "2011/downloaded.zip",
+          "size_bytes": 31199,
+          "sha256": "ce3536b811395e3a29e44494a87c8b9c3ea8471009c89d6c5bc0146f774e2a3e"
+        },
+        "inner_zip": {
+          "path": "2011/SURFACE_ASOS_108_DAY_2011_2011_2015.zip",
+          "size_bytes": 31025,
+          "sha256": "df800ab8ce4bff72e266833601938de41cfadc5e0650830acec782f917dd58cd"
+        },
+        "csv": {
+          "path": "2011/SURFACE_ASOS_108_DAY_2011_2011_2015.csv",
+          "size_bytes": 87069,
+          "sha256": "80db009d7fa37c267399e2a495702c5119638b1f41f489f3c32f7cd8d86e05be"
+        }
+      }
+    },
+    {
+      "year": 2012,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:44+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2012_2012_2015.zip",
+      "fileset_id": "43",
+      "fileset_detail_id": "4060",
+      "portal_reported_size_kb": 30.43,
+      "files": {
+        "outer_zip": {
+          "path": "2012/downloaded.zip",
+          "size_bytes": 31334,
+          "sha256": "250dc6fb5d89794d268d8f4d738fadfcc3694871032485b35133880db228d109"
+        },
+        "inner_zip": {
+          "path": "2012/SURFACE_ASOS_108_DAY_2012_2012_2015.zip",
+          "size_bytes": 31159,
+          "sha256": "295c3849b960506f84ad66d47fbda23297943b5db10c26b67f90b23352359755"
+        },
+        "csv": {
+          "path": "2012/SURFACE_ASOS_108_DAY_2012_2012_2015.csv",
+          "size_bytes": 87073,
+          "sha256": "2fef13677420534ebd5b9b7a876b185b2aa1db7c303c020517cb972089d6a3c3"
+        }
+      }
+    },
+    {
+      "year": 2013,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:45+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2013_2013_2015.zip",
+      "fileset_id": "43",
+      "fileset_detail_id": "4061",
+      "portal_reported_size_kb": 30.37,
+      "files": {
+        "outer_zip": {
+          "path": "2013/downloaded.zip",
+          "size_bytes": 31273,
+          "sha256": "c5c9de01d307ef0eef664e9e03934c3d0fc393c968fac94359a7580201f85920"
+        },
+        "inner_zip": {
+          "path": "2013/SURFACE_ASOS_108_DAY_2013_2013_2015.zip",
+          "size_bytes": 31097,
+          "sha256": "8c4a05028c34b1c1fb4d478347f7948d80db9728cd682e2f677a48bd1a5204d9"
+        },
+        "csv": {
+          "path": "2013/SURFACE_ASOS_108_DAY_2013_2013_2015.csv",
+          "size_bytes": 87044,
+          "sha256": "80d959d7b2af8c692fccff37c2cc59779a4faaa9a0a4b78bec256f100ae68cf0"
+        }
+      }
+    },
+    {
+      "year": 2014,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:46+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2014_2014_2015.zip",
+      "fileset_id": "43",
+      "fileset_detail_id": "4062",
+      "portal_reported_size_kb": 29.96,
+      "files": {
+        "outer_zip": {
+          "path": "2014/downloaded.zip",
+          "size_bytes": 30863,
+          "sha256": "56fd876f912fbfe43e3ef22e01b2c9733754992acabd54ab4c11a4b69659941d"
+        },
+        "inner_zip": {
+          "path": "2014/SURFACE_ASOS_108_DAY_2014_2014_2015.zip",
+          "size_bytes": 30683,
+          "sha256": "a88167a3a473d48bf0d1f6d10ebafda9d5167f648f57667ec0251d63f9d6d9e7"
+        },
+        "csv": {
+          "path": "2014/SURFACE_ASOS_108_DAY_2014_2014_2015.csv",
+          "size_bytes": 86584,
+          "sha256": "3619763d2e49eb51310057e6a07ea78767836634f19f8fa095903e18e4f288c5"
+        }
+      }
+    },
+    {
+      "year": 2015,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:46+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2015_2015_2016.zip",
+      "fileset_id": "81",
+      "fileset_detail_id": "19624",
+      "portal_reported_size_kb": 29.86,
+      "files": {
+        "outer_zip": {
+          "path": "2015/downloaded.zip",
+          "size_bytes": 30757,
+          "sha256": "4aa7bcef25bf284adbf4a459d63d19abd48e9b500d30357656b9626b54422d86"
+        },
+        "inner_zip": {
+          "path": "2015/SURFACE_ASOS_108_DAY_2015_2015_2016.zip",
+          "size_bytes": 30579,
+          "sha256": "4b7ec44ff1d774246214976ac92c52a623f207a391d0bab80b5124b39ef13220"
+        },
+        "csv": {
+          "path": "2015/SURFACE_ASOS_108_DAY_2015_2015_2016.csv",
+          "size_bytes": 86180,
+          "sha256": "1547b560995629fba89c9041bd2609665e3379220cc58134d70d464c164361b5"
+        }
+      }
+    },
+    {
+      "year": 2016,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:47+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2016_2016_2017.zip",
+      "fileset_id": "119",
+      "fileset_detail_id": "21443",
+      "portal_reported_size_kb": 30.24,
+      "files": {
+        "outer_zip": {
+          "path": "2016/downloaded.zip",
+          "size_bytes": 31136,
+          "sha256": "6e342339f6b06bf85e42b8f214e2630aca8aad6f1949bb52ebce26cee2f172d4"
+        },
+        "inner_zip": {
+          "path": "2016/SURFACE_ASOS_108_DAY_2016_2016_2017.zip",
+          "size_bytes": 30964,
+          "sha256": "d068922d305ae7c2e055e61cdadc49661156c253d03afa551899101943ff7972"
+        },
+        "csv": {
+          "path": "2016/SURFACE_ASOS_108_DAY_2016_2016_2017.csv",
+          "size_bytes": 87036,
+          "sha256": "c4340ec63a43200f12f1de4842fd2eb2d8930afe9ece89bee8806562a851f9fb"
+        }
+      }
+    },
+    {
+      "year": 2017,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:48+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2017_2017_2018.zip",
+      "fileset_id": "289",
+      "fileset_detail_id": "173316",
+      "portal_reported_size_kb": 30.06,
+      "files": {
+        "outer_zip": {
+          "path": "2017/downloaded.zip",
+          "size_bytes": 30954,
+          "sha256": "7c260b891e12c79f1a61cdbd296921e268379b216a7028ccfa80fee35492a8f3"
+        },
+        "inner_zip": {
+          "path": "2017/SURFACE_ASOS_108_DAY_2017_2017_2018.zip",
+          "size_bytes": 30777,
+          "sha256": "3a27de7616d21b7dd58d83e2964c82f27092d38d219bdf1ec6822f529b62a1bc"
+        },
+        "csv": {
+          "path": "2017/SURFACE_ASOS_108_DAY_2017_2017_2018.csv",
+          "size_bytes": 87067,
+          "sha256": "6882c99c497ad7a0263e2ac9224df1a2fad6ec6f8798e7d6cd1962f6f89e78ec"
+        }
+      }
+    },
+    {
+      "year": 2018,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:48+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2018_2018_2019.zip",
+      "fileset_id": "1596",
+      "fileset_detail_id": "484470",
+      "portal_reported_size_kb": 30.22,
+      "files": {
+        "outer_zip": {
+          "path": "2018/downloaded.zip",
+          "size_bytes": 31118,
+          "sha256": "2cbc90c91fc9382298a2d2e6f2a0a372e076c5ff1690ed372de9572c3fc3d795"
+        },
+        "inner_zip": {
+          "path": "2018/SURFACE_ASOS_108_DAY_2018_2018_2019.zip",
+          "size_bytes": 30943,
+          "sha256": "c31cd4918ac2e112b70cce7cb3b860300828caf1d5e058d598fd057a7294ff06"
+        },
+        "csv": {
+          "path": "2018/SURFACE_ASOS_108_DAY_2018_2018_2019.csv",
+          "size_bytes": 87083,
+          "sha256": "1d4f1706c9cc39204585080111f8cf5d4c2ebc2c318150f77dd6960c9ac9c005"
+        }
+      }
+    },
+    {
+      "year": 2019,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:49+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2019_2019_2020.zip",
+      "fileset_id": "2467",
+      "fileset_detail_id": "522654",
+      "portal_reported_size_kb": 29.96,
+      "files": {
+        "outer_zip": {
+          "path": "2019/downloaded.zip",
+          "size_bytes": 30855,
+          "sha256": "a63e2b437e2c436a94581b1fa086bb6f531fd726ae236a77a7594b6e82a1a6f9"
+        },
+        "inner_zip": {
+          "path": "2019/SURFACE_ASOS_108_DAY_2019_2019_2020.zip",
+          "size_bytes": 30680,
+          "sha256": "d0b2adec7024b6392dbdee9de5039605c9c0a196d51f295511ebbd20a71b3801"
+        },
+        "csv": {
+          "path": "2019/SURFACE_ASOS_108_DAY_2019_2019_2020.csv",
+          "size_bytes": 87003,
+          "sha256": "f0d2d305dbeecfcbe256bde3529eb629c2f9a46a02535b025591a1b6ac096c0d"
+        }
+      }
+    },
+    {
+      "year": 2020,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:50+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2020_2020_2021.zip",
+      "fileset_id": "3531",
+      "fileset_detail_id": "624838",
+      "portal_reported_size_kb": 30.28,
+      "files": {
+        "outer_zip": {
+          "path": "2020/downloaded.zip",
+          "size_bytes": 31187,
+          "sha256": "5781b93fc17e6f0156a6d53b69beaca6e4efe09b7488916d2683aa452cd4e857"
+        },
+        "inner_zip": {
+          "path": "2020/SURFACE_ASOS_108_DAY_2020_2020_2021.zip",
+          "size_bytes": 31011,
+          "sha256": "6bd56d95dd29a343dc7d54e2579a02f0e64e3256efe7979fed23826efd2be205"
+        },
+        "csv": {
+          "path": "2020/SURFACE_ASOS_108_DAY_2020_2020_2021.csv",
+          "size_bytes": 87603,
+          "sha256": "ed86af0189a5bf7b4851287cc5c3474449c3fb251c47babf2105b46fd32b7132"
+        }
+      }
+    },
+    {
+      "year": 2021,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:50+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2021_2021_2022.zip",
+      "fileset_id": "6162",
+      "fileset_detail_id": "1590692",
+      "portal_reported_size_kb": 30.4,
+      "files": {
+        "outer_zip": {
+          "path": "2021/downloaded.zip",
+          "size_bytes": 31311,
+          "sha256": "0beeff80a0a7d17fc888e0cab4900f8fda360e6dc00abf8b41591c73fec1c9e9"
+        },
+        "inner_zip": {
+          "path": "2021/SURFACE_ASOS_108_DAY_2021_2021_2022.zip",
+          "size_bytes": 31134,
+          "sha256": "0d1b7716c19d69bed9e6b1f6f12119f88f3e7dd8210581f565258c6810c24466"
+        },
+        "csv": {
+          "path": "2021/SURFACE_ASOS_108_DAY_2021_2021_2022.csv",
+          "size_bytes": 87606,
+          "sha256": "bbad1d4526922b4bff5250d44e3ee31a79aceab8388c401815271f615cd2de5c"
+        }
+      }
+    },
+    {
+      "year": 2022,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:51+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2022_2022_2023.zip",
+      "fileset_id": "8737",
+      "fileset_detail_id": "2545468",
+      "portal_reported_size_kb": 30.27,
+      "files": {
+        "outer_zip": {
+          "path": "2022/downloaded.zip",
+          "size_bytes": 31171,
+          "sha256": "dec063f03b30ba291a59571f26bf9c80e95bfe07ce3b45d1d0cc7c3c1d7b5405"
+        },
+        "inner_zip": {
+          "path": "2022/SURFACE_ASOS_108_DAY_2022_2022_2023.zip",
+          "size_bytes": 30993,
+          "sha256": "982cf984215d975d81f23323c4a9a7c2965ed5a58f80782c9e600c108b74a838"
+        },
+        "csv": {
+          "path": "2022/SURFACE_ASOS_108_DAY_2022_2022_2023.csv",
+          "size_bytes": 87665,
+          "sha256": "ec46e2c9a0c8127e39823cc621b85b46c6285fb73efc594b5a8a4b0153037479"
+        }
+      }
+    },
+    {
+      "year": 2023,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:52+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2023_2023_2024.zip",
+      "fileset_id": "11269",
+      "fileset_detail_id": "3508676",
+      "portal_reported_size_kb": 30.23,
+      "files": {
+        "outer_zip": {
+          "path": "2023/downloaded.zip",
+          "size_bytes": 31134,
+          "sha256": "8201aaf7aadf59f8172c9f24bea5ecac708139bb53f4f95b873adc7f7063bdb4"
+        },
+        "inner_zip": {
+          "path": "2023/SURFACE_ASOS_108_DAY_2023_2023_2024.zip",
+          "size_bytes": 30959,
+          "sha256": "202015eb8d155815e8508f44c079e394c53373ff04cac5d454fb6a5c89482855"
+        },
+        "csv": {
+          "path": "2023/SURFACE_ASOS_108_DAY_2023_2023_2024.csv",
+          "size_bytes": 87457,
+          "sha256": "082ea1f9fd4e8709b7a37e546a75a90c7ccea194f28eb7ea3b640db073621200"
+        }
+      }
+    },
+    {
+      "year": 2024,
+      "station_id": 108,
+      "source_url": "https://data.kma.go.kr/data/grnd/selectAsosList.do?pgmNo=34",
+      "accessed_at": "2026-08-21T05:37:52+00:00",
+      "portal_filename": "SURFACE_ASOS_108_DAY_2024_2024_2025.zip",
+      "fileset_id": "13813",
+      "fileset_detail_id": "4465642",
+      "portal_reported_size_kb": 30.35,
+      "files": {
+        "outer_zip": {
+          "path": "2024/downloaded.zip",
+          "size_bytes": 31248,
+          "sha256": "4b8fad4d964fa7533379b40545d482a97c36b669b48d363b47a675f59c43c68d"
+        },
+        "inner_zip": {
+          "path": "2024/SURFACE_ASOS_108_DAY_2024_2024_2025.zip",
+          "size_bytes": 31074,
+          "sha256": "cea8af39b93937527b5ca0cf6ab3eae4f487c0019f2c2bf086052a8b85bebdf0"
+        },
+        "csv": {
+          "path": "2024/SURFACE_ASOS_108_DAY_2024_2024_2025.csv",
+          "size_bytes": 87540,
+          "sha256": "5e558f9aa723c92664c9f2fbb6fb1e8d3d340be13f84b746c106e4eba6eeb7f2"
+        }
+      }
+    }
+  ],
+  "processing": {
+    "duplicate_rows_removed": 0,
+    "duplicate_groups": []
+  }
+}
