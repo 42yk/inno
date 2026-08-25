@@ -89,6 +89,29 @@ FastAPI Routers
 
 라우터는 HTTP 요청과 응답을 담당하고, 서비스는 검증 이후의 업무 규칙과 Firestore 접근을 담당한다. API 엔드포인트와 Function Calling 도구는 동일한 데이터 서비스를 호출하여 통계 계산을 중복하지 않는다.
 
+### 4.1 상세 설계 문서
+
+이 문서는 전체 범위와 의사결정의 기준이며, 구현 세부사항은 프론트엔드와 백엔드의 독립된 문서에서 관리한다.
+
+#### 백엔드
+
+- [백엔드 설계 인덱스](../../../backend/docs/README.md)
+- [아키텍처](../../../backend/docs/architecture.md)
+- [데이터 및 Firestore](../../../backend/docs/data-design.md)
+- [HTTP API](../../../backend/docs/api-design.md)
+- [AI Function Calling](../../../backend/docs/ai-function-calling.md)
+- [테스트 및 Render 배포](../../../backend/docs/testing-and-deployment.md)
+
+#### 프론트엔드
+
+- [프론트엔드 설계 인덱스](../../../frontend/docs/README.md)
+- [아키텍처](../../../frontend/docs/architecture.md)
+- [UI 및 상호작용](../../../frontend/docs/ui-design.md)
+- [백엔드 API 연동](../../../frontend/docs/api-integration.md)
+- [테스트 및 Vercel 배포](../../../frontend/docs/testing-and-deployment.md)
+
+상위 문서와 상세 문서가 충돌하면 사용자의 최신 승인 사항을 반영한 상세 문서를 우선한다. API 계약은 백엔드의 `api-design.md`를 단일 기준으로 사용하며 프론트엔드는 해당 계약을 소비한다.
+
 ## 5. 백엔드 API
 
 ### 5.1 데이터 API
@@ -176,7 +199,7 @@ HTML, CSS, JavaScript만 사용한 단일 페이지 대시보드로 구현한다
 - `FIREBASE_SERVICE_ACCOUNT_JSON`
 - `ALLOWED_ORIGINS`
 
-프론트는 백엔드의 `API_BASE_URL`을 환경별 설정으로 주입받는다. 서비스 계정과 API 키는 저장소에 커밋하지 않는다.
+프론트는 빌드 시 `API_BASE_URL` 환경 변수로 생성한 `config.js`를 통해 백엔드 주소를 주입받는다. 서비스 계정과 API 키는 저장소에 커밋하지 않는다.
 
 - Render: `M1-2/backend`의 FastAPI 애플리케이션 배포
 - Vercel: `M1-2/frontend` 정적 사이트 배포
