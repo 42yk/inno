@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from decimal import Decimal, ROUND_HALF_UP
+from datetime import date
+from typing import TYPE_CHECKING
 
 from app.schemas.data import (
     DataRecord,
@@ -16,6 +18,9 @@ from app.schemas.data import (
 
 
 ONE_DECIMAL = Decimal("0.1")
+
+if TYPE_CHECKING:
+    from app.services.data_service import DataService
 
 
 def _round(value: Decimal) -> Decimal:
@@ -96,3 +101,24 @@ def calculate_period_statistics(
 def calculate_summary(records: Sequence[DataRecord]) -> DataSummary:
     statistics = calculate_period_statistics(records)
     return DataSummary.model_validate(statistics.model_dump())
+
+
+class SummaryService:
+    def __init__(self, data_service: "DataService") -> None:
+        self._data_service = data_service
+
+    def get_summary(self) -> DataSummary:
+        records = self._data_service.list_records(descending=False)
+        return calculate_summary(records)
+
+    def get_period_statistics(
+        self,
+        start_date: date,
+        end_date: date,
+    ) -> PeriodStatistics:
+        records = self._data_service.list_records(
+            start_date=start_date,
+            end_date=end_date,
+            descending=False,
+        )
+        return calculate_period_statistics(records)
