@@ -1,7 +1,9 @@
+import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 from app.services.data_service import DataService
-from scripts.import_csv import import_records, parse_csv
+from scripts.import_csv import import_records, main, parse_csv
 from tests.fakes.repositories import InMemoryDataRepository
 
 
@@ -82,3 +84,36 @@ def test_import_preserves_existing_dates(tmp_path: Path) -> None:
     assert report.skipped == 1
     assert report.failed == 0
     assert len(service.list_records()) == 2
+
+
+def test_main_uses_configured_service_account_file(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    csv_path = write(
+        tmp_path / "weights.csv",
+        "date,value,memo\n2025-01-01,72.4,\n",
+    )
+    repository = InMemoryDataRepository()
+    received_paths: list[str] = []
+    monkeypatch.setattr(
+        "scripts.import_csv.Settings.from_env",
+        lambda: SimpleNamespace(
+            firebase_service_account_file="service-account.json"
+        ),
+    )
+    monkeypatch.setattr(
+        "scripts.import_csv.create_firestore_client",
+        lambda path: received_paths.append(path) or object(),
+    )
+    monkeypatch.setattr(
+        "scripts.import_csv.FirestoreDataRepository",
+        lambda _client: repository,
+    )
+    monkeypatch.setattr(sys, "argv", ["import_csv.py", str(csv_path)])
+
+    exit_code = main()
+
+    assert exit_code == 0
+    assert received_paths == ["service-account.json"]
+    assert len(repository.list()) == 1

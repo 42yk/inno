@@ -7,7 +7,7 @@
 - 체중 데이터 등록·목록·수정·삭제와 전체 요약 API
 - Firestore `data`, `conversations` 컬렉션 저장
 - 대화 저장·목록·상세 불러오기·삭제
-- 요약 컨텍스트 주입과 OpenAI Responses API Function Calling 채팅
+- 요약 컨텍스트 주입과 OpenAI 호환 Chat Completions Function Calling 채팅
 - 바닐라 HTML/CSS/JavaScript 대시보드
 - Render와 Vercel 배포 설정, Swagger UI
 
@@ -19,7 +19,7 @@
 |---|---|
 | 백엔드 | Python 3.12, FastAPI, Pydantic, Uvicorn |
 | 데이터베이스 | Firebase Firestore |
-| AI | OpenAI Responses API, Function Calling |
+| AI | Codyssey OpenAI 호환 Chat Completions API, Function Calling |
 | 프론트엔드 | HTML, CSS, JavaScript ES Modules |
 | 배포 | Render, Vercel |
 | 테스트 | pytest, FastAPI TestClient, Node.js test runner, 브라우저 통합 QA |
@@ -68,7 +68,7 @@ dry-run 결과는 `valid: 120`, `created: 0`, `failed: 0`이어야 한다. 실�
 cd M1-2/backend
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
-cp .env.example .env
+cp .env.sample .env
 .venv/bin/uvicorn app.main:create_app --factory --reload
 ```
 
@@ -87,10 +87,11 @@ python3 -m http.server 5173 -d dist
 
 | 이름 | 위치 | 설명 |
 |---|---|---|
-| `OPENAI_API_KEY` | 백엔드 | OpenAI API 키 |
+| `OPENAI_API_KEY` | 백엔드 | Codyssey API 콘솔에서 발급한 가상 키 |
+| `OPENAI_BASE_URL` | 백엔드 | OpenAI 호환 API Base URL (`https://copa.codyssey.kr/v1`) |
 | `OPENAI_MODEL` | 백엔드 | 사용할 모델 ID |
 | `OPENAI_MAX_OUTPUT_TOKENS` | 백엔드 | 응답 최대 토큰 수 |
-| `FIREBASE_SERVICE_ACCOUNT_JSON` | 백엔드 | Firebase 서비스 계정 JSON 전체 문자열 |
+| `FIREBASE_SERVICE_ACCOUNT_FILE` | 백엔드 | Firebase 서비스 계정 JSON 파일 경로 |
 | `ALLOWED_ORIGINS` | 백엔드 | 쉼표로 구분한 프론트 Origin |
 | `API_BASE_URL` | 프론트 빌드 | 공개된 Render 백엔드 주소 |
 
@@ -111,7 +112,7 @@ python3 -m http.server 5173 -d dist
 
 1. 공통 `SummaryService`로 현재 전체 요약을 계산한다.
 2. 같은 요약을 시스템 instructions에 주입한다.
-3. 기존 대화와 새 질문, 읽기 전용 도구 정의를 OpenAI Responses API에 전달한다.
+3. 기존 대화와 새 질문, 읽기 전용 도구 정의를 OpenAI 호환 Chat Completions API에 전달한다.
 4. 모델이 요청한 도구 이름과 JSON 인자를 허용 목록과 Pydantic으로 재검증한다.
 5. `call_id`를 유지한 도구 결과를 모델에 돌려주고 최종 답변을 받는다.
 6. 최종 사용자 질문과 AI 답변만 Firestore에 저장한다.
@@ -121,17 +122,14 @@ python3 -m http.server 5173 -d dist
 ## 배포
 
 - 백엔드: `backend/render.yaml`을 사용하고 `/health`, `/docs`를 확인한다.
+- Render에는 서비스 계정 JSON을 Secret File `firebase-service-account.json`으로 등록한다.
 - 프론트엔드: `frontend/vercel.json`을 사용하고 `API_BASE_URL`을 Render URL로 설정한다.
 - Vercel Origin을 `ALLOWED_ORIGINS`에 넣은 뒤 백엔드를 다시 배포한다.
 - Render 무료 티어의 첫 연결은 지연될 수 있어 채팅이 8초 이상 걸리면 콜드스타트 안내를 표시한다.
 
 ## 제출 스크린샷
 
-운영 배포 후 비밀 값이 보이지 않는 상태로 다음 파일을 캡처한다.
-
-- `screenshots/chat-summary.png`: 요약 패널과 질문·답변
-- `screenshots/data-crud.png`: 데이터 등록·수정·삭제 중 하나의 완료 상태
-- `screenshots/conversation-load.png`: 저장된 대화를 선택해 메시지를 불러온 상태
+![메인 페이지](screenshots/main-page.png)
 
 ## 검증
 
@@ -147,3 +145,4 @@ API_BASE_URL=http://localhost:8000 npm run build
 ```
 
 브라우저 통합 QA에서는 120건 초기 표시, 신규 등록 후 121건 요약 갱신, 중복 날짜 오류, 채팅 자동 저장, 새 대화·불러오기와 390px 모바일 레이아웃을 확인했다.
+****

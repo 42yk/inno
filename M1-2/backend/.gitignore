@@ -3,3 +3,6 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+
+*-*-*-firebase-adminsdk-*-*.json
+firebase-service-account.json

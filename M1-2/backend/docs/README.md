@@ -1,6 +1,6 @@
 # 백엔드 설계 문서
 
-개인 체중 변화 기록 분석 AI MVP의 FastAPI 백엔드 설계를 관리한다. 백엔드의 책임은 입력 검증, Firestore 영속화, 통계 계산, OpenAI Function Calling 실행, 대화 자동 저장과 API 오류 변환이다.
+개인 체중 변화 기록 분석 AI MVP의 FastAPI 백엔드 설계를 관리한다. 백엔드의 책임은 입력 검증, Firestore 영속화, OpenAI 호환 Chat Completions Function Calling 실행, 대화 자동 저장과 API 오류 변환이다.
 
 ## 문서 구성
 
@@ -55,7 +55,8 @@ backend/
 │   ├── unit/
 │   ├── integration/
 │   └── fakes/
-├── .env.example
+├── .env.sample
+├── firebase-service-account.example.json
 ├── requirements.txt
 └── render.yaml
 ```

@@ -14,14 +14,7 @@ class FunctionCall:
 
 
 @dataclass(frozen=True)
-class ToolOutput:
-    call_id: str
-    output: str
-
-
-@dataclass(frozen=True)
 class ModelTurn:
-    response_id: str
     final_text: str | None
     function_calls: list[FunctionCall]
 
@@ -30,74 +23,54 @@ class OpenAIClient:
     def __init__(
         self,
         api_key: str,
+        base_url: str,
         model: str,
         max_output_tokens: int,
         *,
         sdk_client: Any | None = None,
     ) -> None:
-        self._client = sdk_client or SDKOpenAI(api_key=api_key)
+        self._client = sdk_client or SDKOpenAI(
+            api_key=api_key,
+            base_url=base_url,
+        )
         self._model = model
         self._max_output_tokens = max_output_tokens
 
     @staticmethod
     def _to_turn(response: Any) -> ModelTurn:
+        if not response.choices:
+            raise ValueError("Chat completion returned no choices")
+        message = response.choices[0].message
         function_calls = [
             FunctionCall(
-                call_id=item.call_id,
-                name=item.name,
-                arguments=item.arguments,
+                call_id=tool_call.id,
+                name=tool_call.function.name,
+                arguments=tool_call.function.arguments,
             )
-            for item in response.output
-            if item.type == "function_call"
+            for tool_call in (message.tool_calls or [])
+            if tool_call.type == "function"
         ]
-        text = (response.output_text or "").strip()
+        text = (message.content or "").strip()
         return ModelTurn(
-            response_id=response.id,
             final_text=None if function_calls else (text or None),
             function_calls=function_calls,
         )
 
-    def start(
+    def complete(
         self,
         *,
         instructions: str,
-        messages: list[dict[str, str]],
+        messages: list[dict[str, Any]],
         tools: list[dict[str, object]],
     ) -> ModelTurn:
-        response = self._client.responses.create(
+        response = self._client.chat.completions.create(
             model=self._model,
-            instructions=instructions,
-            input=messages,
-            tools=tools,
-            max_output_tokens=self._max_output_tokens,
-            parallel_tool_calls=False,
-            store=True,
-        )
-        return self._to_turn(response)
-
-    def continue_with_tools(
-        self,
-        *,
-        previous_response_id: str,
-        outputs: list[ToolOutput],
-        instructions: str,
-        tools: list[dict[str, object]],
-    ) -> ModelTurn:
-        response = self._client.responses.create(
-            model=self._model,
-            previous_response_id=previous_response_id,
-            instructions=instructions,
-            input=[
-                {
-                    "type": "function_call_output",
-                    "call_id": output.call_id,
-                    "output": output.output,
-                }
-                for output in outputs
+            messages=[
+                {"role": "system", "content": instructions},
+                *messages,
             ],
             tools=tools,
-            max_output_tokens=self._max_output_tokens,
-            parallel_tool_calls=False,
-            store=True,
+            tool_choice="auto",
+            max_completion_tokens=self._max_output_tokens,
         )
         return self._to_turn(response)

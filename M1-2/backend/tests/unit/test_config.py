@@ -5,10 +5,11 @@ from app.config import Settings
 
 def test_settings_parses_origins(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://copa.example/v1")
     monkeypatch.setenv("OPENAI_MODEL", "test-model")
     monkeypatch.setenv(
-        "FIREBASE_SERVICE_ACCOUNT_JSON",
-        '{"project_id":"test"}',
+        "FIREBASE_SERVICE_ACCOUNT_FILE",
+        "firebase-service-account.json",
     )
     monkeypatch.setenv(
         "ALLOWED_ORIGINS",
@@ -22,17 +23,22 @@ def test_settings_parses_origins(monkeypatch: pytest.MonkeyPatch) -> None:
         "https://app.example",
     )
     assert settings.openai_max_output_tokens == 500
+    assert settings.openai_base_url == "https://copa.example/v1"
+    assert settings.firebase_service_account_file == (
+        "firebase-service-account.json"
+    )
     assert settings.max_tool_calls == 4
 
 
 def test_settings_rejects_missing_required_value(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setenv("OPENAI_API_KEY", "")
+    monkeypatch.setenv("OPENAI_BASE_URL", "https://copa.example/v1")
     monkeypatch.setenv("OPENAI_MODEL", "test-model")
     monkeypatch.setenv(
-        "FIREBASE_SERVICE_ACCOUNT_JSON",
-        '{"project_id":"test"}',
+        "FIREBASE_SERVICE_ACCOUNT_FILE",
+        "firebase-service-account.json",
     )
     monkeypatch.setenv("ALLOWED_ORIGINS", "http://localhost:5173")
 

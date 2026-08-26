@@ -1,30 +1,33 @@
 # Weight AI 백엔드
 
-날짜별 체중을 Firestore에 저장하고 통계를 계산하며, 현재 데이터 요약과 읽기 전용 Function Calling 결과를 근거로 OpenAI 답변을 생성하는 FastAPI 서비스다.
+날짜별 체중을 Firestore에 저장하고 통계를 계산하며, 현재 데이터 요약과 읽기 전용 Function Calling 결과를 근거로 OpenAI 호환 API 답변을 생성하는 FastAPI 서비스다.
 
 ## 실행 환경
 
 - Python 3.10 이상(권장 3.12)
 - Firebase Firestore 프로젝트와 서비스 계정
-- OpenAI API 키
+- Codyssey API 콘솔의 가상 키
 
 ## 로컬 실행
 
 ```bash
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
-cp .env.example .env
+cp .env.sample .env
 ```
 
 `.env`에 실제 값을 입력한다.
 
 ```dotenv
-OPENAI_API_KEY=
-OPENAI_MODEL=gpt-4o-mini
+OPENAI_API_KEY=<virtual-key>
+OPENAI_BASE_URL=https://copa.codyssey.kr/v1
+OPENAI_MODEL=gpt-5-mini
 OPENAI_MAX_OUTPUT_TOKENS=500
-FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account",...}
+FIREBASE_SERVICE_ACCOUNT_FILE=./m1-2-firebase-adminsdk-xxxxx.json
 ALLOWED_ORIGINS=http://localhost:5173
 ```
+
+`firebase-service-account.example.json`은 필드 구조만 보여주는 예제다. Firebase에서 내려받은 실제 JSON 파일을 백엔드 디렉터리에 두고 `FIREBASE_SERVICE_ACCOUNT_FILE`에 그 파일 경로를 입력한다. 실제 키 파일은 Git에 커밋하지 않는다.
 
 샘플 CSV는 120개의 유효한 날짜·체중 레코드를 포함한다. 데이터가 없는 날짜는 CSV에 넣지 않는다.
 
@@ -76,4 +79,4 @@ AI 도구는 전체 요약, 날짜별 기록, 기간 목록과 기간 통계 조
 - Start Command: `uvicorn app.main:create_app --factory --host 0.0.0.0 --port $PORT`
 - Health Check Path: `/health`
 
-비밀 값은 Render 환경 변수로만 등록한다. 배포 뒤 Vercel 주소를 `ALLOWED_ORIGINS`에 지정하고 배포 URL의 `/docs`까지 확인한다.
+가상 키는 Render 환경 변수로 등록한다. Firebase JSON은 Render의 Secret File 기능으로 `firebase-service-account.json`을 만들고 `FIREBASE_SERVICE_ACCOUNT_FILE=/etc/secrets/firebase-service-account.json`을 사용한다. 배포 뒤 Vercel 주소를 `ALLOWED_ORIGINS`에 지정하고 배포 URL의 `/docs`까지 확인한다.

@@ -30,7 +30,7 @@ FastAPI 테스트 클라이언트를 사용하고 외부 네트워크를 호출�
 
 - Firebase 테스트 프로젝트에 CSV 100건 이상 등록
 - Swagger UI에서 필수 API 실행
-- 실제 OpenAI API로 전체·특정일·기간 질문 각 1회 확인
+- Codyssey OpenAI 호환 API로 전체·특정일·기간 질문 각 1회 확인
 - Render 배포 후 `/health`와 `/docs` 확인
 
 ## 2. 주요 테스트 데이터
@@ -45,17 +45,21 @@ FastAPI 테스트 클라이언트를 사용하고 외부 네트워크를 호출�
 
 ## 3. 환경 변수
 
-`.env.example`에는 값 없이 다음 키만 제공한다.
+`.env.sample`에는 다음 키와 공개 가능한 기본값만 제공한다.
 
 ```dotenv
-OPENAI_API_KEY=
-OPENAI_MODEL=
-OPENAI_MAX_OUTPUT_TOKENS=
-FIREBASE_SERVICE_ACCOUNT_JSON=
+OPENAI_API_KEY=<virtual-key>
+OPENAI_BASE_URL=https://copa.codyssey.kr/v1
+OPENAI_MODEL=gpt-5-mini
+OPENAI_MAX_OUTPUT_TOKENS=500
+FIREBASE_SERVICE_ACCOUNT_FILE=./firebase-service-account.example.json
 ALLOWED_ORIGINS=http://localhost:5173
 ```
 
-- `FIREBASE_SERVICE_ACCOUNT_JSON`은 JSON 전체 문자열을 사용한다.
+- `OPENAI_API_KEY`에는 Codyssey API 콘솔에서 발급한 가상 키를 입력한다.
+- `OPENAI_BASE_URL`은 OpenAI SDK가 `/v1/chat/completions`를 호출하도록 `/v1`까지 포함한다.
+- `FIREBASE_SERVICE_ACCOUNT_FILE`은 서비스 계정 JSON 파일 경로다. 상대 경로는 백엔드 루트를 기준으로 해석한다.
+- `firebase-service-account.example.json`에는 필드 구조만 있으며 실제 인증에는 사용할 수 없다.
 - `ALLOWED_ORIGINS`는 쉼표로 구분해 파싱하고 공백을 제거한다.
 - 키와 서비스 계정은 `.env`, 로그, Git 및 프론트 코드에 노출하지 않는다.
 - 운영 환경에서는 Vercel 실제 도메인만 추가한다.
@@ -67,9 +71,9 @@ README에는 다음 순서를 문서화한다.
 1. Python 3.10 이상 확인
 2. 가상환경 생성 및 활성화
 3. `requirements.txt` 설치
-4. `.env.example`을 기준으로 `.env` 작성
+4. `.env.sample`을 복사해 `.env`를 만들고 실제 가상 키와 Firebase 파일 경로 입력
 5. CSV 정제 및 일회성 가져오기 실행
-6. `uvicorn app.main:app --reload` 실행
+6. `uvicorn app.main:create_app --factory --reload` 실행
 7. `/health`와 `/docs` 확인
 
 ## 5. Render 배포
@@ -78,7 +82,8 @@ README에는 다음 순서를 문서화한다.
 - Build Command: 의존성 설치
 - Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 - Health Check Path: `/health`
-- 비밀 값은 Render 환경 변수로 등록한다.
+- 가상 키는 Render 환경 변수로 등록한다.
+- Firebase JSON은 Render Secret File `firebase-service-account.json`으로 등록하고 파일 경로는 `/etc/secrets/firebase-service-account.json`을 사용한다.
 - 배포 완료 후 Vercel 도메인을 `ALLOWED_ORIGINS`에 반영한다.
 
 `render.yaml`을 제공하되 비밀 값은 선언하지 않는다. 무료 티어의 콜드스타트를 고려해 프론트에는 첫 응답이 지연될 수 있다는 안내를 표시한다.

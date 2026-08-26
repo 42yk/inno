@@ -11,7 +11,7 @@ Router ── Pydantic Schema
     ▼
 Application Service
     ├── Repository ── Firestore
-    └── OpenAI Client ── OpenAI API
+    └── OpenAI Client ── Codyssey OpenAI-compatible API
 ```
 
 ### Router
@@ -43,7 +43,7 @@ Application Service
 ### Client
 
 - OpenAI SDK 초기화와 모델 호출을 캡슐화한다.
-- API 키, 모델명과 출력 토큰 제한을 설정에서 전달받는다.
+- 가상 API 키, Base URL, 모델명과 출력 토큰 제한을 설정에서 전달받는다.
 - OpenAI 응답 항목을 채팅 서비스가 다룰 수 있는 구조로 변환한다.
 
 ## 2. 의존성 방향
@@ -62,13 +62,13 @@ clients → config
 ## 3. 앱 시작
 
 1. 환경 변수를 읽고 필수 값과 CORS 목록을 검증한다.
-2. 서비스 계정 JSON으로 Firebase Admin 앱을 한 번만 초기화한다.
+2. 설정된 파일 경로에서 서비스 계정 JSON을 읽어 Firebase Admin 앱을 한 번만 초기화한다.
 3. Firestore 클라이언트와 저장소를 생성한다.
 4. OpenAI 클라이언트와 서비스를 생성한다.
 5. FastAPI에 라우터, CORS와 공통 예외 처리기를 등록한다.
 6. `/docs`와 상태 확인용 `GET /health`를 제공한다.
 
-필수 환경 변수가 없거나 서비스 계정 JSON을 해석할 수 없으면 애플리케이션 시작을 실패시킨다. 운영 중 첫 요청에서 설정 오류가 발견되도록 미루지 않는다.
+필수 환경 변수가 없거나 서비스 계정 JSON 파일을 읽거나 해석할 수 없으면 애플리케이션 시작을 실패시킨다. 운영 중 첫 요청에서 설정 오류가 발견되도록 미루지 않는다.
 
 ## 4. 데이터 CRUD 흐름
 
@@ -105,13 +105,13 @@ POST /api/chat
   → request validation
   → SummaryService.get_summary()
   → system prompt composition
-  → OpenAI first response
+  → Chat Completions request
       ├── final text → save exchange
       └── function call
             → allow-list check
             → tool argument validation
             → read-only service execution
-            → OpenAI continuation
+            → assistant tool_calls + tool message로 재요청
             → final text
             → save exchange
 ```

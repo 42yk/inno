@@ -53,10 +53,12 @@ class ToolService:
         return [
             {
                 "type": "function",
-                "name": name,
-                "description": description,
-                "parameters": arguments_model.model_json_schema(),
-                "strict": True,
+                "function": {
+                    "name": name,
+                    "description": description,
+                    "parameters": arguments_model.model_json_schema(),
+                    "strict": True,
+                },
             }
             for name, (arguments_model, _handler, description) in self._tools.items()
         ]

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from typing import Any, Protocol
 
-from app.clients.openai_client import ModelTurn, ToolOutput
+from app.clients.openai_client import ModelTurn
 from app.errors import (
     AIProviderError,
     InvalidToolArgumentsError,
@@ -17,20 +17,11 @@ from app.services.tool_service import ToolService
 
 
 class AIClient(Protocol):
-    def start(
+    def complete(
         self,
         *,
         instructions: str,
-        messages: list[dict[str, str]],
-        tools: list[dict[str, object]],
-    ) -> ModelTurn: ...
-
-    def continue_with_tools(
-        self,
-        *,
-        previous_response_id: str,
-        outputs: list[ToolOutput],
-        instructions: str,
+        messages: list[dict[str, Any]],
         tools: list[dict[str, object]],
     ) -> ModelTurn: ...
 
@@ -67,33 +58,16 @@ class ChatService:
         self._conversation_service = conversation_service
         self._max_tool_calls = max_tool_calls
 
-    def _start(
+    def _complete(
         self,
         instructions: str,
-        messages: list[dict[str, str]],
+        messages: list[dict[str, Any]],
         tools: list[dict[str, object]],
     ) -> ModelTurn:
         try:
-            return self._ai_client.start(
+            return self._ai_client.complete(
                 instructions=instructions,
                 messages=messages,
-                tools=tools,
-            )
-        except Exception as exc:
-            raise AIProviderError() from exc
-
-    def _continue(
-        self,
-        turn: ModelTurn,
-        outputs: list[ToolOutput],
-        instructions: str,
-        tools: list[dict[str, object]],
-    ) -> ModelTurn:
-        try:
-            return self._ai_client.continue_with_tools(
-                previous_response_id=turn.response_id,
-                outputs=outputs,
-                instructions=instructions,
                 tools=tools,
             )
         except Exception as exc:
@@ -102,7 +76,7 @@ class ChatService:
     def chat(self, request: ChatRequest) -> ChatResult:
         summary = self._summary_service.get_summary()
         instructions = build_instructions(summary.model_dump(mode="json"))
-        messages: list[dict[str, str]] = []
+        messages: list[dict[str, Any]] = []
         if request.conversation_id is not None:
             conversation = self._conversation_service.get(request.conversation_id)
             messages.extend(
@@ -111,7 +85,7 @@ class ChatService:
             )
         messages.append({"role": "user", "content": request.message})
         tools = self._tool_service.definitions()
-        turn = self._start(instructions, messages, tools)
+        turn = self._complete(instructions, messages, tools)
         tools_used: list[str] = []
         call_count = 0
 
@@ -132,7 +106,23 @@ class ChatService:
             if call_count + len(turn.function_calls) > self._max_tool_calls:
                 raise ToolCallLimitError()
 
-            outputs: list[ToolOutput] = []
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": None,
+                    "tool_calls": [
+                        {
+                            "id": call.call_id,
+                            "type": "function",
+                            "function": {
+                                "name": call.name,
+                                "arguments": call.arguments,
+                            },
+                        }
+                        for call in turn.function_calls
+                    ],
+                }
+            )
             for call in turn.function_calls:
                 call_count += 1
                 tools_used.append(call.name)
@@ -148,10 +138,11 @@ class ChatService:
                         "ok": False,
                         "error": {"code": "unknown_tool"},
                     }
-                outputs.append(
-                    ToolOutput(
-                        call_id=call.call_id,
-                        output=json.dumps(result, ensure_ascii=False),
-                    )
+                messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": call.call_id,
+                        "content": json.dumps(result, ensure_ascii=False),
+                    }
                 )
-            turn = self._continue(turn, outputs, instructions, tools)
+            turn = self._complete(instructions, messages, tools)

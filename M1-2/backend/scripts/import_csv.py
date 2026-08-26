@@ -127,7 +127,7 @@ def main() -> int:
         )
     else:
         settings = Settings.from_env()
-        client = create_firestore_client(settings.firebase_service_account_json)
+        client = create_firestore_client(settings.firebase_service_account_file)
         service = DataService(FirestoreDataRepository(client))
         report = import_records(service, batch, dry_run=False)
 

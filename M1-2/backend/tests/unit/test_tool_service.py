@@ -31,16 +31,16 @@ def test_tool_definitions_are_strict_and_read_only(
 ) -> None:
     definitions = tool_service.definitions()
 
-    assert {tool["name"] for tool in definitions} == {
+    assert {tool["function"]["name"] for tool in definitions} == {
         "get_weight_summary",
         "get_weight_by_date",
         "get_weight_records",
         "get_weight_statistics",
     }
     assert all(tool["type"] == "function" for tool in definitions)
-    assert all(tool["strict"] is True for tool in definitions)
+    assert all(tool["function"]["strict"] is True for tool in definitions)
     assert all(
-        tool["parameters"]["additionalProperties"] is False
+        tool["function"]["parameters"]["additionalProperties"] is False
         for tool in definitions
     )
 

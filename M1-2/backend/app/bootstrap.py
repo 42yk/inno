@@ -24,7 +24,7 @@ class Services:
 
 def build_services(settings: Settings) -> Services:
     firestore_client = create_firestore_client(
-        settings.firebase_service_account_json
+        settings.firebase_service_account_file
     )
     data_service = DataService(FirestoreDataRepository(firestore_client))
     summary_service = SummaryService(data_service)
@@ -34,6 +34,7 @@ def build_services(settings: Settings) -> Services:
     tool_service = ToolService(data_service, summary_service)
     ai_client = OpenAIClient(
         settings.openai_api_key,
+        settings.openai_base_url,
         settings.openai_model,
         settings.openai_max_output_tokens,
     )

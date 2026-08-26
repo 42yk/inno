@@ -46,7 +46,6 @@ def test_chat_returns_answer_and_automatic_conversation_id() -> None:
     client = make_client(
         [
             ModelTurn(
-                response_id="response-1",
                 final_text="최근 체중은 72.4kg입니다.",
                 function_calls=[],
             )

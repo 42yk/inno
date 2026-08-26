@@ -29,7 +29,7 @@ def assembled_client() -> TestClient:
     conversations = ConversationService(InMemoryConversationRepository())
     chat_service = ChatService(
         ai_client=ScriptedOpenAIClient(
-            [ModelTurn(response_id="response", final_text="답변", function_calls=[])]
+            [ModelTurn(final_text="답변", function_calls=[])]
         ),
         summary_service=summary_service,
         tool_service=ToolService(data_service, summary_service),
