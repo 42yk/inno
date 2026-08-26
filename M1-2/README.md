@@ -26,13 +26,13 @@
 
 ## 배포 URL
 
-현재 작업공간에는 Render·Vercel 계정 연결과 운영 비밀 값이 없어 실제 배포 URL이 아직 생성되지 않았다. 배포 완료 후 아래 세 값을 실제 URL로 교체한다.
+프론트엔드는 Vercel에 배포하고 가비아 도메인을 연결했다. 백엔드는 Render에 배포하고 `api.harubang.store` 커스텀 도메인을 연결했다.
 
 | 항목 | URL |
 |---|---|
-| 프론트엔드 | 배포 후 입력 |
-| 백엔드 API | 배포 후 입력 |
-| Swagger UI | 배포 후 입력 |
+| 프론트엔드 | [https://www.harubang.store](https://www.harubang.store) |
+| 백엔드 API | [https://api.harubang.store](https://api.harubang.store) |
+| Swagger UI | [https://api.harubang.store/docs](https://api.harubang.store/docs) |
 
 ## 저장 데이터와 결측치
 
@@ -97,6 +97,12 @@ python3 -m http.server 5173 -d dist
 
 비밀 값은 `.env`, Render 환경 변수에만 저장하고 Git, 프론트 코드, 로그와 오류 응답에 넣지 않는다.
 
+운영 백엔드의 CORS 허용 Origin은 다음과 같이 설정한다.
+
+```dotenv
+ALLOWED_ORIGINS=https://www.harubang.store
+```
+
 ## API와 Function Calling 흐름
 
 필수 API:
@@ -124,12 +130,34 @@ python3 -m http.server 5173 -d dist
 - 백엔드: `backend/render.yaml`을 사용하고 `/health`, `/docs`를 확인한다.
 - Render에는 서비스 계정 JSON을 Secret File `firebase-service-account.json`으로 등록한다.
 - 프론트엔드: `frontend/vercel.json`을 사용하고 `API_BASE_URL`을 Render URL로 설정한다.
-- Vercel Origin을 `ALLOWED_ORIGINS`에 넣은 뒤 백엔드를 다시 배포한다.
+- 프론트엔드 Origin `https://www.harubang.store`를 `ALLOWED_ORIGINS`에 넣은 뒤 백엔드를 다시 배포한다.
 - Render 무료 티어의 첫 연결은 지연될 수 있어 채팅이 8초 이상 걸리면 콜드스타트 안내를 표시한다.
 
 ## 제출 스크린샷
 
-![메인 페이지](screenshots/main-page.png)
+### 데이터 요약이 보이는 AI 채팅
+
+저장된 체중 데이터 요약과 사용자의 질문, AI 답변이 함께 표시되는 화면이다.
+
+![데이터 요약이 보이는 AI 채팅 화면](screenshots/chat-summary.png)
+
+### 데이터 관리(CRUD)
+
+새 체중 기록 입력 폼, 저장된 데이터 목록과 수정·삭제 기능이 표시되는 화면이다.
+
+![체중 데이터 관리 화면](screenshots/data-crud.png)
+
+### 대화 기록 불러오기
+
+저장된 대화를 선택하고 해당 대화의 메시지를 다시 표시한 화면이다.
+
+![저장된 대화 불러오기 화면](screenshots/conversation-load.png)
+
+### Swagger UI
+
+로컬 백엔드의 `http://localhost:8000/docs`에서 필수 API 엔드포인트를 확인한 화면이다.
+
+![로컬 백엔드 Swagger UI 화면](screenshots/swagger-ui.png)
 
 ## 검증
 
@@ -145,4 +173,3 @@ API_BASE_URL=http://localhost:8000 npm run build
 ```
 
 브라우저 통합 QA에서는 120건 초기 표시, 신규 등록 후 121건 요약 갱신, 중복 날짜 오류, 채팅 자동 저장, 새 대화·불러오기와 390px 모바일 레이아웃을 확인했다.
-****
