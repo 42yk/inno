@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="저장된 체중 변화를 분석하는 개인 AI 비서" />
+    <title>Weight AI</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./css/styles.css" />
+    <script src="./config.js"></script>
+    <script type="module" src="./js/app.js"></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div>
+        <p class="eyebrow">MY DATA ASSISTANT</p>
+        <h1>Weight AI</h1>
+        <p>저장된 체중 기록을 조회하고 기간별 변화를 분석합니다.</p>
+      </div>
+      <span class="status-chip" id="connection-status">연결 확인 중</span>
+    </header>
+    <div id="global-notice" class="notice" aria-live="polite" hidden></div>
+    <main id="app" class="dashboard" aria-busy="true">
+      <section class="panel history-panel" aria-labelledby="history-title">
+        <div class="panel-heading">
+          <div><p class="section-kicker">HISTORY</p><h2 id="history-title">대화 기록</h2></div>
+          <button id="new-conversation" class="button button--primary" type="button">+ 새 대화</button>
+        </div>
+        <div id="conversation-list" class="conversation-list">
+          <p class="empty-state">저장된 대화를 불러오는 중입니다.</p>
+        </div>
+      </section>
+      <section class="panel chat-panel" aria-labelledby="chat-title">
+        <div class="panel-heading">
+          <div><p class="section-kicker">ASSISTANT</p><h2 id="chat-title">내 데이터를 아는 AI</h2></div>
+        </div>
+        <div id="message-list" class="message-list" role="log" aria-live="polite">
+          <div class="chat-empty">
+            <strong>체중 기록에 관해 물어보세요.</strong>
+            <p>“전체 체중 추세가 어때?” 또는 “2025년 3월 평균은?”</p>
+          </div>
+        </div>
+        <form id="chat-form" class="chat-form">
+          <label for="chat-message">질문</label>
+          <textarea id="chat-message" name="message" rows="2" maxlength="1000" placeholder="저장된 기록을 기준으로 질문해 보세요"></textarea>
+          <button class="button button--primary" type="submit">전송</button>
+        </form>
+      </section>
+      <aside class="right-column">
+        <section class="panel summary-panel" aria-labelledby="summary-title">
+          <div class="panel-heading"><div><p class="section-kicker">OVERVIEW</p><h2 id="summary-title">체중 요약</h2></div></div>
+          <div id="summary-content"><p class="empty-state">요약을 불러오는 중입니다.</p></div>
+        </section>
+        <section class="panel data-panel" aria-labelledby="data-form-title">
+          <div class="panel-heading"><div><p class="section-kicker">DATA</p><h2 id="data-form-title">새 체중 기록</h2></div></div>
+          <form id="data-form" class="data-form" novalidate>
+            <div class="field">
+              <label for="data-date">날짜</label>
+              <input id="data-date" name="date" type="date" required />
+              <span class="field-error" data-field-error="date"></span>
+            </div>
+            <div class="field">
+              <label for="data-value">체중 (kg)</label>
+              <input id="data-value" name="value" type="number" min="20" max="300" step="0.1" inputmode="decimal" required />
+              <span class="field-error" data-field-error="value"></span>
+            </div>
+            <div class="field">
+              <label for="data-memo">메모</label>
+              <input id="data-memo" name="memo" type="text" maxlength="200" placeholder="선택 입력" />
+              <span class="field-error" data-field-error="memo"></span>
+            </div>
+            <div class="form-actions">
+              <button id="data-submit" class="button button--primary" type="submit">기록 저장</button>
+              <button id="data-cancel" class="button button--ghost" type="button" hidden>수정 취소</button>
+            </div>
+          </form>
+          <div class="data-list-heading"><h3>기록 목록</h3><span>최신순</span></div>
+          <div id="data-list" class="data-list"><p class="empty-state">기록을 불러오는 중입니다.</p></div>
+        </section>
+      </aside>
+    </main>
+  </body>
+</html>
