@@ -16,3 +16,23 @@ class InvalidPeriodError(DomainError):
 
 class RecordNotFoundError(DomainError):
     """Raised when a requested record does not exist."""
+
+
+class UnknownToolError(DomainError):
+    """Raised when a model requests a tool outside the allow-list."""
+
+
+class InvalidToolArgumentsError(DomainError):
+    """Raised when model-provided tool arguments fail validation."""
+
+
+class AIProviderError(DomainError):
+    """Raised when an AI response cannot be generated safely."""
+
+
+class ToolCallLimitError(DomainError):
+    """Raised when a model requests too many tools for one chat turn."""
+
+
+class DataStoreError(DomainError):
+    """Raised when persisted application data cannot be processed."""

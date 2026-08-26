@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
+from app.schemas.conversations import Conversation, Message, MessageInput
 from app.schemas.data import DataCreate, DataRecord, DataUpdate
 
 
@@ -60,3 +61,71 @@ class InMemoryDataRepository:
 
     def delete(self, record_id: str) -> bool:
         return self.records.pop(record_id, None) is not None
+
+
+class InMemoryConversationRepository:
+    def __init__(self) -> None:
+        self.conversations: dict[str, Conversation] = {}
+        self._counter = 0
+
+    def _now(self) -> datetime:
+        self._counter += 1
+        return datetime.now(UTC) + timedelta(microseconds=self._counter)
+
+    def create(
+        self,
+        title: str,
+        messages: list[MessageInput],
+    ) -> Conversation:
+        now = self._now()
+        conversation_id = f"conversation-{self._counter}"
+        conversation = Conversation(
+            id=conversation_id,
+            title=title,
+            messages=[
+                Message(
+                    role=message.role,
+                    content=message.content,
+                    created_at=now,
+                )
+                for message in messages
+            ],
+            created_at=now,
+            updated_at=now,
+        )
+        self.conversations[conversation_id] = conversation
+        return conversation
+
+    def list(self) -> list[Conversation]:
+        return list(self.conversations.values())
+
+    def get(self, conversation_id: str) -> Conversation | None:
+        return self.conversations.get(conversation_id)
+
+    def delete(self, conversation_id: str) -> bool:
+        return self.conversations.pop(conversation_id, None) is not None
+
+    def append_exchange(
+        self,
+        conversation_id: str,
+        user_content: str,
+        assistant_content: str,
+    ) -> Conversation:
+        original = self.conversations[conversation_id]
+        now = self._now()
+        updated = original.model_copy(
+            update={
+                "messages": [
+                    *original.messages,
+                    Message(role="user", content=user_content, created_at=now),
+                    Message(
+                        role="assistant",
+                        content=assistant_content,
+                        created_at=now,
+                    ),
+                ],
+                "updated_at": now,
+            }
+        )
+        self.conversations[conversation_id] = updated
+        return updated
