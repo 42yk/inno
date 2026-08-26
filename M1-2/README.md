@@ -105,6 +105,33 @@ ALLOWED_ORIGINS=https://www.harubang.store
 
 ## API와 Function Calling 흐름
 
+```mermaid
+sequenceDiagram
+    actor User as 사용자
+    participant Frontend as 프론트엔드 (Vercel)
+    participant Backend as 백엔드 (Render)
+    participant OpenAI as OpenAI API
+
+    User->>Frontend: 자연어 질문 입력
+    Frontend->>Backend: POST /api/chat
+    Note over Frontend: 답변을 기다리는 동안 로딩 표시
+    Backend->>Backend: Firestore 데이터 조회 및 요약 계산
+    Backend->>OpenAI: 시스템 프롬프트 + 데이터 요약<br/>대화 내역 + 질문 + 도구 정의
+
+    alt 도구 호출 없이 답변
+        OpenAI-->>Backend: 최종 AI 답변
+    else Function Calling 필요
+        OpenAI-->>Backend: 도구 이름 + JSON 인자
+        Backend->>Backend: 도구·인자 검증 후<br/>읽기 전용 데이터 조회
+        Backend->>OpenAI: 도구 실행 결과
+        OpenAI-->>Backend: 도구 결과를 반영한 최종 답변
+    end
+
+    Backend->>Backend: 사용자 질문과 AI 답변을<br/>conversations에 자동 저장
+    Backend-->>Frontend: AI 답변 + conversation_id
+    Frontend-->>User: 답변 표시 및 대화 목록 갱신
+```
+
 필수 API:
 
 - `POST/GET /api/data`
